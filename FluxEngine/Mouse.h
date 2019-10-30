@@ -1,4 +1,5 @@
 #pragma once
+#include "StrippedWindows.h";
 #include<queue>
 struct MousePoint
 {
@@ -64,6 +65,7 @@ private:
 	void OnMiddleReleased(int x, int y);
 	void OnWheelUp(int x, int y);
 	void OnWheelDown(int x, int y);
+	void OnWheelDelta(int x, int y, int delta);
 	void OnMouseMove(int x, int y);
 	void OnMouseLeave();
 	void OnMouseEnter();
@@ -74,6 +76,7 @@ private:
 	bool rightIsPressed = false;
 	bool middleIsPressed = false;
 	bool isInWindow = false;
+	int wheelDeltaCarry = 0;
 	int x, y = 0;
 };
 

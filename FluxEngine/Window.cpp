@@ -250,14 +250,7 @@ LRESULT Window::WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		const POINTS pt = MAKEPOINTS(lParam);
 		int x = pt.x;
 		int y = pt.y;
-		if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
-		{
-			mouse.OnWheelUp(x, y);
-		}
-		else if (GET_WHEEL_DELTA_WPARAM(wParam) < 0)
-		{
-			mouse.OnWheelDown(x, y);
-		}
+		mouse.OnWheelDelta(x, y, GET_WHEEL_DELTA_WPARAM(wParam));
 		break;
 	}
 	case WM_INPUT:

@@ -80,6 +80,22 @@ void Mouse::OnWheelDown(int x, int y)
 	this->eventBuffer.push(Event(Event::Type::WHEEL_DOWN, x, y));
 }
 
+void Mouse::OnWheelDelta(int x, int y, int delta)
+{
+	wheelDeltaCarry += delta;
+
+	while (wheelDeltaCarry >= WHEEL_DELTA)
+	{
+		wheelDeltaCarry -= WHEEL_DELTA;
+		OnWheelUp(x, y);
+	}
+	while (wheelDeltaCarry <= -WHEEL_DELTA)
+	{
+		wheelDeltaCarry += WHEEL_DELTA;
+		OnWheelDown(x, y);
+	}
+}
+
 void Mouse::OnMouseMove(int x, int y)
 {
 	this->x = x;
