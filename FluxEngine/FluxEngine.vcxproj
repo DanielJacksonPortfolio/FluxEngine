@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ErrorLogger.cpp" />
+    <ClCompile Include="ExceptionHandler.cpp" />
     <ClCompile Include="StringTools.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WinMain.cpp" />
@@ -153,8 +154,17 @@
   <ItemGroup>
     <ClInclude Include="Config.h" />
     <ClInclude Include="ErrorLogger.h" />
+    <ClInclude Include="ExceptionHandler.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="StringTools.h" />
+    <ClInclude Include="StrippedWindows.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FluxEngine.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\images\icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

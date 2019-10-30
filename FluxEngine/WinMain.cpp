@@ -1,34 +1,35 @@
 #include "Window.h"
 
-int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	Config config;
 
-	if (!config.Load("data//config"))
+	try
 	{
-		return 0;
+		if (!config.Load("data//config"))
+		{
+			ErrorLogger::Log("Failed to Load config file");
+			return -1;
+		}
+
+		Window window(&config);
+
+		int result = window.Update();
+
+		return result;
 	}
-
-	Window window;
-	window.Init(hInstance, "Main Window", "Default", &config);
-
-	MSG msg;
-	BOOL gResult;
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+	catch (const CustomException & e)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		ErrorLogger::Log(e);
 	}
-
-	if (gResult == -1)
+	catch (const std::exception& e)
 	{
-		return -1;
+		ErrorLogger::Log(e);
 	}
-	else if (gResult == 0)
+	catch (...)
 	{
-		return msg.wParam;
+		ErrorLogger::Log("Unknown Exception");
 	}
-
-	return 0;
+	return -1;
 }
 

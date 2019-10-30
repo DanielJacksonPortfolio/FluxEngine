@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <iostream>
 
 enum class StyleType {WINDOWED,FULLSCREEN};
 
@@ -8,8 +9,7 @@ class Config
 public:
 	int width;
 	int height;
-	int displayWidth;
-	int displayHeight;
+	std::string name= "BOB";
 	StyleType styleFlag;
 
 	bool Load(std::string configLocation)
@@ -21,23 +21,28 @@ public:
 			return false;
 		}
 		int styleFlag;
-		configFile >> this->width;
-		configFile >> this->height;
+		configFile >> this->rawWidth;
+		configFile >> this->rawHeight;
 		configFile >> styleFlag;
-
+		configFile.ignore();
+		std::getline(configFile, this->name);
+		configFile.close();
 		this->styleFlag = static_cast<StyleType>(styleFlag);
 
 		if (this->styleFlag == StyleType::FULLSCREEN)
 		{
-			this->displayWidth = GetSystemMetrics(SM_CXSCREEN);
-			this->displayHeight = GetSystemMetrics(SM_CYSCREEN);
+			this->width = GetSystemMetrics(SM_CXSCREEN);
+			this->height = GetSystemMetrics(SM_CYSCREEN);
 		}
 		else
 		{
-			this->displayWidth = this->width;
-			this->displayHeight = this->height;
+			this->width = this->rawWidth;
+			this->height = this->rawHeight;
 		}
 
 		return true;
 	}
+private:
+	int rawWidth;
+	int rawHeight;
 };
