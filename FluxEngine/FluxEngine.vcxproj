@@ -166,9 +166,12 @@
   <ItemGroup>
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp" />
     <ClCompile Include="Game\Application.cpp" />
+    <ClCompile Include="Game\Graphics\Shader.cpp" />
+    <ClCompile Include="Game\Graphics\PixelShader.cpp" />
     <ClCompile Include="Tools\ErrorLogger.cpp" />
     <ClCompile Include="Tools\ExceptionHandler.cpp" />
     <ClCompile Include="Game\Graphics\GraphicsHandler.cpp" />
+    <ClCompile Include="Game\Graphics\VertexShader.cpp" />
     <ClCompile Include="Windows\Keyboard.cpp" />
     <ClCompile Include="Windows\Mouse.cpp" />
     <ClCompile Include="Tools\StringTools.cpp" />
@@ -180,9 +183,12 @@
     <ClInclude Include="Game\Graphics\AdapterHandler.h" />
     <ClInclude Include="Game\Application.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="Game\Graphics\Shader.h" />
+    <ClInclude Include="Game\Graphics\PixelShader.h" />
     <ClInclude Include="Tools\ErrorLogger.h" />
     <ClInclude Include="Tools\ExceptionHandler.h" />
     <ClInclude Include="Game\Graphics\GraphicsHandler.h" />
+    <ClInclude Include="Game\Graphics\VertexShader.h" />
     <ClInclude Include="Windows\Keyboard.h" />
     <ClInclude Include="Windows\Mouse.h" />
     <ClInclude Include="resource.h" />
@@ -196,6 +202,28 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\images\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="pixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="vertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Tools/StrippedWindows.h";
+#include "../Tools/StrippedWindows.h"
 #include<queue>
 struct MousePoint
 {

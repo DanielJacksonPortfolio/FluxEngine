@@ -1,17 +1,19 @@
 #include "GraphicsHandler.h"
 
-bool GraphicsHandler::Init(HWND hWnd, int width, int height)
+
+bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 {
 	this->windowWidth = width;
 	this->windowHeight = height;
 	this->hWnd = hWnd;
+	this->config = config;
 	fpsTimer.Start();
 
 	if (!InitDirectX())
 		return false;
 
-	//if (!InitShaders())
-	//	return false;
+	if (!InitShaders())
+		return false;
 
 	//if (!InitScene())
 	//	return false;
@@ -32,7 +34,7 @@ void GraphicsHandler::RenderFrame()
 	if (wireframe == false)
 		this->deviceContext->RSSetState(this->rasterizerState.Get());
 	else
-		this->deviceContext->RSSetState(this->rasterizerState_FillWire.Get());
+		this->deviceContext->RSSetState(this->rasterizerState_WireFrame.Get());
 	this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
 	this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
 	this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
@@ -50,7 +52,7 @@ void GraphicsHandler::RenderFrame()
 	}
 
 
-	this->swapChain->Present(0, NULL);
+	this->swapChain->Present(config->vSync, NULL);
 }
 
 GraphicsHandler::~GraphicsHandler()
@@ -61,6 +63,8 @@ bool GraphicsHandler::InitDirectX()
 {
 	try
 	{
+		//Adapters
+
 		std::vector<AdapterData> adapters = AdapterReader::GetAdapters();
 
 		if (adapters.size() < 1)
@@ -69,11 +73,15 @@ bool GraphicsHandler::InitDirectX()
 			return false;
 		}
 
+		//Get Largest VRAM adapterID
+
 		int id = 0;
 		if (adapters.size() > 1)
 			for (size_t i = 0; i < adapters.size(); ++i)
 				if (adapters[id].description.DedicatedVideoMemory < adapters[i].description.DedicatedVideoMemory)
 					id = i;
+
+		//Swap Chain
 
 		DXGI_SWAP_CHAIN_DESC scd = { 0 };
 		scd.BufferDesc.Width = this->windowWidth;
@@ -93,39 +101,45 @@ bool GraphicsHandler::InitDirectX()
 		scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 		HRESULT hr = D3D11CreateDeviceAndSwapChain(
-			adapters[id].pAdapter,				///IDXGI Adapter (Largest VRAM)
-			D3D_DRIVER_TYPE_UNKNOWN,			///D3D Driver
-			nullptr,								///For software driver type
-			0,								///Flags for runtime layers
-			nullptr,								///Feature Levels Array
-			0,									///Number of feature levels
-			D3D11_SDK_VERSION,					///D3D SDK (Required)
-			&scd,								///Swap Chain description
-			this->swapChain.GetAddressOf(),		///&swapChain
-			this->device.GetAddressOf(),		///&device
-			nullptr,								///Supported feature level
-			this->deviceContext.GetAddressOf()	///&deviceContext
+			adapters[id].pAdapter,				//IDXGI Adapter (Largest VRAM)
+			D3D_DRIVER_TYPE_UNKNOWN,			//D3D Driver
+			nullptr,							//For software driver type
+			D3D11_CREATE_DEVICE_DEBUG,			//Flags for runtime layers
+			nullptr,							//Feature Levels Array
+			0,									//Number of feature levels
+			D3D11_SDK_VERSION,					//D3D SDK (Required)
+			&scd,								//Swap Chain description
+			this->swapChain.GetAddressOf(),		//&swapChain
+			this->device.GetAddressOf(),		//&device
+			nullptr,							//Supported feature level
+			this->deviceContext.GetAddressOf()	//&deviceContext
 		);
 		EXCEPT_IF_FAILED(hr, "CreateDeviceAndSwapChain Failed");
 
+		//Back Buffer
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
 		hr = this->swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
 		EXCEPT_IF_FAILED(hr, "GetBuffer Failed");
 
+		//Render Target View
 		hr = this->device->CreateRenderTargetView(backBuffer.Get(), nullptr, this->renderTargetView.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRenderTargetView Failed");
 
+		//Depth Stencil
 		CD3D11_TEXTURE2D_DESC depthStencilTextureDesc(DXGI_FORMAT_D24_UNORM_S8_UINT, this->windowWidth, this->windowHeight);
 		depthStencilTextureDesc.MipLevels = 1;
 		depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		hr = this->device->CreateTexture2D(&depthStencilTextureDesc, nullptr, this->depthStencilBuffer.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateTexture2D for DepthStencilBuffer Failed");
 
+		//Depth Stencil View
 		hr = this->device->CreateDepthStencilView(this->depthStencilBuffer.Get(), nullptr, this->depthStencilView.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateDepthStencilView for DepthStencilView Failed");
 
+		//OMSet Render Targets
 		this->deviceContext->OMSetRenderTargets(1, this->renderTargetView.GetAddressOf(), this->depthStencilView.Get());
 
+		//Depth Stencil State
 		CD3D11_DEPTH_STENCIL_DESC depthStencilStateDesc(D3D11_DEFAULT);
 		depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
 		hr = this->device->CreateDepthStencilState(&depthStencilStateDesc, this->depthStencilState.GetAddressOf());
@@ -135,25 +149,25 @@ bool GraphicsHandler::InitDirectX()
 		CD3D11_VIEWPORT viewport(0.0f, 0.0f, static_cast<float>(this->windowWidth), static_cast<float>(this->windowHeight));
 		this->deviceContext->RSSetViewports(1, &viewport);
 
-		// Create Rasterizer State
+		//Rasterizer State - Default
 		CD3D11_RASTERIZER_DESC rasterizerDesc(D3D11_DEFAULT);
 		hr = this->device->CreateRasterizerState(&rasterizerDesc, this->rasterizerState.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
 
-		//RASTERIZER CULL FRONT
+		//Rasterizer State - Cull Front
 		CD3D11_RASTERIZER_DESC rasterizerDesc_CullFront(D3D11_DEFAULT);
 		rasterizerDesc_CullFront.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
 		hr = this->device->CreateRasterizerState(&rasterizerDesc_CullFront, this->rasterizerState_CullFront.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
 
 
-		// Create Rasterizer State
+		//Rasterizer State - Wireframe
 		CD3D11_RASTERIZER_DESC rasterizerDesc_FillWire(D3D11_DEFAULT);
 		rasterizerDesc_FillWire.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-		hr = this->device->CreateRasterizerState(&rasterizerDesc_FillWire, this->rasterizerState_FillWire.GetAddressOf());
+		hr = this->device->CreateRasterizerState(&rasterizerDesc_FillWire, this->rasterizerState_WireFrame.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
 
-		// Create Blend State
+		//Blend State
 		D3D11_BLEND_DESC blendDesc = { 0 };
 
 		D3D11_RENDER_TARGET_BLEND_DESC renderTargetBlendDesc = { 0 };
@@ -171,11 +185,11 @@ bool GraphicsHandler::InitDirectX()
 		hr = this->device->CreateBlendState(&blendDesc, this->blendState.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateBlendState Failed");
 
-		//// Setup Fonts
+		// Setup Fonts
 		//this->spriteBatch = std::make_unique<SpriteBatch>(this->deviceContext.Get());
 		//this->spriteFont = std::make_unique<SpriteFont>(this->device.Get(), L"Data\\Fonts\\ComicSansMS_16.spritefont");
 
-		// Create Sampler State
+		//Sampler State
 		CD3D11_SAMPLER_DESC samplerStateDesc(D3D11_DEFAULT);
 		samplerStateDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerStateDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -188,5 +202,43 @@ bool GraphicsHandler::InitDirectX()
 		ErrorLogger::Log(e);
 		return false;
 	}
+	return true;
+}
+
+bool GraphicsHandler::InitShaders()
+{
+	std::wstring shaderFolder = L"";
+	#pragma region DetermineShaderPath
+	if (IsDebuggerPresent() == TRUE)
+	{
+		#ifdef _DEBUG
+			#ifdef _WIN64
+				shaderFolder = L"..\\x64\\Debug\\";
+			#else
+				shaderFolder = L"..\\Debug\\";
+			#endif
+		#else
+			#ifdef _WIN64
+				shaderFolder = L"..\\x64\\Release\\";
+			#else
+				shaderFolder = L"..\\Release\\";
+			#endif
+		#endif
+	}
+
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+	};
+	UINT numElements = ARRAYSIZE(layout);
+
+	if (!vertexShader.Init(this->device, shaderFolder + L"vertexshader.cso", layout, numElements))
+		return false;
+
+	if (!pixelShader.Init(this->device, shaderFolder + L"pixelshader.cso"))
+		return false;
+
 	return true;
 }

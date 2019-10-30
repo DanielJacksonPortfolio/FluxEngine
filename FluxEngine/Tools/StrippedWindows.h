@@ -1,46 +1,107 @@
 #pragma once
 
-#define _WIN32_WINNT 0x0601
+    #define _WIN32_WINNT 0x0601
 #include <sdkddkver.h>
 
 #ifndef FULL_WINTARD
-#define WIN32_LEAN_AND_MEAN
-#define NOGDICAPMASKS
-//#define NOSYSMETRICS
-#define NOMENUS
-#define NOICONS
-#define NOSYSCOMMANDS
-#define NORASTEROPS
-#define OEMRESOURCE
-#define NOATOM
-#define NOCLIPBOARD
-#define NOCOLOR
-#define NOCTLMGR
-#define NODRAWTEXT
-#define NOKERNEL
-//#define NONLS
-#define NOMEMMGR
-#define NOMETAFILE
-#define NOOPENFILE
-#define NOSCROLL
-#define NOSERVICE
-#define NOSOUND
-#define NOTEXTMETRIC
-#define NOWH
-#define NOCOMM
-#define NOKANJI
-#define NOHELP
-#define NOPROFILER
-#define NODEFERWINDOWPOS
-#define NOMCX
-#define NORPC
-#define NOPROXYSTUB
-#define NOIMAGE
-#define NOTAPE
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
+	#endif
+	#ifndef NOGDICAPMASKS	
+	    #define NOGDICAPMASKS		
+	#endif
+	#ifndef NOMENUS			
+	    #define NOMENUS				
+	#endif
+	#ifndef NOICONS			
+		#define NOICONS				
+	#endif
+	#ifndef NOSYSCOMMANDS	
+	    #define NOSYSCOMMANDS		
+	#endif
+	#ifndef NORASTEROPS		
+	    #define NORASTEROPS			
+	#endif
+	#ifndef OEMRESOURCE		
+	    #define OEMRESOURCE			
+	#endif
+	#ifndef NOATOM			
+	    #define NOATOM				
+	#endif
+	#ifndef NOCLIPBOARD		
+	    #define NOCLIPBOARD			
+	#endif
+	#ifndef NOCOLOR			
+	    #define NOCOLOR				
+	#endif
+	#ifndef NOCTLMGR		
+	    #define NOCTLMGR			
+	#endif
+	#ifndef NODRAWTEXT		
+	    #define NODRAWTEXT			
+	#endif
+	#ifndef NOKERNEL		
+	    #define NOKERNEL			
+	#endif
+	#ifndef NOMEMMGR		
+	    #define NOMEMMGR			
+	#endif
+	#ifndef NOMETAFILE		
+	    #define NOMETAFILE			
+	#endif
+	#ifndef NOOPENFILE		
+	    #define NOOPENFILE			
+	#endif
+	#ifndef NOSCROLL		
+	    #define NOSCROLL			
+	#endif
+	#ifndef NOSERVICE		
+	    #define NOSERVICE			
+	#endif
+	#ifndef NOSOUND			
+	    #define NOSOUND				
+	#endif
+	#ifndef NOTEXTMETRIC	
+	    #define NOTEXTMETRIC		
+	#endif
+	#ifndef NOWH			
+	    #define NOWH				
+	#endif
+	#ifndef NOCOMM			
+	    #define NOCOMM				
+	#endif
+	#ifndef NOKANJI			
+	    #define NOKANJI				
+	#endif
+	#ifndef NOHELP			
+	    #define NOHELP				
+	#endif
+	#ifndef NOPROFILER		
+	    #define NOPROFILER			
+	#endif
+	#ifndef NODEFERWINDOWPOS
+	    #define NODEFERWINDOWPOS	
+	#endif
+	#ifndef NOMCX			
+		#define NOMCX				
+	#endif
+	#ifndef NORPC			
+		#define NORPC				
+	#endif
+	#ifndef NOPROXYSTUB		
+		#define NOPROXYSTUB			
+	#endif
+	#ifndef NOIMAGE			
+		#define NOIMAGE				
+	#endif
+	#ifndef NOTAPE			
+		#define NOTAPE				
+	#endif
+	//    #define NOSYSMETRICS
+	//    #define NONLS
 #endif
 
 #define NOMINMAX
-
 #define STRICT
 
 #include <Windows.h>

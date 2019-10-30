@@ -4,13 +4,14 @@
 //#include <SpriteFont.h>
 #include <memory>
 #include <WICTextureLoader.h>
-#include "AdapterHandler.h";
-#include "../../Tools/Timer.h";
+#include "AdapterHandler.h"
+#include "VertexShader.h"
+#include "PixelShader.h"
+#include "../../Tools/Timer.h"
+#include "../../Config.h"
 
 //#include "Light.h"
-//#include "Shaders.h"
 //#include "Camera.h"
-//#include "..\\Timer.h"
 //#include "ImGUI\\imgui.h"
 //#include "ImGUI\\imgui_impl_win32.h"
 //#include "ImGUI\\imgui_impl_dx11.h"
@@ -18,24 +19,29 @@
 class GraphicsHandler
 {
 public:
-	bool Init(HWND hWnd, int width, int height);
+
+	bool Init(HWND hWnd, int width, int height, Config* config);
 	void RenderFrame();
 	~GraphicsHandler();
 	bool wireframe = false;
 private:
 	bool InitDirectX();
-	//bool InitShaders();
+	bool InitShaders();
 	//bool InitScene();
 	//void InitImGUI(HWND hWnd);
 
 	int windowWidth, windowHeight = 0;
 	Timer fpsTimer;
 	HWND hWnd;
+	Config* config;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+
+	VertexShader vertexShader;
+	PixelShader pixelShader;
 
 	//ConstantBuffer<CB_VS_vertexShader> cb_vs_vertexShader;
 	//ConstantBuffer<CB_PS_light> cb_ps_light;
@@ -45,7 +51,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_CullFront;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_FillWire;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_WireFrame;
 
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
 

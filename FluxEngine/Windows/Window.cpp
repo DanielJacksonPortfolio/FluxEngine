@@ -42,8 +42,8 @@ bool Window::Init(Application* pApplication, Config* config)
 	DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 
 	RECT windowRect;
-	windowRect.left = GetSystemMetrics(SM_CXSCREEN) * 0.5f - this->width * 0.5f;
-	windowRect.top = GetSystemMetrics(SM_CYSCREEN) * 0.5f - this->height * 0.5f;
+	windowRect.left = static_cast<LONG>(GetSystemMetrics(SM_CXSCREEN) * 0.5f - this->width * 0.5f);
+	windowRect.top = static_cast<LONG>(GetSystemMetrics(SM_CYSCREEN) * 0.5f - this->height * 0.5f);
 	windowRect.right = windowRect.left + this->width;
 	windowRect.bottom = windowRect.top + this->height;
 	if (AdjustWindowRect(&windowRect, windowStyle, FALSE) == FALSE)
@@ -67,6 +67,8 @@ bool Window::Init(Application* pApplication, Config* config)
 	ShowWindow(hWnd, SW_SHOW);
 	SetForegroundWindow(this->hWnd);
 	SetFocus(this->hWnd);
+
+	return true;
 }
 
 Window::~Window()

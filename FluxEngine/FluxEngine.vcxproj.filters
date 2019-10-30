@@ -39,9 +39,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
       <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
@@ -71,6 +68,18 @@
     </ClCompile>
     <ClCompile Include="Tools\Timer.cpp">
       <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shader.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\VertexShader.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\PixelShader.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +122,15 @@
     <ClInclude Include="Tools\StringTools.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Graphics\Shader.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\VertexShader.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\PixelShader.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FluxEngine.rc">
@@ -123,5 +141,13 @@
     <Image Include="data\images\icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="vertexShader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="pixelShader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

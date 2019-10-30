@@ -159,8 +159,10 @@ bool Application::Init(Config* config)
 	if (!this->window.Init(this, config))
 		return false;
 
-	if (!this->gfx.Init(window.GetHandle(), window.GetWidth(), window.GetHeight()))
+	if (!this->gfx.Init(window.GetHandle(), window.GetWidth(), window.GetHeight(),config))
 		return false;
+
+	return true;
 }
 
 bool Application::ProcessMessages()
@@ -172,7 +174,7 @@ bool Application::ProcessMessages()
 
 void Application::Update()
 {
-	float dt = timer.GetMilisecondsElapsed();
+	float dt = static_cast<float>(timer.GetMilisecondsElapsed());
 
 	while (!keyboard.CharBufferIsEmpty())
 	{
