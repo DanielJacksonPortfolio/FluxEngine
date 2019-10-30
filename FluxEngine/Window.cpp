@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "WindowContainer.h"
 
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -35,8 +35,10 @@ HINSTANCE Window::WindowClass::GetInstance()
 	return wndClass.hInstance;
 }
 
-Window::Window(Config* config) : width(config->width), height(config->height)
+bool Window::Init(WindowContainer* pWindowContainer, Config* config)
 {
+	this->width = config->width;
+	this->height = config->height;
 	DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 
 	RECT windowRect;
@@ -47,6 +49,7 @@ Window::Window(Config* config) : width(config->width), height(config->height)
 	if (AdjustWindowRect(&windowRect, windowStyle, FALSE) == FALSE)
 	{
 		ErrorLogger::Log(GetLastError(), "AdjustWindowRect Failed");
+		return false;
 	}
 
 	this->hWnd = CreateWindow(
@@ -58,7 +61,7 @@ Window::Window(Config* config) : width(config->width), height(config->height)
 	if (this->hWnd == nullptr)
 	{
 		ErrorLogger::Log(GetLastError(), "CreateWindowEx Failed for window: " + config->name);
-		return;
+		return false;
 	}
 
 	ShowWindow(hWnd, SW_SHOW);
@@ -71,26 +74,6 @@ Window::~Window()
 	DestroyWindow(hWnd);
 }
 
-int Window::Update()
-{
-	MSG msg;
-	BOOL gResult;
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-
-	if (gResult == -1)
-	{
-		return -1;
-	}
-	else if (gResult == 0)
-	{
-		return msg.wParam;
-	}
-}
-
 void Window::SetWindowTitle(const std::string& title)
 {
 	if (SetWindowText(hWnd, title.c_str()) == FALSE)
@@ -99,6 +82,36 @@ void Window::SetWindowTitle(const std::string& title)
 	}
 }
 
+bool Window::ProcessMessages()
+{
+	MSG msg;
+	ZeroMemory(&msg, sizeof(msg));
+
+	while (PeekMessage(&msg, this->hWnd, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	if (msg.message == WM_NULL)
+	{
+		if (!IsWindow(this->hWnd))
+		{
+			this->hWnd = NULL;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+const HWND Window::GetHandle()
+{
+	return this->hWnd;
+}
+
+
 LRESULT WINAPI Window::HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -106,10 +119,10 @@ LRESULT WINAPI Window::HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LP
 	case WM_NCCREATE:
 	{
 		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
-		Window* pWindow = reinterpret_cast<Window*>(pCreate->lpCreateParams);
+		WindowContainer* pWindow = reinterpret_cast<WindowContainer*>(pCreate->lpCreateParams);
 		if (pWindow == nullptr)
 		{
-			ErrorLogger::Log("Critical Error: Pointer to window container is null during WM_NCCREATE.");
+			ErrorLogger::Log("Critical Error: Pointer to Window is null during WM_NCCREATE.");
 			exit(-1);
 		}
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWindow));
@@ -123,155 +136,17 @@ LRESULT WINAPI Window::HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 LRESULT WINAPI Window::HandleMessageRedirect(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) // Redirects to member fucntion
 {
-	Window* const pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	return pWindow->WindowProc(hWnd, msg, wParam, lParam);
-}
-
-LRESULT Window::WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	//if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-	//	return true;
 	switch (msg)
 	{
 	case WM_CLOSE:
-		PostQuitMessage(0);
+	{
+		DestroyWindow(hWnd);
 		return 0;
-	case WM_KILLFOCUS:
-		keyboard.ClearState();
-		mouse.ClearState();
-
-	//KEYBOARD MESSAGES
-	case WM_KEYDOWN:
-	case WM_SYSKEYDOWN:
-	{
-		unsigned char keycode = static_cast<unsigned char>(wParam);
-		if (keyboard.IsKeysAutoRepeat() || !(lParam & 0x40000000))
-			keyboard.OnKeyPressed(keycode);
-		break;
 	}
-	case WM_KEYUP:
-	case WM_SYSKEYUP:
+	default:
 	{
-		unsigned char keycode = static_cast<unsigned char>(wParam);
-		keyboard.OnKeyReleased(keycode);
-		break;
+		WindowContainer* const pWindow = reinterpret_cast<WindowContainer*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+		return pWindow->WindowProc(hWnd, msg, wParam, lParam);
 	}
-	case WM_CHAR:
-	{
-		unsigned char ch = static_cast<unsigned char>(wParam);
-		if (keyboard.IsCharsAutoRepeat() || !(lParam & 0x40000000))
-		{
-			keyboard.OnChar(ch);
-		}
-		break;
 	}
-
-	// Mouse Messages //
-
-	case WM_MOUSEMOVE:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-
-		if (x >= 0 && x < this->width && y >= 0 && y < this->height) //Client in region, log move
-		{
-			mouse.OnMouseMove(x, y);
-			if (!this->mouse.IsInWindow()) //If not previously in region, log enter
-			{
-				SetCapture(hWnd);
-				this->mouse.OnMouseEnter();
-			}
-		}
-		else // Not in region
-		{
-			if (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) //If button down, maintain capture
-			{
-				this->mouse.OnMouseMove(x, y);
-			}
-			else //Leaving window without button pressed, log leave
-			{
-				ReleaseCapture();
-				this->mouse.OnMouseLeave();
-			}
-		}
-		break;
-	}
-	case WM_LBUTTONDOWN:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnLeftPressed(x, y);
-		break;
-	}
-	case WM_LBUTTONUP:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnLeftReleased(x, y);
-		break;
-	}
-	case WM_RBUTTONDOWN:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnRightPressed(x, y);
-		break;
-	}
-	case WM_RBUTTONUP:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnRightReleased(x, y);
-		break;
-	}
-	case WM_MBUTTONDOWN:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnMiddlePressed(x, y);
-		break;
-	}
-	case WM_MBUTTONUP:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnMiddleReleased(x, y);
-		break;
-	}
-	case WM_MOUSEWHEEL:
-	{
-		const POINTS pt = MAKEPOINTS(lParam);
-		int x = pt.x;
-		int y = pt.y;
-		mouse.OnWheelDelta(x, y, GET_WHEEL_DELTA_WPARAM(wParam));
-		break;
-	}
-	case WM_INPUT:
-	{
-		UINT dataSize = {0};
-		GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, NULL, &dataSize, sizeof(RAWINPUTHEADER));
-		if (dataSize > 0)
-		{
-			std::unique_ptr<BYTE[]> rawdata = std::make_unique<BYTE[]>(dataSize);
-			if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, rawdata.get(), &dataSize, sizeof(RAWINPUTHEADER)) == dataSize)
-			{
-				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawdata.get());
-				if (raw->header.dwType == RIM_TYPEMOUSE)
-				{
-					mouse.OnMouseMoveRaw(raw->data.mouse.lLastX, raw->data.mouse.lLastY);
-				}
-			}
-		}
-
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-	}
-	}//Switch End
-	return DefWindowProc(hWnd, msg, wParam, lParam);
 }

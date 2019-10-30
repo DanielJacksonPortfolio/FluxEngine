@@ -1,7 +1,9 @@
-#include "Window.h"
+#include "Application.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	EXCEPT_IF_FAILED(CoInitialize(NULL),"Failed to CoInitialize");
+
 	Config config;
 
 	try
@@ -12,11 +14,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			return -1;
 		}
 
-		Window window(&config);
-
-		int result = window.Update();
-
-		return result;
+		Application app;
+		if (app.Init(&config))
+		{
+			while (app.ProcessMessages())
+			{
+				app.Update();
+				app.RenderFrame();
+			}
+		}
+		return 0;
 	}
 	catch (const CustomException & e)
 	{

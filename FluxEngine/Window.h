@@ -1,9 +1,9 @@
 #pragma once
 #include "ErrorLogger.h"
-#include "Keyboard.h"
-#include "Mouse.h"
 #include "Config.h"
 #include "resource.h"
+
+class WindowContainer;
 
 class Window
 {
@@ -16,23 +16,17 @@ private:
 	private:
 		WindowClass();
 		~WindowClass();
-		WindowClass(const WindowClass&) = delete;
-		WindowClass& operator=(const WindowClass&) = delete;
 		static constexpr const char* wndClassName = "FluxEngine Window";
 		static WindowClass wndClass;
 		HINSTANCE hInstance;
 	};
 
 public:
-	Window(Config* config);
+	bool Init(WindowContainer* pWindowContainer, Config* config);
 	~Window();
-	Window(const Window&) = delete;
-	Window& operator=(const Window&) = delete;
-	int Update();
 	void SetWindowTitle(const std::string& title);
-
-	Keyboard keyboard;
-	Mouse mouse;
+	bool ProcessMessages();
+	const HWND GetHandle();
 
 private:
 	int width;
@@ -41,7 +35,6 @@ private:
 
 	static LRESULT WINAPI HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static LRESULT WINAPI HandleMessageRedirect(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	LRESULT WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 };
 

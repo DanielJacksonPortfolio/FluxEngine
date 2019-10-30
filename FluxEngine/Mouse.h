@@ -9,7 +9,7 @@ struct MousePoint
 class Mouse
 {
 private:
-	friend class Window;
+	friend class WindowContainer;
 public:
 	class Event
 	{
