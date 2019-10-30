@@ -1,4 +1,4 @@
-#include "WindowContainer.h"
+#include "../Game/Application.h"
 
 Window::WindowClass Window::WindowClass::wndClass;
 
@@ -11,7 +11,7 @@ Window::WindowClass::WindowClass() : hInstance(GetModuleHandle(nullptr))
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = GetInstance();
-	windowClass.hIcon = static_cast<HICON>(LoadImage(GetInstance(),MAKEINTRESOURCE(IDI_ICON1),IMAGE_ICON,256,256,NULL));
+	windowClass.hIcon = static_cast<HICON>(LoadImage(GetInstance(),MAKEINTRESOURCE(IDI_ICON1),IMAGE_ICON,256,256, NULL));
 	windowClass.hCursor = nullptr;
 	windowClass.hbrBackground = nullptr;
 	windowClass.lpszMenuName = nullptr;
@@ -35,7 +35,7 @@ HINSTANCE Window::WindowClass::GetInstance()
 	return wndClass.hInstance;
 }
 
-bool Window::Init(WindowContainer* pWindowContainer, Config* config)
+bool Window::Init(Application* pApplication, Config* config)
 {
 	this->width = config->width;
 	this->height = config->height;
@@ -56,7 +56,7 @@ bool Window::Init(WindowContainer* pWindowContainer, Config* config)
 		WindowClass::GetName(),config->name.c_str(),
 		windowStyle,
 		windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
-		nullptr, nullptr,WindowClass::GetInstance(), this);
+		nullptr, nullptr,WindowClass::GetInstance(), pApplication);
 
 	if (this->hWnd == nullptr)
 	{
@@ -97,7 +97,7 @@ bool Window::ProcessMessages()
 	{
 		if (!IsWindow(this->hWnd))
 		{
-			this->hWnd = NULL;
+			this->hWnd = nullptr;
 			return false;
 		}
 	}
@@ -111,6 +111,16 @@ const HWND Window::GetHandle()
 	return this->hWnd;
 }
 
+const int Window::GetWidth()
+{
+	return this->width;
+}
+
+const int Window::GetHeight()
+{
+	return this->height;
+}
+
 
 LRESULT WINAPI Window::HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -119,7 +129,7 @@ LRESULT WINAPI Window::HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LP
 	case WM_NCCREATE:
 	{
 		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
-		WindowContainer* pWindow = reinterpret_cast<WindowContainer*>(pCreate->lpCreateParams);
+		Application* pWindow = reinterpret_cast<Application*>(pCreate->lpCreateParams);
 		if (pWindow == nullptr)
 		{
 			ErrorLogger::Log("Critical Error: Pointer to Window is null during WM_NCCREATE.");
@@ -145,7 +155,7 @@ LRESULT WINAPI Window::HandleMessageRedirect(HWND hWnd, UINT msg, WPARAM wParam,
 	}
 	default:
 	{
-		WindowContainer* const pWindow = reinterpret_cast<WindowContainer*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+		Application* const pWindow = reinterpret_cast<Application*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		return pWindow->WindowProc(hWnd, msg, wParam, lParam);
 	}
 	}

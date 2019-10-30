@@ -25,37 +25,52 @@
     <Filter Include="Source Files\Windows">
       <UniqueIdentifier>{9d6b3524-ffdd-4b73-8bab-41122b603bf4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{1f4b06b4-17c2-4544-8b6e-4b1f2c326096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Graphics">
+      <UniqueIdentifier>{117a1854-a649-410a-a79d-f8641749b736}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{bae4b0c6-6b94-4172-bfc8-87a3edeb9adf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Graphics">
+      <UniqueIdentifier>{e710b4ea-37a9-4fe4-ad71-49bfd8fd8d46}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ErrorLogger.cpp">
+    <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Application.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\ErrorLogger.cpp">
       <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="ExceptionHandler.cpp">
+    <ClCompile Include="Tools\ExceptionHandler.cpp">
       <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="StringTools.cpp">
-      <Filter>Source Files\Tools</Filter>
+    <ClCompile Include="Game\Graphics\GraphicsHandler.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="Windows\Keyboard.cpp">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
+    <ClCompile Include="Windows\Mouse.cpp">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="Mouse.cpp">
+    <ClCompile Include="Windows\Window.cpp">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
+    <ClCompile Include="Tools\StringTools.cpp">
       <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="WindowContainer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Tools\Timer.cpp">
+      <Filter>Source Files\Tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,35 +80,38 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ErrorLogger.h">
+    <ClInclude Include="Game\Graphics\AdapterHandler.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Application.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\ExceptionHandler.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="ExceptionHandler.h">
+    <ClInclude Include="Tools\ErrorLogger.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="StringTools.h">
+    <ClInclude Include="Game\Graphics\GraphicsHandler.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\StrippedWindows.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="Keyboard.h">
+    <ClInclude Include="Windows\Keyboard.h">
       <Filter>Header Files\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="Windows\Mouse.h">
       <Filter>Header Files\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="StrippedWindows.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Mouse.h">
+    <ClInclude Include="Windows\Window.h">
       <Filter>Header Files\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="Application.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
+    <ClInclude Include="Tools\Timer.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="WindowContainer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Tools\StringTools.h">
+      <Filter>Header Files\Tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,8 @@
-#include "Application.h"
+#include "Game/Application.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	EXCEPT_IF_FAILED(CoInitialize(NULL),"Failed to CoInitialize");
+	EXCEPT_IF_FAILED(CoInitialize(nullptr),"Failed to CoInitialize");
 
 	Config config;
 

@@ -1,9 +1,9 @@
 #pragma once
-#include "ErrorLogger.h"
-#include "Config.h"
-#include "resource.h"
+#include "../Tools/ErrorLogger.h"
+#include "../Config.h"
+#include "../resource.h"
 
-class WindowContainer;
+class Application;
 
 class Window
 {
@@ -22,11 +22,13 @@ private:
 	};
 
 public:
-	bool Init(WindowContainer* pWindowContainer, Config* config);
+	bool Init(Application* pApplication, Config* config);
 	~Window();
 	void SetWindowTitle(const std::string& title);
 	bool ProcessMessages();
 	const HWND GetHandle();
+	const int GetWidth();
+	const int GetHeight();
 
 private:
 	int width;

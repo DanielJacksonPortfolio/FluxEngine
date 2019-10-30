@@ -1,5 +1,5 @@
 #pragma once
-#include "StrippedWindows.h";
+#include "../Tools/StrippedWindows.h";
 #include<queue>
 struct MousePoint
 {
@@ -9,7 +9,7 @@ struct MousePoint
 class Mouse
 {
 private:
-	friend class WindowContainer;
+	friend class Application;
 public:
 	class Event
 	{

@@ -69,7 +69,22 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SOLUTIONDIR)/../DX11 Files/Includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SOLUTIONDIR)/../DX11 Files/Libs/Any;$(SOLUTIONDIR)/../DX11 Files/Libs/x86/Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SOLUTIONDIR)/../DX11 Files/Includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SOLUTIONDIR)/../DX11 Files/Libs/x86/Release;$(SOLUTIONDIR)/../DX11 Files/Libs/Any;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SOLUTIONDIR)/../DX11 Files/Includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SOLUTIONDIR)/../DX11 Files/Libs/Any;$(SOLUTIONDIR)/../DX11 Files/Libs/x64/Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SOLUTIONDIR)/../DX11 Files/Includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SOLUTIONDIR)/../DX11 Files/Libs/x64/Release;$(SOLUTIONDIR)/../DX11 Files/Libs/Any;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -84,13 +99,14 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -100,6 +116,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,6 +138,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,33 +160,36 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;DXGI.lib;D3DCompiler.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="ErrorLogger.cpp" />
-    <ClCompile Include="ExceptionHandler.cpp" />
-    <ClCompile Include="Keyboard.cpp" />
-    <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="StringTools.cpp" />
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Window.cpp" />
-    <ClCompile Include="WindowContainer.cpp" />
+    <ClCompile Include="Game\Graphics\AdapterHandler.cpp" />
+    <ClCompile Include="Game\Application.cpp" />
+    <ClCompile Include="Tools\ErrorLogger.cpp" />
+    <ClCompile Include="Tools\ExceptionHandler.cpp" />
+    <ClCompile Include="Game\Graphics\GraphicsHandler.cpp" />
+    <ClCompile Include="Windows\Keyboard.cpp" />
+    <ClCompile Include="Windows\Mouse.cpp" />
+    <ClCompile Include="Tools\StringTools.cpp" />
+    <ClCompile Include="Tools\Timer.cpp" />
+    <ClCompile Include="Windows\Window.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
+    <ClInclude Include="Game\Graphics\AdapterHandler.h" />
+    <ClInclude Include="Game\Application.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="ErrorLogger.h" />
-    <ClInclude Include="ExceptionHandler.h" />
-    <ClInclude Include="Keyboard.h" />
-    <ClInclude Include="Mouse.h" />
+    <ClInclude Include="Tools\ErrorLogger.h" />
+    <ClInclude Include="Tools\ExceptionHandler.h" />
+    <ClInclude Include="Game\Graphics\GraphicsHandler.h" />
+    <ClInclude Include="Windows\Keyboard.h" />
+    <ClInclude Include="Windows\Mouse.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="StringTools.h" />
-    <ClInclude Include="StrippedWindows.h" />
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="Window.h" />
-    <ClInclude Include="WindowContainer.h" />
+    <ClInclude Include="Tools\StringTools.h" />
+    <ClInclude Include="Tools\StrippedWindows.h" />
+    <ClInclude Include="Tools\Timer.h" />
+    <ClInclude Include="Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FluxEngine.rc" />

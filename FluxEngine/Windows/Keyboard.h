@@ -5,7 +5,7 @@
 class Keyboard
 {
 private:
-	friend class WindowContainer;
+	friend class Application;
 public:
 	class Event
 	{
