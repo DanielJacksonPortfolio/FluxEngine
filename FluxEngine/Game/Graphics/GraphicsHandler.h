@@ -14,7 +14,7 @@
 #include "IndexBuffer.h"
 #include "ConstantBuffer.h"
 
-#include "GameObject.h"
+#include "Camera.h"
 
 //#include "Light.h"
 //#include "Camera.h"
@@ -30,6 +30,8 @@ public:
 	void RenderFrame();
 	~GraphicsHandler();
 	bool wireframe = false;
+	float cameraSpeed = 0.005f;
+	Camera camera;
 private:
 	bool InitDirectX();
 	bool InitShaders();
@@ -60,9 +62,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
+
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_CullFront;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_WireFrame;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_CullFront_WireFrame;
 
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
 

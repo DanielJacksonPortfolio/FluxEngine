@@ -172,8 +172,6 @@ bool Application::ProcessMessages()
 	return window.ProcessMessages();
 }
 
-
-
 void Application::Update()
 {
 	float dt = static_cast<float>(timer.GetMilisecondsElapsed());
@@ -181,7 +179,6 @@ void Application::Update()
 	while (!keyboard.CharBufferIsEmpty())
 	{
 		unsigned char ch = keyboard.ReadChar();
-
 	}
 	while (!keyboard.KeyBufferIsEmpty())
 	{
@@ -195,9 +192,34 @@ void Application::Update()
 		{
 			if (me.GetType() == Mouse::Event::Type::RAW_MOVE)
 			{
-				//this->gfpt.x.camera.AdjustRotation(static_cast<float>(me.GetPosY()) * 0.01f, static_cast<float>(me.GetPosX()) * 0.01f, 0.0f);
+				this->gfx.camera.AdjustRotation(static_cast<float>(me.GetPosY()) * 0.01f, static_cast<float>(me.GetPosX()) * 0.01f, 0.0f);
 			}
 		}
+	}
+
+	if (keyboard.KeyIsPressed('W'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetForwardVector() * gfx.cameraSpeed * dt);
+	}
+	if (keyboard.KeyIsPressed('A'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetLeftVector() * gfx.cameraSpeed * dt);
+	}
+	if (keyboard.KeyIsPressed('S'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetBackwardVector() * gfx.cameraSpeed * dt);
+	}
+	if (keyboard.KeyIsPressed('D'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetRightVector() * gfx.cameraSpeed * dt);
+	}
+	if (keyboard.KeyIsPressed(VK_SPACE))
+	{
+		this->gfx.camera.AdjustPosition(0.0f, gfx.cameraSpeed * dt, 0.0f);
+	}
+	if (keyboard.KeyIsPressed(VK_SHIFT))
+	{
+		this->gfx.camera.AdjustPosition(0.0f, -gfx.cameraSpeed * dt, 0.0f);
 	}
 
 	timer.Restart();

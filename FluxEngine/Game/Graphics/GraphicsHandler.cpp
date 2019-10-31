@@ -26,7 +26,7 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 void GraphicsHandler::RenderFrame()
 {
 	XMMATRIX worldMatrix = XMMatrixIdentity(); //XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XM_PIDIV2);
-	XMMATRIX viewProjectionMatrix = XMMatrixIdentity();
+	XMMATRIX viewProjectionMatrix = this->camera.GetViewMatrix()*this->camera.GetProjectionMatrix();
 	this->deviceContext->VSSetConstantBuffers(0, 1, this->cb_vertexShader_PosCol_3D.GetAddressOf());
 	this->cb_vertexShader_PosCol_3D.data.wvpMatrix = worldMatrix * viewProjectionMatrix;
 	this->cb_vertexShader_PosCol_3D.data.worldMatrix = worldMatrix;
@@ -52,6 +52,13 @@ void GraphicsHandler::RenderFrame()
 
 	this->deviceContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), this->vertexBuffer.GetStridePtr(), &offset);
 	this->deviceContext->IASetIndexBuffer(this->indexBuffer.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+
+	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
+	
+	if (wireframe == false)
+		this->deviceContext->RSSetState(this->rasterizerState_CullFront.Get());
+	else
+		this->deviceContext->RSSetState(this->rasterizerState_CullFront_WireFrame.Get());
 	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
 
 	static int fpsCounter = 0;
@@ -77,6 +84,7 @@ void GraphicsHandler::RenderGUI()
 	ImGui::NewFrame();
 
 	ImGui::Begin("Debug");
+	ImGui::DragFloat("Camera Speed", &cameraSpeed, 0.005f, 0.0f, 5.0f);
 	ImGui::Checkbox("Wireframe?", &wireframe);
 	ImGui::End();
 
@@ -190,11 +198,17 @@ bool GraphicsHandler::InitDirectX()
 		hr = this->device->CreateRasterizerState(&rasterizerDesc_CullFront, this->rasterizerState_CullFront.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
 
-
 		//Rasterizer State - Wireframe
-		CD3D11_RASTERIZER_DESC rasterizerDesc_FillWire(D3D11_DEFAULT);
-		rasterizerDesc_FillWire.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-		hr = this->device->CreateRasterizerState(&rasterizerDesc_FillWire, this->rasterizerState_WireFrame.GetAddressOf());
+		CD3D11_RASTERIZER_DESC rasterizerDesc_WireFrame(D3D11_DEFAULT);
+		rasterizerDesc_WireFrame.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+		hr = this->device->CreateRasterizerState(&rasterizerDesc_WireFrame, this->rasterizerState_WireFrame.GetAddressOf());
+		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
+		
+		//Rasterizer State - Cull Front Wireframe
+		CD3D11_RASTERIZER_DESC rasterizerDesc_CullFront_WireFrame(D3D11_DEFAULT);
+		rasterizerDesc_CullFront_WireFrame.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
+		rasterizerDesc_CullFront_WireFrame.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+		hr = this->device->CreateRasterizerState(&rasterizerDesc_CullFront_WireFrame, this->rasterizerState_CullFront_WireFrame.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
 
 		//Blend State
@@ -350,7 +364,10 @@ bool GraphicsHandler::InitScene()
 		//Constant Buffers
 		hr = cb_vertexShader_PosCol_3D.Init(this->device.Get(), this->deviceContext.Get());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader_PosCol_3D");
-
+		
+		//Camera(s)
+		camera.SetPosition(0.0f, 0.0f, -2.0f);
+		camera.SetProjectionValues(90.0f, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
 	}
 	catch (CustomException & e)
 	{

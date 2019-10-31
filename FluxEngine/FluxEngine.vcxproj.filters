@@ -120,6 +120,9 @@
     <ClCompile Include="Game\Graphics\GameObject.cpp">
       <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Graphics\Camera.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Graphics\AdapterHandler.h">
@@ -213,6 +216,9 @@
       <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Game\Graphics\ConstantBuffer.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Camera.h">
       <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
