@@ -1,6 +1,6 @@
 #pragma once
 
-    #define _WIN32_WINNT 0x0601
+//#define _WIN32_WINNT 0x0601
 #include <sdkddkver.h>
 
 #ifndef FULL_WINTARD
@@ -102,6 +102,6 @@
 #endif
 
 #define NOMINMAX
-#define STRICT
+//#define STRICT
 
 #include <Windows.h>

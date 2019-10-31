@@ -37,6 +37,9 @@
     <Filter Include="Header Files\Game\Graphics">
       <UniqueIdentifier>{e710b4ea-37a9-4fe4-ad71-49bfd8fd8d46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Resources">
+      <UniqueIdentifier>{43f8aabb-dd4d-456b-ae7f-19ffbc6f0f3c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
@@ -83,12 +86,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game\Graphics\AdapterHandler.h">
       <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
@@ -131,6 +128,24 @@
     <ClInclude Include="Game\Graphics\PixelShader.h">
       <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Graphics\VertexTypes.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Buffer.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Resources\Config.h">
+      <Filter>Header Files\Game\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Resources\resource.h">
+      <Filter>Header Files\Game\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\VertexBuffer.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\IndexBuffer.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FluxEngine.rc">
@@ -143,10 +158,10 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="vertexShader.hlsl">
+    <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="pixelShader.hlsl">
+    <FxCompile Include="data\shaders\vertexShader_PosCol.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

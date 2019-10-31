@@ -77,6 +77,6 @@ private:
 	bool middleIsPressed = false;
 	bool isInWindow = false;
 	int wheelDeltaCarry = 0;
-	int x, y = 0;
+	int x = 0, y = 0;
 };
 

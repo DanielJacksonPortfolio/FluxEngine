@@ -8,7 +8,11 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "../../Tools/Timer.h"
-#include "../../Config.h"
+#include "../Resources/Config.h"
+
+#include "VertexTypes.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 //#include "Light.h"
 //#include "Camera.h"
@@ -27,18 +31,21 @@ public:
 private:
 	bool InitDirectX();
 	bool InitShaders();
-	//bool InitScene();
+	bool InitScene();
 	//void InitImGUI(HWND hWnd);
 
 	int windowWidth, windowHeight = 0;
 	Timer fpsTimer;
-	HWND hWnd;
-	Config* config;
+	HWND hWnd = NULL;
+	Config* config = nullptr;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+
+	VertexBuffer<Vertex_PC> vertexBuffer;
+	IndexBuffer indexBuffer;
 
 	VertexShader vertexShader;
 	PixelShader pixelShader;
@@ -59,7 +66,5 @@ private:
 	//std::unique_ptr<DirectX::SpriteFont> spriteFont;
 
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
-
-
 };
 

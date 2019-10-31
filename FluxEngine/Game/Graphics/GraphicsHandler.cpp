@@ -15,8 +15,8 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 	if (!InitShaders())
 		return false;
 
-	//if (!InitScene())
-	//	return false;
+	if (!InitScene())
+		return false;
 
 	//InitImGUI(hWnd);
 
@@ -29,7 +29,7 @@ void GraphicsHandler::RenderFrame()
 	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	//this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
+	this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	if (wireframe == false)
 		this->deviceContext->RSSetState(this->rasterizerState.Get());
@@ -38,7 +38,14 @@ void GraphicsHandler::RenderFrame()
 	this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
 	this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
 	this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-	//this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
+	this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
+	this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
+
+	UINT offset = 0;
+
+	this->deviceContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), this->vertexBuffer.GetStridePtr(), &offset);
+	this->deviceContext->IASetIndexBuffer(this->indexBuffer.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
 
 	static int fpsCounter = 0;
 	static std::string fpsString = "FPS: 0";
@@ -50,6 +57,7 @@ void GraphicsHandler::RenderFrame()
 		fpsCounter = 0;
 		this->fpsTimer.Restart();
 	}
+
 
 
 	this->swapChain->Present(config->vSync, NULL);
@@ -77,7 +85,7 @@ bool GraphicsHandler::InitDirectX()
 
 		int id = 0;
 		if (adapters.size() > 1)
-			for (size_t i = 0; i < adapters.size(); ++i)
+			for (int i = 0; i < static_cast<int>(adapters.size()); ++i)
 				if (adapters[id].description.DedicatedVideoMemory < adapters[i].description.DedicatedVideoMemory)
 					id = i;
 
@@ -229,8 +237,9 @@ bool GraphicsHandler::InitShaders()
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"COLOR",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		//{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		//{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 	UINT numElements = ARRAYSIZE(layout);
 
@@ -240,5 +249,71 @@ bool GraphicsHandler::InitShaders()
 	if (!pixelShader.Init(this->device, shaderFolder + L"pixelshader.cso"))
 		return false;
 
+	return true;
+}
+
+bool GraphicsHandler::InitScene()
+{
+	try
+	{
+		Vertex_PC vertices[] =
+		{
+			Vertex_PC(-0.23f,-0.13f, 0.0f, 1.0f, 1.0f, 1.0f), // 0
+			Vertex_PC(0.0f, 0.27f	, 0.0f, 1.0f, 1.0f, 1.0f), // 1
+			Vertex_PC(0.23f,-0.13f	, 0.0f, 1.0f, 1.0f, 1.0f), // 2
+			Vertex_PC(-0.21f,-0.12f, 0.0f, 0.0f, 0.0f, 0.0f), // 3
+			Vertex_PC(0.0f, 0.25f	, 0.0f,   0.0f, 0.0f, 0.0f), // 4
+			Vertex_PC(0.21f,-0.12f	, 0.0f,  0.0f, 0.0f, 0.0f), // 5
+			Vertex_PC(-0.15f, 0.07f, 0.0f, 1.0f, 1.0f, 1.0f), // 6
+			Vertex_PC(0.08f, 0.11f, 0.0f, 0.0f, 0.0f, 0.0f), // 7
+			Vertex_PC(0.12f, 0.03f, 0.0f, 0.0f, 0.0f, 0.0f), // 8
+			Vertex_PC(-1.0f, -0.11f, 0.0f, 1.0f, 1.0f, 1.0f), // 9
+			Vertex_PC(-0.10f, 0.08f, 0.0f, 1.0f, 1.0f, 1.0f), // 10
+			Vertex_PC(-0.11f, 0.06f, 0.0f, 1.0f, 1.0f, 1.0f), // 11
+			Vertex_PC(-1.0f, -0.13f, 0.0f, 1.0f, 1.0f, 1.0f), // 12
+			Vertex_PC(0.09f, 0.11f,	1.0f, 1.0f, 0.0f, 0.0f), // 13
+			Vertex_PC(1.00f, 0.02f,	1.0f, 1.0f, 0.0f, 0.0f), // 14
+			Vertex_PC(1.00f,-0.03f,	1.0f, 1.0f, 0.5f, 0.0f), // 15
+			Vertex_PC(0.098f,0.09f,	1.0f, 1.0f, 0.5f, 0.0f), // 16
+			Vertex_PC(1.00f,-0.063f,	1.0f, 1.0f, 1.0f, 0.0f), // 17
+			Vertex_PC(0.111f,0.077f ,	1.0f, 1.0f, 1.0f, 0.0f), // 18
+			Vertex_PC(1.00f,-0.097f,	1.0f, 0.0f, 1.0f, 0.0f), // 19
+			Vertex_PC(0.119f,0.063f,	1.0f, 0.0f, 1.0f, 0.0f), // 20
+			Vertex_PC(1.00f,-0.13f,	1.0f, 0.0f, 0.0f, 1.0f), // 21
+			Vertex_PC(0.128f,0.05f	,	1.0f, 0.0f, 0.0f, 1.0f), // 22
+			Vertex_PC(1.00f,-0.20f,	1.0f, 1.0f, 0.0f, 1.0f), // 23
+			Vertex_PC(0.14f, 0.03f,	1.0f, 1.0f, 0.0f, 1.0f), // 24
+		};
+
+		HRESULT hr = this->vertexBuffer.Init(device.Get(), vertices, ARRAYSIZE(vertices));
+		EXCEPT_IF_FAILED(hr, "Failed to initialize vertex buffer for mesh");
+
+		DWORD indices[] =
+		{
+			0, 1, 2, // MAIN TRIANGLE
+			3, 4, 5, // INNER TRIANGLE
+			6, 7, 8, //FADE TRIANGLE
+			9, 10, 11, // LINE
+			11, 12, 9,
+			13, 14, 15, // RO
+			15, 16, 13, // OR
+			16, 15, 17, // OY
+			17, 18, 16, // YO
+			18, 17, 19, // YG
+			19, 20, 18, // GY
+			20, 19, 21, // GB
+			21, 22, 20, // BG
+			22, 21, 23, // BP
+			23, 24, 22  // PB
+		};
+
+		hr = this->indexBuffer.Init(device.Get(), indices, ARRAYSIZE(indices));
+		EXCEPT_IF_FAILED(hr, "Failed to initialize index buffer for mesh");
+	}
+	catch (CustomException & e)
+	{
+		ErrorLogger::Log(e);
+		return false;
+	}
 	return true;
 }

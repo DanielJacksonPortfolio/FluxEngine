@@ -2,13 +2,12 @@
 
 std::wstring StringTools::StandardToWide(std::string str)
 {
-	std::wstring wideString(str.begin(), str.end());
-	return wideString;
+	return std::wstring(str.begin(), str.end());
 }
 std::string StringTools::WideToStandard(std::wstring wstr)
 {
-	std::string string(wstr.begin(), wstr.end());
-	return string;
+	return std::string(wstr.begin(), wstr.end());
+	
 }
 
 std::string StringTools::GetDirectoryFromPath(const std::string& filepath)

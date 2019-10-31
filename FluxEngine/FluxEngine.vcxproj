@@ -180,18 +180,22 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Graphics\Buffer.h" />
     <ClInclude Include="Game\Graphics\AdapterHandler.h" />
     <ClInclude Include="Game\Application.h" />
-    <ClInclude Include="Config.h" />
+    <ClInclude Include="Game\Resources\Config.h" />
     <ClInclude Include="Game\Graphics\Shader.h" />
     <ClInclude Include="Game\Graphics\PixelShader.h" />
+    <ClInclude Include="Game\Graphics\IndexBuffer.h" />
     <ClInclude Include="Tools\ErrorLogger.h" />
     <ClInclude Include="Tools\ExceptionHandler.h" />
     <ClInclude Include="Game\Graphics\GraphicsHandler.h" />
     <ClInclude Include="Game\Graphics\VertexShader.h" />
+    <ClInclude Include="Game\Graphics\VertexTypes.h" />
+    <ClInclude Include="Game\Graphics\VertexBuffer.h" />
     <ClInclude Include="Windows\Keyboard.h" />
     <ClInclude Include="Windows\Mouse.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Game\Resources\resource.h" />
     <ClInclude Include="Tools\StringTools.h" />
     <ClInclude Include="Tools\StrippedWindows.h" />
     <ClInclude Include="Tools\Timer.h" />
@@ -204,7 +208,7 @@
     <Image Include="data\images\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="pixelShader.hlsl">
+    <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -214,7 +218,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="vertexShader.hlsl">
+    <FxCompile Include="data\shaders\vertexShader_PosCol.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
