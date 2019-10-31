@@ -93,7 +93,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -110,7 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -130,7 +130,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -152,7 +152,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -164,8 +164,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Game\Graphics\Camera.cpp" />
-    <ClCompile Include="Game\Graphics\GameObject.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\Camera.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\GameObject.cpp" />
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp" />
     <ClCompile Include="Game\Application.cpp" />
     <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp" />
@@ -173,12 +173,14 @@
     <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp" />
     <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp" />
     <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp" />
-    <ClCompile Include="Game\Graphics\Shader.cpp" />
-    <ClCompile Include="Game\Graphics\PixelShader.cpp" />
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\Shader.cpp" />
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\Model.cpp" />
     <ClCompile Include="Tools\ErrorLogger.cpp" />
     <ClCompile Include="Tools\ExceptionHandler.cpp" />
     <ClCompile Include="Game\Graphics\GraphicsHandler.cpp" />
-    <ClCompile Include="Game\Graphics\VertexShader.cpp" />
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\VertexShader.cpp" />
     <ClCompile Include="Windows\Keyboard.cpp" />
     <ClCompile Include="Windows\Mouse.cpp" />
     <ClCompile Include="Tools\StringTools.cpp" />
@@ -187,11 +189,11 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game\Graphics\Camera.h" />
-    <ClInclude Include="Game\Graphics\ConstantBuffer.h" />
-    <ClInclude Include="Game\Graphics\ConstantBufferTypes.h" />
-    <ClInclude Include="Game\Graphics\GameObject.h" />
-    <ClInclude Include="Game\Graphics\Buffer.h" />
+    <ClInclude Include="Game\Graphics\Objects\Camera.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBuffer.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h" />
+    <ClInclude Include="Game\Graphics\Objects\GameObject.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\Buffer.h" />
     <ClInclude Include="Game\Graphics\AdapterHandler.h" />
     <ClInclude Include="Game\Application.h" />
     <ClInclude Include="Game\Graphics\ImGUI\imconfig.h" />
@@ -203,15 +205,17 @@
     <ClInclude Include="Game\Graphics\ImGUI\imstb_textedit.h" />
     <ClInclude Include="Game\Graphics\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Game\Resources\Config.h" />
-    <ClInclude Include="Game\Graphics\Shader.h" />
-    <ClInclude Include="Game\Graphics\PixelShader.h" />
-    <ClInclude Include="Game\Graphics\IndexBuffer.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\Shader.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\PixelShader.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\IndexBuffer.h" />
+    <ClInclude Include="Game\Graphics\Objects\RenderableGameObject.h" />
+    <ClInclude Include="Game\Graphics\Objects\Model.h" />
     <ClInclude Include="Tools\ErrorLogger.h" />
     <ClInclude Include="Tools\ExceptionHandler.h" />
     <ClInclude Include="Game\Graphics\GraphicsHandler.h" />
-    <ClInclude Include="Game\Graphics\VertexShader.h" />
-    <ClInclude Include="Game\Graphics\VertexTypes.h" />
-    <ClInclude Include="Game\Graphics\VertexBuffer.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexShader.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexTypes.h" />
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexBuffer.h" />
     <ClInclude Include="Windows\Keyboard.h" />
     <ClInclude Include="Windows\Mouse.h" />
     <ClInclude Include="Game\Resources\resource.h" />
@@ -227,7 +231,7 @@
     <Image Include="data\images\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
+    <FxCompile Include="data\shaders\pixelShader_PosTex.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -256,6 +260,18 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_PosTex.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

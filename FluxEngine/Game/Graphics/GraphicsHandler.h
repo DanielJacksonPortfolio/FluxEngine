@@ -1,26 +1,22 @@
 #pragma once
 
-//#include <SpriteBatch.h>
-//#include <SpriteFont.h>
-#include <memory>
-#include <WICTextureLoader.h>
 #include "AdapterHandler.h"
-#include "VertexShader.h"
-#include "PixelShader.h"
+#include "Shaders+Buffers/VertexShader.h"
+#include "Shaders+Buffers/PixelShader.h"
 #include "../../Tools/Timer.h"
 #include "../Resources/Config.h"
 
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "ConstantBuffer.h"
-
-#include "Camera.h"
+#include "Objects/Camera.h"
+#include "Objects/RenderableGameObject.h"
 
 //#include "Light.h"
-//#include "Camera.h"
 #include "ImGUI\\imgui.h"
 #include "ImGUI\\imgui_impl_win32.h"
 #include "ImGUI\\imgui_impl_dx11.h"
+
+#include <memory>
+#include <SpriteBatch.h>
+#include <SpriteFont.h>
 
 class GraphicsHandler
 {
@@ -28,10 +24,11 @@ public:
 
 	bool Init(HWND hWnd, int width, int height, Config* config);
 	void RenderFrame();
-	~GraphicsHandler();
 	bool wireframe = false;
 	float cameraSpeed = 0.005f;
+	float bgColor[4] = { 0.1f,0.1f,0.1f,1.0f };
 	Camera camera;
+	RenderableGameObject cube;
 private:
 	bool InitDirectX();
 	bool InitShaders();
@@ -42,22 +39,12 @@ private:
 	int windowWidth, windowHeight = 0;
 	Timer fpsTimer;
 	HWND hWnd = NULL;
-	Config* config = nullptr;
+	std::unique_ptr<Config> config = nullptr;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
-
-	VertexBuffer<Vertex_PC> vertexBuffer;
-	IndexBuffer indexBuffer;
-
-	VertexShader vertexShader_PosCol_2D;
-	VertexShader vertexShader_PosCol_3D;
-	PixelShader pixelShader;
-
-	ConstantBuffer<CB_vertexShader_PosCol_3D> cb_vertexShader_PosCol_3D;
-	//ConstantBuffer<CB_PS_light> cb_ps_light;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
@@ -70,9 +57,14 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
 
-	//std::unique_ptr<DirectX::SpriteBatch> spriteBatch;
-	//std::unique_ptr<DirectX::SpriteFont> spriteFont;
+	std::unique_ptr<SpriteBatch> spriteBatch;
+	std::unique_ptr<SpriteFont> spriteFont;
 
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+
+	VertexShader vertexShader;
+	PixelShader pixelShader;
+
+	ConstantBuffer<CB_vertexShader_PosTex> cb_vertexShader;
 };
 

@@ -6,7 +6,7 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 	this->windowWidth = width;
 	this->windowHeight = height;
 	this->hWnd = hWnd;
-	this->config = config;
+	this->config = std::make_unique<Config>(*config);
 	fpsTimer.Start();
 
 	if (!InitDirectX())
@@ -25,41 +25,43 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 
 void GraphicsHandler::RenderFrame()
 {
-	XMMATRIX worldMatrix = XMMatrixIdentity(); //XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XM_PIDIV2);
-	XMMATRIX viewProjectionMatrix = this->camera.GetViewMatrix()*this->camera.GetProjectionMatrix();
-	this->deviceContext->VSSetConstantBuffers(0, 1, this->cb_vertexShader_PosCol_3D.GetAddressOf());
-	this->cb_vertexShader_PosCol_3D.data.wvpMatrix = worldMatrix * viewProjectionMatrix;
-	this->cb_vertexShader_PosCol_3D.data.worldMatrix = worldMatrix;
-	this->cb_vertexShader_PosCol_3D.ApplyChanges();
 
-	static float bgColor[] = { 0.0f,0.0f,0.0f,1.0f };
 	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	this->deviceContext->IASetInputLayout(this->vertexShader_PosCol_3D.GetInputLayout());
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//Rasterizer State
 	if (wireframe == false)
 		this->deviceContext->RSSetState(this->rasterizerState.Get());
 	else
 		this->deviceContext->RSSetState(this->rasterizerState_WireFrame.Get());
+
 	this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
 	this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
 	this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-	this->deviceContext->VSSetShader(this->vertexShader_PosCol_3D.GetShader(), NULL, 0);
+
+	///Shader Stuff///
+
+	//Matrices
+	XMMATRIX worldMatrix = XMMatrixIdentity(); //XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XM_PIDIV2);
+	XMMATRIX viewProjectionMatrix = this->camera.GetViewMatrix() * this->camera.GetProjectionMatrix();
+
+	//Setup Constant Buffer - cb_vertexShader_PosTex
+	this->deviceContext->VSSetConstantBuffers(0, 1, this->cb_vertexShader.GetAddressOf());
+	this->cb_vertexShader.data.wvpMatrix = worldMatrix * viewProjectionMatrix;
+	this->cb_vertexShader.data.worldMatrix = worldMatrix;
+	this->cb_vertexShader.ApplyChanges();
+
+	//Set Shader Layout
+	this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
+
+	//Set Shaders
+	this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
 	this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 
-	UINT offset = 0;
+	cube.Draw(viewProjectionMatrix);
 
-	this->deviceContext->IASetVertexBuffers(0, 1, this->vertexBuffer.GetAddressOf(), this->vertexBuffer.GetStridePtr(), &offset);
-	this->deviceContext->IASetIndexBuffer(this->indexBuffer.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
-
-	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
-	
-	if (wireframe == false)
-		this->deviceContext->RSSetState(this->rasterizerState_CullFront.Get());
-	else
-		this->deviceContext->RSSetState(this->rasterizerState_CullFront_WireFrame.Get());
-	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
+	///FPS Counter///
 
 	static int fpsCounter = 0;
 	static std::string fpsString = "FPS: 0";
@@ -67,11 +69,17 @@ void GraphicsHandler::RenderFrame()
 	if (fpsTimer.GetMilisecondsElapsed() > 1000.0)
 	{
 		fpsString = "FPS: " + std::to_string(fpsCounter);
-		SetWindowText(hWnd, fpsString.c_str());
+		//SetWindowText(hWnd, fpsString.c_str());
 		fpsCounter = 0;
 		this->fpsTimer.Restart();
 	}
 
+	//Render Font
+	this->spriteBatch->Begin();
+	this->spriteFont->DrawString(this->spriteBatch.get(), StringTools::StandardToWide(fpsString).c_str(), XMFLOAT2(10, 10), DirectX::Colors::White, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
+	this->spriteBatch->End();
+
+	//GUI
 	RenderGUI();
 
 	this->swapChain->Present(config->vSync, NULL);
@@ -83,6 +91,10 @@ void GraphicsHandler::RenderGUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	ImGui::Begin("Lighting");
+	ImGui::DragFloat3("Background Color", bgColor, 0.01f, 0.0f, 1.0f);
+	ImGui::End();
+	
 	ImGui::Begin("Debug");
 	ImGui::DragFloat("Camera Speed", &cameraSpeed, 0.005f, 0.0f, 5.0f);
 	ImGui::Checkbox("Wireframe?", &wireframe);
@@ -93,18 +105,12 @@ void GraphicsHandler::RenderGUI()
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
-GraphicsHandler::~GraphicsHandler()
-{
-}
-
 bool GraphicsHandler::InitDirectX()
 {
 	try
 	{
 		//Adapters
-
 		std::vector<AdapterData> adapters = AdapterReader::GetAdapters();
-
 		if (adapters.size() < 1)
 		{
 			ErrorLogger::Log("No DXGI Adapters Found");
@@ -112,7 +118,6 @@ bool GraphicsHandler::InitDirectX()
 		}
 
 		//Get Largest VRAM adapterID
-
 		int id = 0;
 		if (adapters.size() > 1)
 			for (int i = 0; i < static_cast<int>(adapters.size()); ++i)
@@ -120,7 +125,6 @@ bool GraphicsHandler::InitDirectX()
 					id = i;
 
 		//Swap Chain
-
 		DXGI_SWAP_CHAIN_DESC scd = { 0 };
 		scd.BufferDesc.Width = this->windowWidth;
 		scd.BufferDesc.Height = this->windowHeight;
@@ -229,9 +233,9 @@ bool GraphicsHandler::InitDirectX()
 		hr = this->device->CreateBlendState(&blendDesc, this->blendState.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateBlendState Failed");
 
-		// Setup Fonts
-		//this->spriteBatch = std::make_unique<SpriteBatch>(this->deviceContext.Get());
-		//this->spriteFont = std::make_unique<SpriteFont>(this->device.Get(), L"Data\\Fonts\\ComicSansMS_16.spritefont");
+		//Setup Fonts
+		this->spriteBatch = std::make_unique<SpriteBatch>(this->deviceContext.Get());
+		this->spriteFont = std::make_unique<SpriteFont>(this->device.Get(), L"data\\fonts\\ComicSansMS_16.spritefont");
 
 		//Sampler State
 		CD3D11_SAMPLER_DESC samplerStateDesc(D3D11_DEFAULT);
@@ -280,24 +284,20 @@ bool GraphicsHandler::InitShaders()
 		#endif
 	}
 
-	//Input Layout
+
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"COLOR",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		//{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		//{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 	UINT numElements = ARRAYSIZE(layout);
-	
+
 	//Vertex Shaders
-	if (!vertexShader_PosCol_2D.Init(this->device, shaderFolder + L"vertexShader_PosCol_2D.cso", layout, numElements))
-		return false;
-	if (!vertexShader_PosCol_3D.Init(this->device, shaderFolder + L"vertexShader_PosCol_3D.cso", layout, numElements))
+	if (!vertexShader.Init(this->device, shaderFolder + L"vertexShader_PosTex.cso", layout, numElements))
 		return false;
 
 	//Pixel Shaders
-	if (!pixelShader.Init(this->device, shaderFolder + L"pixelShader_PosCol.cso"))
+	if (!pixelShader.Init(this->device, shaderFolder + L"pixelShader_PosTex.cso"))
 		return false;
 
 	return true;
@@ -307,64 +307,16 @@ bool GraphicsHandler::InitScene()
 {
 	try
 	{
-		Vertex_PC vertices[] =
-		{
-			Vertex_PC(-0.23f,-0.13f, 0.0f, 1.0f, 1.0f, 1.0f), // 0
-			Vertex_PC(0.0f, 0.27f	, 0.0f, 1.0f, 1.0f, 1.0f), // 1
-			Vertex_PC(0.23f,-0.13f	, 0.0f, 1.0f, 1.0f, 1.0f), // 2
-			Vertex_PC(-0.21f,-0.12f, 0.0f, 0.0f, 0.0f, 0.0f), // 3
-			Vertex_PC(0.0f, 0.25f	, 0.0f,   0.0f, 0.0f, 0.0f), // 4
-			Vertex_PC(0.21f,-0.12f	, 0.0f,  0.0f, 0.0f, 0.0f), // 5
-			Vertex_PC(-0.15f, 0.07f, 0.0f, 1.0f, 1.0f, 1.0f), // 6
-			Vertex_PC(0.08f, 0.11f, 0.0f, 0.0f, 0.0f, 0.0f), // 7
-			Vertex_PC(0.12f, 0.03f, 0.0f, 0.0f, 0.0f, 0.0f), // 8
-			Vertex_PC(-1.0f, -0.11f, 0.0f, 1.0f, 1.0f, 1.0f), // 9
-			Vertex_PC(-0.10f, 0.08f, 0.0f, 1.0f, 1.0f, 1.0f), // 10
-			Vertex_PC(-0.11f, 0.06f, 0.0f, 1.0f, 1.0f, 1.0f), // 11
-			Vertex_PC(-1.0f, -0.13f, 0.0f, 1.0f, 1.0f, 1.0f), // 12
-			Vertex_PC(0.09f, 0.11f,	1.0f, 1.0f, 0.0f, 0.0f), // 13
-			Vertex_PC(1.00f, 0.02f,	1.0f, 1.0f, 0.0f, 0.0f), // 14
-			Vertex_PC(1.00f,-0.03f,	1.0f, 1.0f, 0.5f, 0.0f), // 15
-			Vertex_PC(0.098f,0.09f,	1.0f, 1.0f, 0.5f, 0.0f), // 16
-			Vertex_PC(1.00f,-0.063f,	1.0f, 1.0f, 1.0f, 0.0f), // 17
-			Vertex_PC(0.111f,0.077f ,	1.0f, 1.0f, 1.0f, 0.0f), // 18
-			Vertex_PC(1.00f,-0.097f,	1.0f, 0.0f, 1.0f, 0.0f), // 19
-			Vertex_PC(0.119f,0.063f,	1.0f, 0.0f, 1.0f, 0.0f), // 20
-			Vertex_PC(1.00f,-0.13f,	1.0f, 0.0f, 0.0f, 1.0f), // 21
-			Vertex_PC(0.128f,0.05f	,	1.0f, 0.0f, 0.0f, 1.0f), // 22
-			Vertex_PC(1.00f,-0.20f,	1.0f, 1.0f, 0.0f, 1.0f), // 23
-			Vertex_PC(0.14f, 0.03f,	1.0f, 1.0f, 0.0f, 1.0f), // 24
-		};
-
-		HRESULT hr = this->vertexBuffer.Init(device.Get(), vertices, ARRAYSIZE(vertices));
-		EXCEPT_IF_FAILED(hr, "Failed to initialize vertex buffer for mesh");
-
-		DWORD indices[] =
-		{
-			0, 1, 2, // MAIN TRIANGLE
-			3, 4, 5, // INNER TRIANGLE
-			6, 7, 8, //FADE TRIANGLE
-			9, 10, 11, // LINE
-			11, 12, 9,
-			13, 14, 15, // RO
-			15, 16, 13, // OR
-			16, 15, 17, // OY
-			17, 18, 16, // YO
-			18, 17, 19, // YG
-			19, 20, 18, // GY
-			20, 19, 21, // GB
-			21, 22, 20, // BG
-			22, 21, 23, // BP
-			23, 24, 22  // PB
-		};
-
-		hr = this->indexBuffer.Init(device.Get(), indices, ARRAYSIZE(indices));
-		EXCEPT_IF_FAILED(hr, "Failed to initialize index buffer for mesh");
-
 		//Constant Buffers
-		hr = cb_vertexShader_PosCol_3D.Init(this->device.Get(), this->deviceContext.Get());
+		HRESULT hr = cb_vertexShader.Init(this->device.Get(), this->deviceContext.Get());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader_PosCol_3D");
-		
+
+		hr = cb_vertexShader.Init(this->device.Get(), this->deviceContext.Get());
+		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader_PosTex");
+
+		//Model Load
+		cube.Init("", this->device.Get(), this->deviceContext.Get(), cb_vertexShader);
+
 		//Camera(s)
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
 		camera.SetProjectionValues(90.0f, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);

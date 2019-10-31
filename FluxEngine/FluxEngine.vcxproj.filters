@@ -58,6 +58,18 @@
     <Filter Include="Resource Files\Config">
       <UniqueIdentifier>{177facc7-9619-4e35-a028-d326488c570c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Graphics\Objects">
+      <UniqueIdentifier>{baf64bd7-48bd-4952-afc8-30031d770793}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Graphics\Objects">
+      <UniqueIdentifier>{d272444f-ae76-480a-b5ad-7b0e55914835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Graphics\Shaders+Buffers">
+      <UniqueIdentifier>{61d631ee-0230-4ff4-a0cd-314af738c0bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Graphics\Shaders&amp;Buffers">
+      <UniqueIdentifier>{1b19b919-ab46-43b0-9316-b8ccc2b901d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
@@ -90,17 +102,8 @@
     <ClCompile Include="Tools\Timer.cpp">
       <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Shader.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="WinMain.cpp">
       <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\VertexShader.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\PixelShader.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp">
       <Filter>Source Files\Game\Graphics\ImGUI</Filter>
@@ -117,11 +120,26 @@
     <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp">
       <Filter>Source Files\Game\Graphics\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\GameObject.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
+    <ClCompile Include="Game\Graphics\Objects\Camera.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Camera.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
+    <ClCompile Include="Game\Graphics\Objects\GameObject.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\VertexShader.cpp">
+      <Filter>Source Files\Game\Graphics\Shaders&amp;Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp">
+      <Filter>Source Files\Game\Graphics\Shaders&amp;Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\Shader.cpp">
+      <Filter>Source Files\Game\Graphics\Shaders&amp;Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Model.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -136,9 +154,6 @@
     </ClInclude>
     <ClInclude Include="Tools\ErrorLogger.h">
       <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\GraphicsHandler.h">
-      <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Tools\StrippedWindows.h">
       <Filter>Header Files\Tools</Filter>
@@ -158,32 +173,11 @@
     <ClInclude Include="Tools\StringTools.h">
       <Filter>Header Files\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Shader.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\VertexShader.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\PixelShader.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\VertexTypes.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Buffer.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Game\Resources\Config.h">
       <Filter>Header Files\Game\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Game\Resources\resource.h">
       <Filter>Header Files\Game\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\VertexBuffer.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\IndexBuffer.h">
-      <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Game\Graphics\ImGUI\imconfig.h">
       <Filter>Header Files\Game\Graphics\ImGUI</Filter>
@@ -209,17 +203,47 @@
     <ClInclude Include="Game\Graphics\ImGUI\imstb_truetype.h">
       <Filter>Header Files\Game\Graphics\ImGUI</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\GameObject.h">
-      <Filter>Header Files\Game\Graphics</Filter>
+    <ClInclude Include="Game\Graphics\Objects\Camera.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\ConstantBufferTypes.h">
-      <Filter>Header Files\Game\Graphics</Filter>
+    <ClInclude Include="Game\Graphics\Objects\GameObject.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\ConstantBuffer.h">
-      <Filter>Header Files\Game\Graphics</Filter>
+    <ClInclude Include="Game\Graphics\Objects\RenderableGameObject.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Camera.h">
-      <Filter>Header Files\Game\Graphics</Filter>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\Buffer.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBuffer.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\GraphicsHandler.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\IndexBuffer.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\PixelShader.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\Shader.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexBuffer.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexShader.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexTypes.h">
+      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Model.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -239,8 +263,14 @@
     <FxCompile Include="data\shaders\vertexShader_PosCol_2D.hlsl">
       <Filter>Resource Files\Shaders\Vertex</Filter>
     </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_PosTex.hlsl">
+      <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
     <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
       <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_PosTex.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

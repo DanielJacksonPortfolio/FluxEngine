@@ -1,4 +1,3 @@
-
 struct PS_INPUT
 {
     float4 inPos : SV_POSITION;
@@ -7,5 +6,5 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    return float4(input.inColor,1.0f);
+    return float4(input.inColor, 1.0f);
 }
