@@ -23,10 +23,12 @@ Application::Application()
 
 }
 
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT Application::WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	//if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-	//	return true;
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
+
 	switch (msg)
 	{
 	case WM_KILLFOCUS:

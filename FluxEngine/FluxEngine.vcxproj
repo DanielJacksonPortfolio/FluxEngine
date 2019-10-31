@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -164,8 +164,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Graphics\GameObject.cpp" />
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp" />
     <ClCompile Include="Game\Application.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Game\Graphics\Shader.cpp" />
     <ClCompile Include="Game\Graphics\PixelShader.cpp" />
     <ClCompile Include="Tools\ErrorLogger.cpp" />
@@ -180,9 +186,20 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Graphics\ConstantBuffer.h" />
+    <ClInclude Include="Game\Graphics\ConstantBufferTypes.h" />
+    <ClInclude Include="Game\Graphics\GameObject.h" />
     <ClInclude Include="Game\Graphics\Buffer.h" />
     <ClInclude Include="Game\Graphics\AdapterHandler.h" />
     <ClInclude Include="Game\Application.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imconfig.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imgui.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imgui_impl_dx11.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imgui_impl_win32.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imgui_internal.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imstb_rectpack.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imstb_textedit.h" />
+    <ClInclude Include="Game\Graphics\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Game\Resources\Config.h" />
     <ClInclude Include="Game\Graphics\Shader.h" />
     <ClInclude Include="Game\Graphics\PixelShader.h" />
@@ -218,7 +235,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_PosCol.hlsl">
+    <FxCompile Include="data\shaders\vertexShader_PosCol_3D.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -228,6 +245,19 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_PosCol_2D.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

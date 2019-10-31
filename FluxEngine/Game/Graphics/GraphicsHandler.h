@@ -10,15 +10,17 @@
 #include "../../Tools/Timer.h"
 #include "../Resources/Config.h"
 
-#include "VertexTypes.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "ConstantBuffer.h"
+
+#include "GameObject.h"
 
 //#include "Light.h"
 //#include "Camera.h"
-//#include "ImGUI\\imgui.h"
-//#include "ImGUI\\imgui_impl_win32.h"
-//#include "ImGUI\\imgui_impl_dx11.h"
+#include "ImGUI\\imgui.h"
+#include "ImGUI\\imgui_impl_win32.h"
+#include "ImGUI\\imgui_impl_dx11.h"
 
 class GraphicsHandler
 {
@@ -32,7 +34,8 @@ private:
 	bool InitDirectX();
 	bool InitShaders();
 	bool InitScene();
-	//void InitImGUI(HWND hWnd);
+	void InitImGUI();
+	void RenderGUI();
 
 	int windowWidth, windowHeight = 0;
 	Timer fpsTimer;
@@ -47,10 +50,11 @@ private:
 	VertexBuffer<Vertex_PC> vertexBuffer;
 	IndexBuffer indexBuffer;
 
-	VertexShader vertexShader;
+	VertexShader vertexShader_PosCol_2D;
+	VertexShader vertexShader_PosCol_3D;
 	PixelShader pixelShader;
 
-	//ConstantBuffer<CB_VS_vertexShader> cb_vs_vertexShader;
+	ConstantBuffer<CB_vertexShader_PosCol_3D> cb_vertexShader_PosCol_3D;
 	//ConstantBuffer<CB_PS_light> cb_ps_light;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;

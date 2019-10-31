@@ -1,5 +1,6 @@
 #pragma once
 #include "Buffer.h"
+#include "VertexTypes.h"
 #include <memory>
 
 template<class T>

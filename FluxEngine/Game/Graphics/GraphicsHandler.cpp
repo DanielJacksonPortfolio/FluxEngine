@@ -18,18 +18,25 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 	if (!InitScene())
 		return false;
 
-	//InitImGUI(hWnd);
+	InitImGUI();
 
 	return true;
 }
 
 void GraphicsHandler::RenderFrame()
 {
+	XMMATRIX worldMatrix = XMMatrixIdentity(); //XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XM_PIDIV2);
+	XMMATRIX viewProjectionMatrix = XMMatrixIdentity();
+	this->deviceContext->VSSetConstantBuffers(0, 1, this->cb_vertexShader_PosCol_3D.GetAddressOf());
+	this->cb_vertexShader_PosCol_3D.data.wvpMatrix = worldMatrix * viewProjectionMatrix;
+	this->cb_vertexShader_PosCol_3D.data.worldMatrix = worldMatrix;
+	this->cb_vertexShader_PosCol_3D.ApplyChanges();
+
 	static float bgColor[] = { 0.0f,0.0f,0.0f,1.0f };
 	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
+	this->deviceContext->IASetInputLayout(this->vertexShader_PosCol_3D.GetInputLayout());
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	if (wireframe == false)
 		this->deviceContext->RSSetState(this->rasterizerState.Get());
@@ -38,7 +45,7 @@ void GraphicsHandler::RenderFrame()
 	this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
 	this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
 	this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-	this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
+	this->deviceContext->VSSetShader(this->vertexShader_PosCol_3D.GetShader(), NULL, 0);
 	this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 
 	UINT offset = 0;
@@ -58,9 +65,24 @@ void GraphicsHandler::RenderFrame()
 		this->fpsTimer.Restart();
 	}
 
-
+	RenderGUI();
 
 	this->swapChain->Present(config->vSync, NULL);
+}
+
+void GraphicsHandler::RenderGUI()
+{
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::Begin("Debug");
+	ImGui::Checkbox("Wireframe?", &wireframe);
+	ImGui::End();
+
+	ImGui::Render();
+
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
 GraphicsHandler::~GraphicsHandler()
@@ -213,6 +235,16 @@ bool GraphicsHandler::InitDirectX()
 	return true;
 }
 
+void GraphicsHandler::InitImGUI()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui_ImplWin32_Init(this->hWnd);
+	ImGui_ImplDX11_Init(this->device.Get(), this->deviceContext.Get());
+	ImGui::StyleColorsDark();
+}
+
 bool GraphicsHandler::InitShaders()
 {
 	std::wstring shaderFolder = L"";
@@ -234,6 +266,7 @@ bool GraphicsHandler::InitShaders()
 		#endif
 	}
 
+	//Input Layout
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
@@ -242,11 +275,15 @@ bool GraphicsHandler::InitShaders()
 		//{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 	UINT numElements = ARRAYSIZE(layout);
-
-	if (!vertexShader.Init(this->device, shaderFolder + L"vertexshader.cso", layout, numElements))
+	
+	//Vertex Shaders
+	if (!vertexShader_PosCol_2D.Init(this->device, shaderFolder + L"vertexShader_PosCol_2D.cso", layout, numElements))
+		return false;
+	if (!vertexShader_PosCol_3D.Init(this->device, shaderFolder + L"vertexShader_PosCol_3D.cso", layout, numElements))
 		return false;
 
-	if (!pixelShader.Init(this->device, shaderFolder + L"pixelshader.cso"))
+	//Pixel Shaders
+	if (!pixelShader.Init(this->device, shaderFolder + L"pixelShader_PosCol.cso"))
 		return false;
 
 	return true;
@@ -309,6 +346,11 @@ bool GraphicsHandler::InitScene()
 
 		hr = this->indexBuffer.Init(device.Get(), indices, ARRAYSIZE(indices));
 		EXCEPT_IF_FAILED(hr, "Failed to initialize index buffer for mesh");
+
+		//Constant Buffers
+		hr = cb_vertexShader_PosCol_3D.Init(this->device.Get(), this->deviceContext.Get());
+		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader_PosCol_3D");
+
 	}
 	catch (CustomException & e)
 	{

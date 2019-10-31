@@ -40,6 +40,24 @@
     <Filter Include="Header Files\Game\Resources">
       <UniqueIdentifier>{43f8aabb-dd4d-456b-ae7f-19ffbc6f0f3c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Graphics\ImGUI">
+      <UniqueIdentifier>{463581b5-1030-44df-8e9e-4235e4eac80f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Graphics\ImGUI">
+      <UniqueIdentifier>{35bad92f-f261-4177-b4d0-2bbfa99246d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders">
+      <UniqueIdentifier>{ccd6d062-eaa9-43c1-aa23-e008603c48df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\Pixel">
+      <UniqueIdentifier>{9fc8bfbc-5562-4f3b-9b31-9fd0462b7af2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\Vertex">
+      <UniqueIdentifier>{92902930-29fe-4241-ad50-827606c32d35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Config">
+      <UniqueIdentifier>{177facc7-9619-4e35-a028-d326488c570c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
@@ -82,6 +100,24 @@
       <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Game\Graphics\PixelShader.cpp">
+      <Filter>Source Files\Game\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp">
+      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp">
+      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp">
+      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp">
+      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp">
+      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\GameObject.cpp">
       <Filter>Source Files\Game\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,6 +182,39 @@
     <ClInclude Include="Game\Graphics\IndexBuffer.h">
       <Filter>Header Files\Game\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imconfig.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imgui.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imgui_impl_dx11.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imgui_impl_win32.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imgui_internal.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imstb_rectpack.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imstb_textedit.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ImGUI\imstb_truetype.h">
+      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\GameObject.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ConstantBufferTypes.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\ConstantBuffer.h">
+      <Filter>Header Files\Game\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FluxEngine.rc">
@@ -158,11 +227,19 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="data\shaders\vertexShader_PosCol_3D.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_PosCol_2D.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
     <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Shaders\Pixel</Filter>
     </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_PosCol.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\config">
+      <Filter>Resource Files\Config</Filter>
+    </None>
   </ItemGroup>
 </Project>
