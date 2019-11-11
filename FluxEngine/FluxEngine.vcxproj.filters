@@ -141,6 +141,21 @@
     <ClCompile Include="Game\Graphics\Objects\Model.cpp">
       <Filter>Source Files\Game\Graphics\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Mesh.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\PointLight.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\DirectionalLight.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Texture.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Color.cpp">
+      <Filter>Source Files\Game\Graphics\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Graphics\AdapterHandler.h">
@@ -245,6 +260,24 @@
     <ClInclude Include="Game\Graphics\Objects\Model.h">
       <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Mesh.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\PointLight.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\DirectionalLight.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Texture.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Light.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Color.h">
+      <Filter>Header Files\Game\Graphics\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FluxEngine.rc">
@@ -272,10 +305,32 @@
     <FxCompile Include="data\shaders\vertexShader_PosTex.hlsl">
       <Filter>Resource Files\Shaders\Vertex</Filter>
     </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_PosTexNorm.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_PosTexNorm.hlsl">
+      <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_ADS_Lighting.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_ADS_Lighting.hlsl">
+      <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_NoLight.hlsl">
+      <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
+    <FxCompile Include="pixelShader_ADS_Specular.hlsl">
+      <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
+    <FxCompile Include="vertexShader_ADS_Specular.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\config">
       <Filter>Resource Files\Config</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

@@ -25,6 +25,21 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 
 void GraphicsHandler::RenderFrame()
 {
+	camera.SetProjectionValues(fov, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
+
+	this->cb_pixelShader.data.directionalLightColor = directionalLight.lightColor;
+	this->cb_pixelShader.data.directionalLightStrength = directionalLight.lightStrength;
+	this->cb_pixelShader.data.directionalLightDirection = directionalLight.GetDirection();
+	this->cb_pixelShader.data.pointLightColor = pointLight.lightColor;
+	this->cb_pixelShader.data.pointLightStrength = pointLight.lightStrength;
+	this->cb_pixelShader.data.pointLightPosition = pointLight.GetPositionFloat3();
+	this->cb_pixelShader.data.pointLightConstantAttenuationFactor = pointLight.constantAttenuationFactor;
+	this->cb_pixelShader.data.pointLightLinearAttenuationFactor = pointLight.linearAttenuationFactor;
+	this->cb_pixelShader.data.pointLightExponentAttenuationFactor = pointLight.exponentAttenuationFactor;
+	this->cb_pixelShader.data.shininess = this->shininess;
+	this->cb_pixelShader.data.cameraPosition = this->camera.GetPositionFloat3();
+
+	this->cb_pixelShader.ApplyChanges();
 
 	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -43,14 +58,7 @@ void GraphicsHandler::RenderFrame()
 	///Shader Stuff///
 
 	//Matrices
-	XMMATRIX worldMatrix = XMMatrixIdentity(); //XMMatrixRotationRollPitchYaw(0.0f, 0.0f, XM_PIDIV2);
 	XMMATRIX viewProjectionMatrix = this->camera.GetViewMatrix() * this->camera.GetProjectionMatrix();
-
-	//Setup Constant Buffer - cb_vertexShader_PosTex
-	this->deviceContext->VSSetConstantBuffers(0, 1, this->cb_vertexShader.GetAddressOf());
-	this->cb_vertexShader.data.wvpMatrix = worldMatrix * viewProjectionMatrix;
-	this->cb_vertexShader.data.worldMatrix = worldMatrix;
-	this->cb_vertexShader.ApplyChanges();
 
 	//Set Shader Layout
 	this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
@@ -59,7 +67,15 @@ void GraphicsHandler::RenderFrame()
 	this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
 	this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 
-	cube.Draw(viewProjectionMatrix);
+	//gObj.SetPosition(0.0f, 0.0f, 0.0f);
+
+	gObj.Draw(viewProjectionMatrix);
+
+	this->deviceContext->PSSetShader(this->pixelShader_noLight.GetShader(), NULL, 0);
+
+	{
+		this->pointLight.Draw(this->camera.GetViewMatrix() * this->camera.GetProjectionMatrix());
+	}
 
 	///FPS Counter///
 
@@ -69,7 +85,6 @@ void GraphicsHandler::RenderFrame()
 	if (fpsTimer.GetMilisecondsElapsed() > 1000.0)
 	{
 		fpsString = "FPS: " + std::to_string(fpsCounter);
-		//SetWindowText(hWnd, fpsString.c_str());
 		fpsCounter = 0;
 		this->fpsTimer.Restart();
 	}
@@ -91,14 +106,34 @@ void GraphicsHandler::RenderGUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Begin("Lighting");
+	ImGui::Begin("Light Controls");
 	ImGui::DragFloat3("Background Color", bgColor, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
+
+	ImGui::DragFloat3("Directional Light Color", &this->directionalLight.lightColor.x, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat3("Directional Light Direction", &directionalLight.GetDirection().x, 0.01f, -1.0f, 1.0f);
+	ImGui::DragFloat("Directional Strength", &this->directionalLight.lightStrength, 0.01f, 0.0f, 10.0f);
+	
+	ImGui::DragFloat3("Point Light Color", &this->pointLight.lightColor.x, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat("Point Light Strength", &this->pointLight.lightStrength, 0.01f, 0.0f, 10.0f);
+	ImGui::DragFloat("Point Constant Attenuation", &this->pointLight.constantAttenuationFactor, 0.01f, 0.01f, 10.0f);
+	ImGui::DragFloat("Point Linear Attenuation", &this->pointLight.linearAttenuationFactor, 0.01f, 0.0f, 10.0f);
+	ImGui::DragFloat("Point Exponent Attenuation", &this->pointLight.exponentAttenuationFactor, 0.01f, 0.0f, 10.0f);
+	
+	ImGui::DragFloat("Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
 	ImGui::End();
 	
 	ImGui::Begin("Debug");
 	ImGui::DragFloat("Camera Speed", &cameraSpeed, 0.005f, 0.0f, 5.0f);
+	ImGui::DragFloat("Camera FOV", &fov, 0.1f, 0.01f, 179.99f);
+	ImGui::DragInt("Grayscale Mode", &cb_pixelShader.data.grayscale, 0.01f, 0, 2);
+	ImGui::DragFloat3("Rotation Speed", modelRotationSpeed, 0.00001f, 0.0f, 1.0f);
 	ImGui::Checkbox("Wireframe?", &wireframe);
 	ImGui::End();
+
+
+
 
 	ImGui::Render();
 
@@ -289,15 +324,18 @@ bool GraphicsHandler::InitShaders()
 	{
 		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 		{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"NORMAL",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 	UINT numElements = ARRAYSIZE(layout);
 
 	//Vertex Shaders
-	if (!vertexShader.Init(this->device, shaderFolder + L"vertexShader_PosTex.cso", layout, numElements))
+	if (!vertexShader.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular.cso", layout, numElements))
 		return false;
 
 	//Pixel Shaders
-	if (!pixelShader.Init(this->device, shaderFolder + L"pixelShader_PosTex.cso"))
+	if (!pixelShader.Init(this->device, shaderFolder + L"pixelShader_ADS_Specular.cso"))
+		return false;
+	if (!pixelShader_noLight.Init(this->device, shaderFolder + L"pixelShader_NoLight.cso"))
 		return false;
 
 	return true;
@@ -309,17 +347,32 @@ bool GraphicsHandler::InitScene()
 	{
 		//Constant Buffers
 		HRESULT hr = cb_vertexShader.Init(this->device.Get(), this->deviceContext.Get());
-		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader_PosCol_3D");
+		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader"); 
+		
+		hr = cb_pixelShader.Init(this->device.Get(), this->deviceContext.Get());
+		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_pixelShader");
 
-		hr = cb_vertexShader.Init(this->device.Get(), this->deviceContext.Get());
-		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader_PosTex");
 
 		//Model Load
-		cube.Init("", this->device.Get(), this->deviceContext.Get(), cb_vertexShader);
+		if (!gObj.Init("data//objects//nanosuit//nanosuit.obj", 1, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader))
+			return false;
+		
+		if (!pointLight.Init(this->device.Get(), this->deviceContext.Get(), this->cb_vertexShader, this->cb_pixelShader))
+			return false;
+
+		if (!directionalLight.Init(this->device.Get(), this->deviceContext.Get()))
+			return false;
+
+		directionalLight.SetDirection(0.25f, 0.5f, -1.0f);
+
+		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		this->cb_pixelShader.data.ambientLightStrength = 0.2f;
+		this->cb_pixelShader.data.directionalLightDirection = directionalLight.GetDirection();
+		this->cb_pixelShader.data.grayscale = 0;
 
 		//Camera(s)
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
-		camera.SetProjectionValues(90.0f, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
+		camera.SetProjectionValues(fov, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
 	}
 	catch (CustomException & e)
 	{

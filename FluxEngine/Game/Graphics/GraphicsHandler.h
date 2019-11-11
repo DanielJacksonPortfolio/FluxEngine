@@ -8,6 +8,8 @@
 
 #include "Objects/Camera.h"
 #include "Objects/RenderableGameObject.h"
+#include "Objects/PointLight.h"
+#include "Objects/DirectionalLight.h"
 
 //#include "Light.h"
 #include "ImGUI\\imgui.h"
@@ -24,11 +26,19 @@ public:
 
 	bool Init(HWND hWnd, int width, int height, Config* config);
 	void RenderFrame();
+
 	bool wireframe = false;
+	float fov = 90.0f;
 	float cameraSpeed = 0.005f;
-	float bgColor[4] = { 0.1f,0.1f,0.1f,1.0f };
+	float bgColor[4] = { 0.0f,0.0f,0.0f,1.0f };
+	float modelRotationSpeed[3] = { 0.0f, 0.0f, 0.0f };
+	float shininess = 8.0f;
+
 	Camera camera;
-	RenderableGameObject cube;
+	RenderableGameObject gObj;
+	PointLight pointLight;
+	DirectionalLight directionalLight;
+
 private:
 	bool InitDirectX();
 	bool InitShaders();
@@ -64,7 +74,10 @@ private:
 
 	VertexShader vertexShader;
 	PixelShader pixelShader;
+	PixelShader pixelShader_noLight;
 
-	ConstantBuffer<CB_vertexShader_PosTex> cb_vertexShader;
+	ConstantBuffer<CB_vertexShader> cb_vertexShader;
+	ConstantBuffer<CB_pixelShader> cb_pixelShader;
+
 };
 

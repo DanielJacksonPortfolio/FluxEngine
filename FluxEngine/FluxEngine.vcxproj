@@ -164,6 +164,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Graphics\Objects\Color.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\DirectionalLight.cpp" />
     <ClCompile Include="Game\Graphics\Objects\Camera.cpp" />
     <ClCompile Include="Game\Graphics\Objects\GameObject.cpp" />
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp" />
@@ -177,6 +179,9 @@
     <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp" />
     <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp" />
     <ClCompile Include="Game\Graphics\Objects\Model.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\Mesh.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\PointLight.cpp" />
+    <ClCompile Include="Game\Graphics\Objects\Texture.cpp" />
     <ClCompile Include="Tools\ErrorLogger.cpp" />
     <ClCompile Include="Tools\ExceptionHandler.cpp" />
     <ClCompile Include="Game\Graphics\GraphicsHandler.cpp" />
@@ -189,7 +194,10 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Graphics\Objects\Color.h" />
+    <ClInclude Include="Game\Graphics\Objects\DirectionalLight.h" />
     <ClInclude Include="Game\Graphics\Objects\Camera.h" />
+    <ClInclude Include="Game\Graphics\Objects\Light.h" />
     <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBuffer.h" />
     <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h" />
     <ClInclude Include="Game\Graphics\Objects\GameObject.h" />
@@ -210,6 +218,9 @@
     <ClInclude Include="Game\Graphics\Shaders+Buffers\IndexBuffer.h" />
     <ClInclude Include="Game\Graphics\Objects\RenderableGameObject.h" />
     <ClInclude Include="Game\Graphics\Objects\Model.h" />
+    <ClInclude Include="Game\Graphics\Objects\Mesh.h" />
+    <ClInclude Include="Game\Graphics\Objects\PointLight.h" />
+    <ClInclude Include="Game\Graphics\Objects\Texture.h" />
     <ClInclude Include="Tools\ErrorLogger.h" />
     <ClInclude Include="Tools\ExceptionHandler.h" />
     <ClInclude Include="Game\Graphics\GraphicsHandler.h" />
@@ -273,8 +284,55 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_PosTexNorm.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_PosTexNorm.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_ADS_Lighting.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_ADS_Lighting.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_NoLight.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="pixelShader_ADS_Specular.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="vertexShader_ADS_Specular.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="data\config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -197,6 +197,8 @@ void Application::Update()
 		}
 	}
 
+	this->gfx.gObj.AdjustRotation(gfx.modelRotationSpeed[0] * dt, gfx.modelRotationSpeed[1] * dt, gfx.modelRotationSpeed[2] * dt);
+
 	if (keyboard.KeyIsPressed('W'))
 	{
 		this->gfx.camera.AdjustPosition(this->gfx.camera.GetForwardVector() * gfx.cameraSpeed * dt);
@@ -220,6 +222,13 @@ void Application::Update()
 	if (keyboard.KeyIsPressed(VK_SHIFT))
 	{
 		this->gfx.camera.AdjustPosition(0.0f, -gfx.cameraSpeed * dt, 0.0f);
+	}
+	if (keyboard.KeyIsPressed('C'))
+	{
+		XMVECTOR lightPosition = this->gfx.camera.GetPositionVector();
+		lightPosition -= this->gfx.camera.GetForwardVector();
+		this->gfx.pointLight.SetPosition(lightPosition);
+		this->gfx.pointLight.SetRotation(this->gfx.camera.GetRotationFloat3());
 	}
 
 	timer.Restart();
