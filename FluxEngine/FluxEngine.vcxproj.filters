@@ -40,9 +40,6 @@
     <Filter Include="Header Files\Game\Resources">
       <UniqueIdentifier>{43f8aabb-dd4d-456b-ae7f-19ffbc6f0f3c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Game\Graphics\ImGUI">
-      <UniqueIdentifier>{463581b5-1030-44df-8e9e-4235e4eac80f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Game\Graphics\ImGUI">
       <UniqueIdentifier>{35bad92f-f261-4177-b4d0-2bbfa99246d4}</UniqueIdentifier>
     </Filter>
@@ -72,6 +69,9 @@
     </Filter>
     <Filter Include="Header Files\Game\Graphics\Bindables">
       <UniqueIdentifier>{ca13637c-06b1-4e21-b94f-6f0139fb0289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Graphics\ImGUI">
+      <UniqueIdentifier>{01bd2466-1eb4-4de0-933a-2b2d955b8543}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -197,30 +197,6 @@
     <ClInclude Include="Game\Resources\resource.h">
       <Filter>Header Files\Game\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imconfig.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imgui.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imgui_impl_dx11.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imgui_impl_win32.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imgui_internal.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imstb_rectpack.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imstb_textedit.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\ImGUI\imstb_truetype.h">
-      <Filter>Header Files\Game\Graphics\ImGUI</Filter>
-    </ClInclude>
     <ClInclude Include="Game\Graphics\Objects\Camera.h">
       <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
@@ -302,13 +278,16 @@
     <FxCompile Include="data\shaders\pixelShader_NoLight.hlsl">
       <Filter>Resource Files\Shaders\Pixel</Filter>
     </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_ADS_Specular_Move.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_Skybox.hlsl">
+      <Filter>Resource Files\Shaders\Pixel</Filter>
+    </FxCompile>
     <FxCompile Include="data\shaders\pixelShader_ADS_Specular.hlsl">
       <Filter>Resource Files\Shaders\Pixel</Filter>
     </FxCompile>
     <FxCompile Include="data\shaders\vertexShader_ADS_Specular.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_ADS_Specular_Move.hlsl">
       <Filter>Resource Files\Shaders\Vertex</Filter>
     </FxCompile>
   </ItemGroup>

@@ -207,7 +207,7 @@ void Application::Update()
 	}
 	if (this->gfx.camera != nullptr)
 	{
-		if (this->gfx.currentObject != nullptr && ((this->gfx.camera->GetName() == "Boat 1" || this->gfx.camera->GetName() == "Boat 3") && this->gfx.currentObject->GetName() == "Movable Boat"))
+		if (this->gfx.currentObject != nullptr && ((this->gfx.camera->GetName() == this->gfx.currentObject->GetName() + " 1" || this->gfx.camera->GetName() == this->gfx.currentObject->GetName() + " 3") && this->gfx.currentObject->GetMovable()))
 		{
 			this->gfx.currentObject->SetRotation(0.0f, this->gfx.camera->GetRotationFloat3().y, 0.0f);
 			if (keyboard.KeyIsPressed('W'))
@@ -254,12 +254,6 @@ void Application::Update()
 			if (keyboard.KeyIsPressed(VK_SHIFT))
 			{
 				this->gfx.camera->AdjustPosition(this->gfx.camera->GetDownVector() * gfx.camera->GetSpeed() * dt);
-			}
-			if (keyboard.KeyIsPressed('C') && this->gfx.pointLight != nullptr)
-			{
-				XMVECTOR lightPosition = this->gfx.camera->GetPositionVector();
-				lightPosition += this->gfx.camera->GetForwardVector();
-				this->gfx.pointLight->SetPosition(lightPosition);
 			}
 		}
 	}

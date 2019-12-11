@@ -1,8 +1,9 @@
 #include "RenderableGameObject.h"
 
-RenderableGameObject::RenderableGameObject(std::vector<std::string> data, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader)
+bool RenderableGameObject::Init(std::vector<std::string> data, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader)
 {
-	Init(data[1], std::stof(data[2]), device, deviceContext, cb_vertexShader, cb_pixelShader, data[0]);
+	if(!Init(data[1], std::stof(data[2]), device, deviceContext, cb_vertexShader, cb_pixelShader, data[0]))
+		return false;
 	SetPosition(std::stof(data[3]), std::stof(data[4]), std::stof(data[5]));
 	SetRotation(std::stof(data[6]), std::stof(data[7]), std::stof(data[8]));
 	SetLockedPos(std::stoi(data[9]), 0);
@@ -18,6 +19,7 @@ RenderableGameObject::RenderableGameObject(std::vector<std::string> data, ID3D11
 	SetSpecularMapMode(std::stoi(data[19]));
 	SetScale(std::stof(data[20]));
 	SetRenderMode(std::stof(data[21]));
+	return true;
 }
 
 std::string RenderableGameObject::Save()

@@ -25,15 +25,15 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 
 void GraphicsHandler::RenderFrame()
 {
-
-	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);		
+	float bgColor[3] = {0.0f, 0.0f, 0.0f};
+	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	if (camera != nullptr)
 	{
 		static DWORD dwTimeStart = 0;
-		DWORD dwTimeCur = GetTickCount64();
+		DWORD dwTimeCur = static_cast<DWORD>(GetTickCount64());
 
 		if (dwTimeStart == 0)
 			dwTimeStart = dwTimeCur;
@@ -46,7 +46,7 @@ void GraphicsHandler::RenderFrame()
 			this->cb_pixelShader.data.directionalLightStrength[i] = XMFLOAT4(dLights[i]->GetStrength(),1.0f,1.0f,1.0f);
 			this->cb_pixelShader.data.directionalLightDirection[i] = XMFLOAT4(dLights[i]->GetDirection().x, dLights[i]->GetDirection().y, dLights[i]->GetDirection().z,1.0f);
 		}
-		this->cb_pixelShader.data.numDLights = dLights.size();
+		this->cb_pixelShader.data.numDLights = static_cast<int>(dLights.size());
 
 		for (int i = 0; i < pLights.size(); ++i)
 		{
@@ -57,7 +57,7 @@ void GraphicsHandler::RenderFrame()
 			this->cb_pixelShader.data.pointLightFactors[i].z = pLights[i]->GetLAttenuation();
 			this->cb_pixelShader.data.pointLightFactors[i].w = pLights[i]->GetEAttenuation();
 		}
-		this->cb_pixelShader.data.numPLights = pLights.size();
+		this->cb_pixelShader.data.numPLights = static_cast<int>(pLights.size());
 
 		this->cb_pixelShader.data.shininess = this->shininess;
 		this->cb_pixelShader.data.cameraPosition = this->camera->GetPositionFloat3();
@@ -77,8 +77,16 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
 
 		//Set Shaders
-		this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 
+
+		if (camera != nullptr)
+			skybox->SetPosition(camera->GetPositionFloat3());
+
+		this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
+		this->deviceContext->PSSetShader(this->pixelShader_skybox.GetShader(), NULL, 0);
+		this->skybox->Draw(viewProjectionMatrix);
+		this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
+		this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
 		while (it != objects.end())
@@ -95,26 +103,29 @@ void GraphicsHandler::RenderFrame()
 				this->cb_pixelShader.data.specularMap = object->GetSpecularMapMode();
 				this->cb_pixelShader.data.grayscale = object->GetGrayscale();
 				this->cb_pixelShader.ApplyChanges();
-				if (object->GetName() == "Movable Boat")
+				if(object->GetMovable())
 				{
 					XMFLOAT3 objectPos = object->GetPositionFloat3();
-					if (object != currentObject || !(camera->GetName() == "Boat 1" || camera->GetName() == "Boat 3"))
+					if (object->GetName() == "Boat") // Water Bobbing
 					{
-						if (objects["Water"] != nullptr)
+						if (object != currentObject || !(camera->GetName() == object->GetName() + " 1" || camera->GetName() == object->GetName() + " 3"))
 						{
-							XMFLOAT3 waterPos = objects["Water"]->GetPositionFloat3();
-							waterPos.y += (sin(objectPos.x * 10 + this->cb_vertexShader.data.elapsedTime * 2.0) + sin(objectPos.z * 0.1 + this->cb_vertexShader.data.elapsedTime * 2.2)) * 0.5f;
-							objectPos.y = waterPos.y;
-							object->SetPosition(objectPos);
+							if (objects["Water"] != nullptr)
+							{
+								XMFLOAT3 waterPos = objects["Water"]->GetPositionFloat3();
+								waterPos.y += static_cast<float>(sin(static_cast<double>(objectPos.x) * 10.0 + this->cb_vertexShader.data.elapsedTime * 2.0) + sin(static_cast<double>(objectPos.z) * 0.1 + this->cb_vertexShader.data.elapsedTime * 2.2)) * 0.5f;
+								objectPos.y = waterPos.y;
+								object->SetPosition(objectPos);
+							}
 						}
 					}
-					if (camera->GetName() == "Boat 1" || camera->GetName() == "Boat 3")
+					if (camera->GetName() == object->GetName()+" 1" || camera->GetName() == object->GetName() + " 3")
 					{
 						XMFLOAT3 cameraPos;
 						float xFactor = 0.0f, yFactor = 0.0f, zFactor = 0.0f;
-						if (camera->GetName() == "Boat 1")
+						if (camera->GetName() == object->GetName() + " 1")
 							yFactor = 4.0f;
-						if (camera->GetName() == "Boat 3")
+						if (camera->GetName() == object->GetName() + " 3")
 						{
 							yFactor = 12.0f;
 							zFactor = 20.0f;
@@ -125,10 +136,14 @@ void GraphicsHandler::RenderFrame()
 						camera->SetPosition(cameraPos);
 					}
 				}
-				this->deviceContext->VSSetShader(this->vertexShaderMovable.GetShader(), NULL, 0);
-				if (object->GetName() != "Water")
+				if (object->GetName() == "Water")
+				{
+					this->deviceContext->VSSetShader(this->vertexShaderMovable.GetShader(), NULL, 0);
+					object->Draw(viewProjectionMatrix);
 					this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
-				object->Draw(viewProjectionMatrix);
+				}
+				else
+					object->Draw(viewProjectionMatrix);
 			}
 			it++;
 		}
@@ -213,9 +228,6 @@ void GraphicsHandler::SaveScene(std::string sceneName)
 
 	std::ofstream generalFile(sceneName + "_general.txt");
 	std::string generalData = "";
-	generalData += std::to_string(bgColor[0]) + ",";
-	generalData += std::to_string(bgColor[1]) + ",";
-	generalData += std::to_string(bgColor[2]) + ",";
 	generalData += std::to_string(shininess) + ",";
 	generalData += std::to_string(this->cb_pixelShader.data.ambientLightColor.x) + ",";
 	generalData += std::to_string(this->cb_pixelShader.data.ambientLightColor.y) + ",";
@@ -231,6 +243,8 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	cameraID = -1;
 	pLightID = -1;
 	dLightID = -1;
+
+	DeleteObjects();
 	std::ifstream objectsFile(sceneName + "_objects.txt");
 	std::string line = "";
 	std::unordered_map<std::string, RenderableGameObject*> newObjects = {};
@@ -238,16 +252,18 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	{
 		std::vector<std::string> data = {};
 		StringTools::SplitString(line, data, ',');
-		newObjects[data[0]] = new RenderableGameObject(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader);
+		RenderableGameObject* newObject = new RenderableGameObject();
+		if (newObject->Init(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader))
+			newObjects[data[0]] = newObject;
 	}
 	objectsFile.close();
-	objects.clear();
 	objects = newObjects;
 	if(objects.size() > 0)
 		NextObject();
 	else
 		currentObject = nullptr;
 
+	DeleteCameras();
 	std::ifstream camerasFile(sceneName + "_cameras.txt");
 	std::vector<Camera*> newCameras = {};
 	while (std::getline(camerasFile, line))
@@ -257,7 +273,6 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 		newCameras.push_back(new Camera(data));
 	}
 	camerasFile.close();
-	cameras.clear();
 	cameras = newCameras;
 	if(cameras.size() > 0)
 		NextCamera();
@@ -269,15 +284,14 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	{
 		std::vector<std::string> data = {};
 		StringTools::SplitString(line, data, ',');
-		bgColor[0] = std::stof(data[0]);
-		bgColor[1] = std::stof(data[1]);
-		bgColor[2] = std::stof(data[2]);
 		shininess = std::stof(data[3]);
 		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(std::stof(data[4]), std::stof(data[5]), std::stof(data[6]));
 		this->cb_pixelShader.data.ambientLightStrength = std::stof(data[7]);
 	}
 	generalFile.close();
 
+	DeletePointLights();
+	DeleteDirectionalLights();
 	std::ifstream lightsFile(sceneName + "_lights.txt");
 	std::vector<PointLight*> newPLights = {};
 	std::vector<DirectionalLight*> newDLights = {};
@@ -291,8 +305,7 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 			newDLights.push_back(new DirectionalLight(data, this->device.Get(), this->deviceContext.Get()));
 	}
 	lightsFile.close();
-	pLights.clear();
-	dLights.clear();
+
 	pLights = newPLights;
 	dLights = newDLights;
 	if(pLights.size() > 0)
@@ -311,255 +324,314 @@ void GraphicsHandler::RenderGUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-
-	ImGui::Begin("Point Light Controls");
-	if (pointLight != nullptr)
+	if (showPLControls)
 	{
-		ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
-		ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
-		XMFLOAT3 lightPos = this->pointLight->GetPositionFloat3();
-		ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
-		this->pointLight->SetPosition(lightPos);
+		ImGui::Begin("Point Light Controls");
+		if (pointLight != nullptr)
+		{
+			ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
+			ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
+			XMFLOAT3 lightPos = this->pointLight->GetPositionFloat3();
+			ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
+			this->pointLight->SetPosition(lightPos);
 
-		ImGui::Text("Attenuation:");
-		ImGui::DragFloat("Constant", &this->pointLight->GetCAttenuation(), 0.01f, 0.01f, 10.0f);
-		ImGui::DragFloat("Linear", &this->pointLight-> GetLAttenuation(), 0.01f, 0.0f, 10.0f);
-		ImGui::DragFloat("Exponent", &this->pointLight->GetEAttenuation(), 0.01f, 0.0f, 10.0f);
+			ImGui::Text("Attenuation:");
+			ImGui::DragFloat("Constant", &this->pointLight->GetCAttenuation(), 0.01f, 0.01f, 10.0f);
+			ImGui::DragFloat("Linear", &this->pointLight->GetLAttenuation(), 0.01f, 0.0f, 10.0f);
+			ImGui::DragFloat("Exponent", &this->pointLight->GetEAttenuation(), 0.01f, 0.0f, 10.0f);
 
-		if (pLights.size() > 1)
-		{
-			if (ImGui::Button("Previous Light"))
-				NextPLight(-1);
-			ImGui::SameLine();
-			if (ImGui::Button("Next Light"))
-				NextPLight();
-		}
-	}
-	if (ImGui::Button("New Point Light"))
-		NewPointLight();
-	if (pointLight != nullptr)
-	{
-		ImGui::SameLine();
-		if (ImGui::Button("Delete Point Light"))
-			DeletePointLight();
-	}
-	ImGui::End();
-
-	ImGui::Begin("Directional Light Controls");
-	if (directionalLight != nullptr)
-	{
-		ImGui::ColorEdit3("Color", &this->directionalLight->GetColor().x);
-		ImGui::DragFloat("Strength", &this->directionalLight->GetStrength(), 0.01f, 0.0f, 10.0f);
-		ImGui::DragFloat3("Direction", &directionalLight->GetDirection().x, 0.01f, -1.0f, 1.0f);
-		if (dLights.size() > 1)
-		{
-			if (ImGui::Button("Previous Light"))
-				NextDLight(-1);
-			ImGui::SameLine();
-			if (ImGui::Button("Next Light"))
-				NextDLight();
-		}
-	}
-	if (ImGui::Button("New Directional Light"))
-		NewDirectionalLight();
-	if (directionalLight != nullptr)
-		if (ImGui::Button("Delete Directional Light"))
-			DeleteDirectionalLight();
-	ImGui::End();
-
-	ImGui::Begin("Camera Controls");
-	if (camera != nullptr)
-	{
-		ImGui::Text(camera->GetName().c_str());
-		ImGui::DragFloat("Move Speed", &camera->GetSpeed(), 0.005f, 0.0f, 5.0f);
-		ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
-		ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0)); 
-		if (!camera->GetLookAtMode())
-		{
-			ImGui::SameLine();
-			ImGui::Checkbox("Pitch Lock?", &camera->GetLockedRot(0));
-		}
-		ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
-		if (!camera->GetLookAtMode())
-		{
-			ImGui::SameLine();
-			ImGui::Checkbox("Yaw Lock?", &camera->GetLockedRot(1));
-		}
-		ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
-		if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
-		{
-			XMFLOAT3 camPos = this->camera->GetPositionFloat3();
-			if (!camera->GetLockedPos(0))
+			if (pLights.size() > 1)
 			{
-				if (!camera->GetLockedPos(1))
+				if (ImGui::Button("Previous Light"))
+					NextPLight(-1);
+				ImGui::SameLine();
+				if (ImGui::Button("Next Light"))
+					NextPLight();
+			}
+		}
+		if (ImGui::Button("New Point Light"))
+			NewPointLight();
+		if (pointLight != nullptr)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("Duplicate Light"))
+				DuplicatePointLight();
+			if (ImGui::Button("Delete Light"))
+				DeletePointLight();
+			ImGui::SameLine();
+			if (ImGui::Button("Move To Camera"))
+				pointLight->SetPosition(camera->GetPositionVector() + camera->GetForwardVector());
+		}
+		ImGui::End();
+	}
+
+	if (showDLControls)
+	{
+		ImGui::Begin("Directional Light Controls");
+		if (directionalLight != nullptr)
+		{
+			ImGui::ColorEdit3("Color", &this->directionalLight->GetColor().x);
+			ImGui::DragFloat("Strength", &this->directionalLight->GetStrength(), 0.01f, 0.0f, 10.0f);
+			ImGui::DragFloat3("Direction", &directionalLight->GetDirection().x, 0.01f, -1.0f, 1.0f);
+			if (dLights.size() > 1)
+			{
+				if (ImGui::Button("Previous Light"))
+					NextDLight(-1);
+				ImGui::SameLine();
+				if (ImGui::Button("Next Light"))
+					NextDLight();
+			}
+		}
+		if (ImGui::Button("New Directional Light"))
+			NewDirectionalLight();
+		if (directionalLight != nullptr)
+		{
+			if (ImGui::Button("Duplicate Light"))
+				DuplicateDirectionalLight();
+			if (ImGui::Button("Delete Light"))
+				DeleteDirectionalLight();
+			if (ImGui::Button("Set to Camera Direction"))
+				directionalLight->SetPosition(camera->GetForwardVector()*-1);
+		}
+		ImGui::End();
+	}
+	if (showCamControls)
+	{
+		ImGui::Begin("Camera Controls");
+		if (camera != nullptr)
+		{
+			ImGui::Text(camera->GetName().c_str());
+			ImGui::DragFloat("Move Speed", &camera->GetSpeed(), 0.005f, 0.0f, 5.0f);
+			ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
+			ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0));
+			if (!camera->GetLookAtMode())
+			{
+				ImGui::SameLine();
+				ImGui::Checkbox("Pitch Lock?", &camera->GetLockedRot(0));
+			}
+			ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
+			if (!camera->GetLookAtMode())
+			{
+				ImGui::SameLine();
+				ImGui::Checkbox("Yaw Lock?", &camera->GetLockedRot(1));
+			}
+			ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
+			if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
+			{
+				XMFLOAT3 camPos = this->camera->GetPositionFloat3();
+				if (!camera->GetLockedPos(0))
 				{
-					if (!camera->GetLockedPos(2))
-						ImGui::DragFloat3("Position XYZ", &camPos.x, 0.1f, -80.0f, 80.0f);
+					if (!camera->GetLockedPos(1))
+					{
+						if (!camera->GetLockedPos(2))
+							ImGui::DragFloat3("Position XYZ", &camPos.x, 0.1f, -80.0f, 80.0f);
+						else
+							ImGui::DragFloat2("Position XY", &camPos.x, 0.1f, -80.0f, 80.0f);
+					}
 					else
-						ImGui::DragFloat2("Position XY", &camPos.x, 0.1f, -80.0f, 80.0f);
+					{
+						ImGui::DragFloat("Position X", &camPos.x, 0.1f, -80.0f, 80.0f);
+						if (!camera->GetLockedPos(2))
+							ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+					}
 				}
 				else
 				{
-					ImGui::DragFloat("Position X", &camPos.x, 0.1f, -80.0f, 80.0f);
-					if (!camera->GetLockedPos(2))
+					if (!camera->GetLockedPos(1))
+					{
+						if (!camera->GetLockedPos(2))
+							ImGui::DragFloat2("Position YZ", &camPos.y, 0.1f, -80.0f, 80.0f);
+						else
+							ImGui::DragFloat("Position Y", &camPos.y, 0.1f, -80.0f, 80.0f);
+					}
+					else
 						ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+				}
+				this->camera->SetPosition(camPos);
+			}
+			ImGui::Checkbox("Look At Fixed Position?", &camera->GetLookAtMode());
+			if (!camera->GetLookAtMode())
+			{
+				if (!camera->GetLockedRot(0) || !camera->GetLockedRot(1))
+				{
+					XMFLOAT3 camRot = this->camera->GetRotationFloat3();
+					if (!camera->GetLockedRot(0))
+						ImGui::DragFloat("Pitch", &camRot.x, 0.01f, -XM_PI, XM_PI);
+					if (!camera->GetLockedRot(1))
+						ImGui::DragFloat("Yaw", &camRot.y, 0.01f, -XM_PI, XM_PI);
+					this->camera->SetRotation(camRot);
 				}
 			}
 			else
 			{
-				if (!camera->GetLockedPos(1))
-				{
-					if (!camera->GetLockedPos(2))
-						ImGui::DragFloat2("Position YZ", &camPos.y, 0.1f, -80.0f, 80.0f);
-					else
-						ImGui::DragFloat("Position Y", &camPos.y, 0.1f, -80.0f, 80.0f);
-				}
-				else
-					ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+				ImGui::DragFloat3("Look At", &camera->GetLookAtPos().x, 0.1f, -50.0f, 50.0f);
+				this->camera->SetLookAtPos();
 			}
-			this->camera->SetPosition(camPos);
-		}
-		ImGui::Checkbox("Look At Fixed Position?", &camera->GetLookAtMode());
-		if (!camera->GetLookAtMode())
-		{
-			if (!camera->GetLockedRot(0) || !camera->GetLockedRot(1))
+			if (cameras.size() > 1)
 			{
-				XMFLOAT3 camRot = this->camera->GetRotationFloat3();
-				if (!camera->GetLockedRot(0))
-					ImGui::DragFloat("Pitch", &camRot.x, 0.01f, -XM_PI, XM_PI);
-				if (!camera->GetLockedRot(1))
-					ImGui::DragFloat("Yaw", &camRot.y, 0.01f, -XM_PI, XM_PI);
-				this->camera->SetRotation(camRot);
+				if (ImGui::Button("Previous Camera"))
+					NextCamera(-1);
+				ImGui::SameLine();
+				if (ImGui::Button("Next Camera"))
+					NextCamera();
 			}
 		}
-		else
-		{
-			ImGui::DragFloat3("Look At", &camera->GetLookAtPos().x, 0.1f, -50.0f, 50.0f);
-			this->camera->SetLookAtPos();
-		}
-		if (cameras.size() > 1)
-		{
-			if (ImGui::Button("Previous Camera"))
-				NextCamera(-1);
-			ImGui::SameLine();
-			if (ImGui::Button("Next Camera"))
-				NextCamera();
-		}
-	}
-	if (ImGui::Button("New Camera")) 
-		NewCamera();
-	if (camera != nullptr)
-	{
-		ImGui::SameLine();
-		if (ImGui::Button("Delete Camera"))
-			DeleteCamera();
-	}
-	ImGui::End();
-
-	if (currentObject != nullptr)
-	{
-		ImGui::Begin("Object Controls");
-		ImGui::Text(currentObject->GetName().c_str());
-		ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
-		if (currentObject->GetRenderMode())
-		{
-			if (currentObject->GetMovable())
-				ImGui::DragFloat("Move Speed", &currentObject->GetSpeed(), 0.005f, 0.0f, 5.0f);
-			ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
-			ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
-			ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();
-			ImGui::Checkbox("Yaw Lock?", &currentObject->GetLockedRot(1));
-			ImGui::Checkbox("Move Lock Z?", &currentObject->GetLockedPos(2)); ImGui::SameLine();
-			ImGui::Checkbox("Roll Lock?", &currentObject->GetLockedRot(2));
-
-			if (!currentObject->GetLockedPos(0) || !currentObject->GetLockedPos(1) || !currentObject->GetLockedPos(2))
-			{
-				XMFLOAT3 objPos = this->currentObject->GetPositionFloat3();
-				if (!currentObject->GetLockedPos(0))
-				{
-					if (!currentObject->GetLockedPos(1))
-					{
-						if (!currentObject->GetLockedPos(2))
-							ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -80.0f, 80.0f);
-						else
-							ImGui::DragFloat2("Position XY", &objPos.x, 0.1f, -80.0f, 80.0f);
-					}
-					else
-					{
-						ImGui::DragFloat("Position X", &objPos.x, 0.1f, -80.0f, 80.0f);
-						if (!currentObject->GetLockedPos(2))
-							ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
-					}
-				}
-				else
-				{
-					if (!currentObject->GetLockedPos(1))
-					{
-						if (!currentObject->GetLockedPos(2))
-							ImGui::DragFloat2("Position YZ", &objPos.y, 0.1f, -80.0f, 80.0f);
-						else
-							ImGui::DragFloat("Position Y", &objPos.y, 0.1f, -80.0f, 80.0f);
-					}
-					else
-						ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
-				}
-				this->currentObject->SetPosition(objPos);
-			}
-			if (!currentObject->GetLockedRot(0) || !currentObject->GetLockedRot(1) || !currentObject->GetLockedRot(2))
-			{
-				XMFLOAT3 objRot = this->currentObject->GetRotationFloat3();
-				if (!currentObject->GetLockedRot(0))
-					ImGui::DragFloat("Pitch", &objRot.x, 0.01f, -XM_PI, XM_PI);
-				if (!currentObject->GetLockedRot(1))
-					ImGui::DragFloat("Yaw", &objRot.y, 0.01f, -XM_PI, XM_PI);
-				if (!currentObject->GetLockedRot(2))
-					ImGui::DragFloat("Roll", &objRot.z, 0.01f, -XM_PI, XM_PI);
-				this->currentObject->SetRotation(objRot);
-			}
-			ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
-			ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
-			ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode()); ImGui::SameLine();
-			ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
-			ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
-		}
-		if (objects.size() > 1)
-		{
-			if (ImGui::Button("Previous Object"))
-				NextObject(-1);
-			ImGui::SameLine();
-			if (ImGui::Button("Next Object"))
-				NextObject();
-		}
-		if (ImGui::Button("Duplicate Object"))
-			DuplicateObject();
-		if (ImGui::Button("Delete Object"))
-			DeleteObject();
+		if (ImGui::Button("New Camera"))
+			NewCamera();
 		if (camera != nullptr)
 		{
+			ImGui::SameLine();
+			if (ImGui::Button("Duplicate Camera"))
+				DuplicateCamera();
+			if (ImGui::Button("Delete Camera"))
+				DeleteCamera();
+		}
+		ImGui::End();
+	}
+
+	if (showObjectControls)
+	{
+		ImGui::Begin("Object Controls");
+		if (currentObject != nullptr)
+		{
+			ImGui::Text(currentObject->GetName().c_str());
+			ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
+			if (currentObject->GetRenderMode())
+			{
+				ImGui::SameLine();
+				ImGui::Checkbox("Movable?", &currentObject->GetMovable());
+				if (currentObject->GetMovable())
+					ImGui::DragFloat("Move Speed", &currentObject->GetSpeed(), 0.005f, 0.0f, 5.0f);
+				ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
+				ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
+				ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();
+				ImGui::Checkbox("Yaw Lock?", &currentObject->GetLockedRot(1));
+				ImGui::Checkbox("Move Lock Z?", &currentObject->GetLockedPos(2)); ImGui::SameLine();
+				ImGui::Checkbox("Roll Lock?", &currentObject->GetLockedRot(2));
+
+				if (!currentObject->GetLockedPos(0) || !currentObject->GetLockedPos(1) || !currentObject->GetLockedPos(2))
+				{
+					XMFLOAT3 objPos = this->currentObject->GetPositionFloat3();
+					if (!currentObject->GetLockedPos(0))
+					{
+						if (!currentObject->GetLockedPos(1))
+						{
+							if (!currentObject->GetLockedPos(2))
+								ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -80.0f, 80.0f);
+							else
+								ImGui::DragFloat2("Position XY", &objPos.x, 0.1f, -80.0f, 80.0f);
+						}
+						else
+						{
+							ImGui::DragFloat("Position X", &objPos.x, 0.1f, -80.0f, 80.0f);
+							if (!currentObject->GetLockedPos(2))
+								ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
+						}
+					}
+					else
+					{
+						if (!currentObject->GetLockedPos(1))
+						{
+							if (!currentObject->GetLockedPos(2))
+								ImGui::DragFloat2("Position YZ", &objPos.y, 0.1f, -80.0f, 80.0f);
+							else
+								ImGui::DragFloat("Position Y", &objPos.y, 0.1f, -80.0f, 80.0f);
+						}
+						else
+							ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
+					}
+					this->currentObject->SetPosition(objPos);
+				}
+				if (!currentObject->GetLockedRot(0) || !currentObject->GetLockedRot(1) || !currentObject->GetLockedRot(2))
+				{
+					XMFLOAT3 objRot = this->currentObject->GetRotationFloat3();
+					if (!currentObject->GetLockedRot(0))
+						ImGui::DragFloat("Pitch", &objRot.x, 0.01f, -XM_PI, XM_PI);
+					if (!currentObject->GetLockedRot(1))
+						ImGui::DragFloat("Yaw", &objRot.y, 0.01f, -XM_PI, XM_PI);
+					if (!currentObject->GetLockedRot(2))
+						ImGui::DragFloat("Roll", &objRot.z, 0.01f, -XM_PI, XM_PI);
+					this->currentObject->SetRotation(objRot);
+				}
+				ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
+				ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
+				ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode()); ImGui::SameLine();
+				ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
+				ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
+			}
+			if (objects.size() > 1)
+			{
+				if (ImGui::Button("Previous Object"))
+					NextObject(-1);
+				ImGui::SameLine();
+				if (ImGui::Button("Next Object"))
+					NextObject();
+			}
+		}
+		if (ImGui::Button("New Object"))
+			showNewObjectWindow = true;
+		if (currentObject != nullptr)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("Duplicate Object"))
+				DuplicateObject();
+			if (ImGui::Button("Delete Object"))
+				DeleteObject();
 			if (ImGui::Button("Lock Camera To This"))
 			{
 				camera->SetLookAtPos(currentObject->GetPositionFloat3());
 				camera->SetLookAtMode(true);
 			}
+			ImGui::SameLine();
+			if (ImGui::Button("Move To Camera"))
+				currentObject->SetPosition(camera->GetPositionVector() + camera->GetForwardVector()*10);
 		}
 		ImGui::End();
 	}
 
-	ImGui::Begin("Debug / General Controls");
-	ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
-	ImGui::Checkbox("Show Lights?", &showLights);
-	ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
-	ImGui::ColorEdit3("Background Color", bgColor);
-	ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
-	ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
+	if (showNewObjectWindow)
+	{
+		ImGui::Begin("Create a New Object");
+		ImGui::InputText("Object Filepath", &newObjectPath[0], ARRAYSIZE(newObjectPath));
+		if (ImGui::Button("New Object"))
+			NewObject();
+		ImGui::End();
+	}
 
-	ImGui::InputText("Scene Name", &sceneName[0], 256);
-	if (ImGui::Button("Save Scene"))
-		SaveScene("data//scenes//"+std::string(sceneName));
-	ImGui::SameLine();
-	if (ImGui::Button("Load Scene"))
-		LoadScene("data//scenes//"+std::string(sceneName));
+	if (showGeneralControls)
+	{
+		ImGui::Begin("General Controls");
+		ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
+		ImGui::Checkbox("Show Lights?", &showLights); ImGui::SameLine();
+		ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
+		ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
+		ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
+		ImGui::InputText("Scene Name", &sceneName[0], ARRAYSIZE(sceneName));
+		if (ImGui::Button("Save Scene"))
+			SaveScene("data//scenes//" + std::string(sceneName));
+		ImGui::SameLine();
+		if (ImGui::Button("Load Scene"))
+			LoadScene("data//scenes//" + std::string(sceneName));
+		ImGui::End();
+	}
+
+
+	ImGui::Begin("Show/Hide Windows");
+	ImGui::Checkbox("Show Error Log?", &ErrorLogger::showErrorLog);
+	ImGui::Checkbox("Show Point Light Controls?", &showPLControls);
+	ImGui::Checkbox("Show Directional Light Controls?", &showDLControls);
+	ImGui::Checkbox("Show Camera Controls?", &showCamControls);
+	ImGui::Checkbox("Show Object Controls?", &showObjectControls);
+	ImGui::Checkbox("Show General Controls?", &showGeneralControls);
 	ImGui::End();
+
+	if (ErrorLogger::showErrorLog)
+	{
+		ImGui::Begin("Error Log");
+		ImGui::Text(ErrorLogger::ERROR_LOG.c_str());
+		ImGui::AlignTextToFramePadding();
+		ImGui::End();
+	}
 
 	ImGui::Render();
 
@@ -606,8 +678,18 @@ void GraphicsHandler::NewCamera()
 	this->camera = cameras[cameraID];
 }
 
+void GraphicsHandler::DuplicateCamera()
+{
+	Camera* camera = new Camera(*this->camera);
+	camera->GetName() += " - Copy";
+	cameras.insert(cameras.begin() + cameraID+1, camera);
+	cameraID++;
+	this->camera = camera;
+}
+
 void GraphicsHandler::DeleteCamera()
 {
+	delete camera;
 	camera = nullptr;
 	cameras.erase(cameras.begin() + (cameraID < 0 ? 0 : cameraID--));
 	if (cameras.size() > 0)
@@ -615,19 +697,76 @@ void GraphicsHandler::DeleteCamera()
 	else
 		cameraID = 0;
 }
+
+void GraphicsHandler::DeleteCameras()
+{
+	for (int i = 0; i < cameras.size(); ++i)
+		delete cameras[i];
+	cameras.clear();
+}
+void GraphicsHandler::DeleteObjects()
+{
+	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	while (it != objects.end())
+	{
+		delete it->second;
+		it++;
+	}
+	objects.clear();
+}
+void GraphicsHandler::DeletePointLights()
+{
+	for (int i = 0; i < pLights.size(); ++i)
+		delete pLights[i];
+	pLights.clear();
+}
+void GraphicsHandler::DeleteDirectionalLights()
+{
+	for (int i = 0; i < dLights.size(); ++i)
+		delete dLights[i];
+	dLights.clear();
+}
+
 void GraphicsHandler::DeleteObject()
 {
-	currentObject = nullptr;
 	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	for (int i = 0; i < (objectID < 0 ? 0 : objectID); ++i)
+	while (it->first != currentObject->GetName())
 		it++;
-	objectID--;
+	delete currentObject;
+	currentObject = nullptr;
 	objects.erase(it);
 	if (objects.size() > 0)
 		NextObject();
 	else
 		objectID = 0;
 }
+
+void GraphicsHandler::NewObject()
+{
+	showNewObjectWindow = false;
+	RenderableGameObject* newObject = new RenderableGameObject();
+	std::string directory = StringTools::GetDirectoryFromPath(newObjectPath);
+	std::string fileExtension = StringTools::GetFileExtension(newObjectPath);
+	try
+	{
+		std::string name = std::string(newObjectPath).substr(directory.length() + 1, std::string(newObjectPath).length() - directory.length() - fileExtension.length() - 2);
+		if (newObject->Init(newObjectPath, 1.0f, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader, name))
+		{
+			std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+			for (int i = 0; i < objectID; ++i)
+				it++;
+			objects.insert(it, { newObject->GetName(), newObject });
+			objectID--;
+			this->currentObject = newObject;
+		}
+	}
+	catch(std::exception& e)
+	{
+		ErrorLogger::Log("Error: No filepath given when creating New Object");
+	}
+	memset(newObjectPath, 0, sizeof(newObjectPath));
+}
+
 void GraphicsHandler::DuplicateObject()
 {
 	RenderableGameObject* object = new RenderableGameObject(*currentObject);
@@ -636,6 +775,7 @@ void GraphicsHandler::DuplicateObject()
 	for (int i = 0; i < objectID; ++i)
 		it++;
 	objects.insert(it, { object->GetName(), object });
+	objectID--;
 	this->currentObject = object;
 }
 void GraphicsHandler::NewPointLight()
@@ -646,8 +786,17 @@ void GraphicsHandler::NewPointLight()
 	this->pointLight = pLights[pLightID];
 }
 
+void GraphicsHandler::DuplicatePointLight()
+{
+	PointLight* light = new PointLight(*pointLight);
+	pLights.insert(pLights.begin()+pLightID+1, light);
+	pLightID++;
+	this->pointLight = light;
+}
+
 void GraphicsHandler::DeletePointLight()
 {
+	delete pointLight;
 	pointLight = nullptr;
 	pLights.erase(pLights.begin() + (pLightID < 0 ? 0 : pLightID--));
 	if (pLights.size() > 0)
@@ -663,8 +812,17 @@ void GraphicsHandler::NewDirectionalLight()
 	this->directionalLight = dLights[dLightID];
 }
 
+void GraphicsHandler::DuplicateDirectionalLight()
+{
+	DirectionalLight* light = new DirectionalLight(*directionalLight);
+	dLights.insert(dLights.begin() + dLightID+1, light);
+	dLightID++;
+	this->directionalLight = light;
+}
+
 void GraphicsHandler::DeleteDirectionalLight()
 {
+	delete directionalLight;
 	directionalLight = nullptr;
 	dLights.erase(dLights.begin() + (dLightID < 0 ? 0 : dLightID--));
 	if (dLights.size() > 0)
@@ -672,6 +830,7 @@ void GraphicsHandler::DeleteDirectionalLight()
 	else
 		dLightID = 0;
 }
+
 
 bool GraphicsHandler::InitDirectX()
 {
@@ -849,16 +1008,13 @@ bool GraphicsHandler::InitShaders()
 	UINT numElements = ARRAYSIZE(layout);
 
 	//Vertex Shaders
-	if (!vertexShader.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular.cso", layout, numElements))
-		return false;
-	if (!vertexShaderMovable.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular_Move.cso", layout, numElements))
-		return false;
+	vertexShader.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular.cso", layout, numElements);
+	vertexShaderMovable.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular_Move.cso", layout, numElements);
 
 	//Pixel Shaders
-	if (!pixelShader.Init(this->device, shaderFolder + L"pixelShader_ADS_Specular.cso"))
-		return false;
-	if (!pixelShader_noLight.Init(this->device, shaderFolder + L"pixelShader_NoLight.cso"))
-		return false;
+	pixelShader.Init(this->device, shaderFolder + L"pixelShader_ADS_Specular.cso");
+	pixelShader_noLight.Init(this->device, shaderFolder + L"pixelShader_NoLight.cso");
+	pixelShader_skybox.Init(this->device, shaderFolder + L"pixelShader_Skybox.cso");
 
 	return true;
 }
@@ -876,8 +1032,8 @@ bool GraphicsHandler::InitScene()
 
 		//Model Load
 		LoadScene("data//scenes//initial");
-		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
-		this->cb_pixelShader.data.ambientLightStrength = 0.2f;
+		skybox = new RenderableGameObject();
+		skybox->Init("data//skies//desert.fbx",10.0f, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"SKYBOX");
 	}
 	catch (CustomException & e)
 	{

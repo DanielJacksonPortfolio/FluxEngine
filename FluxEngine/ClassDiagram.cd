@@ -1,206 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Class Name="AdapterData">
-    <Position X="18" Y="9.25" Width="2.75" />
-=======
-<ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="AdapterData">
-    <Position X="23" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  <Class Name="ErrorLogger">
+    <Position X="23.5" Y="2.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAIAAAAAQAAAAAgAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\AdapterHandler.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="AdapterReader">
-<<<<<<< HEAD
-    <Position X="17.25" Y="7.25" Width="3.5" />
-=======
-    <Position X="23" Y="2.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAABAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\AdapterHandler.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Application">
-<<<<<<< HEAD
-    <Position X="28.5" Y="4" Width="2" />
-=======
-    <Position X="24.75" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAQAAAAIABAAgAAAAEAAAEAAAAAEAAAIAAACAAAAAAA=</HashCode>
-      <FileName>Game\Application.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Buffer">
-<<<<<<< HEAD
-    <Position X="4.25" Y="0.5" Width="2.5" />
-=======
-    <Position X="18.75" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAABABAAAAAAAAAAAAAAAAAFAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\Buffer.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Camera">
-<<<<<<< HEAD
-    <Position X="0.75" Y="9.5" Width="3" />
-=======
-    <Position X="9.5" Y="7.5" Width="2" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAACAAAAACAAAAAAAAgAAgAAACQAAAgAIAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\Camera.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Color">
-<<<<<<< HEAD
-    <Position X="28.5" Y="0.5" Width="2" />
-=======
-    <Position X="33.5" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAkgAQAAAAAQAAAAAAAAAAAAAhqAEAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\Color.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Config">
-<<<<<<< HEAD
-    <Position X="28.5" Y="10.75" Width="2" />
-=======
-    <Position X="28.25" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAgAAAAAAAAAwAQAAAgAAAAAAEAAAAAAAAACAAAAA=</HashCode>
-      <FileName>Game\Resources\Config.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ConstantBuffer&lt;T&gt;">
-<<<<<<< HEAD
-    <Position X="4.25" Y="3.5" Width="3.5" />
-    <InheritanceLine Type="Buffer" FixedToPoint="true">
-      <Path>
-        <Point X="5.5" Y="2.632" />
-        <Point X="5.5" Y="3.5" />
-      </Path>
-    </InheritanceLine>
-=======
-    <Position X="16.5" Y="3.25" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAKAAAAAAQAAAAASAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBuffer.h</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAgAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Tools\ErrorLogger.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CustomException">
-<<<<<<< HEAD
-    <Position X="28.5" Y="7.5" Width="2" />
-=======
-    <Position X="30" Y="3.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+    <Position X="26.25" Y="0.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAgAACAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
       <FileName>Tools\ExceptionHandler.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DirectionalLight">
-<<<<<<< HEAD
-    <Position X="4" Y="9.5" Width="2.5" />
-    <InheritanceLine Type="Light" FixedFromPoint="true">
-      <Path>
-        <Point X="5.25" Y="12.5" />
-        <Point X="5.25" Y="11.054" />
-=======
-    <Position X="9.5" Y="5.5" Width="1.5" />
-    <InheritanceLine Type="Light" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="10.25" Y="1.796" />
-        <Point X="10.25" Y="2.171" />
-        <Point X="8.836" Y="2.171" />
-        <Point X="8.836" Y="6.312" />
-        <Point X="9.5" Y="6.312" />
->>>>>>> e2653c6... Normal Mapping etc.
-      </Path>
-    </InheritanceLine>
+  <Class Name="StringTools">
+    <Position X="23.5" Y="0.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\DirectionalLight.h</FileName>
+      <HashCode>AACAAAAQAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAQE=</HashCode>
+      <FileName>Tools\StringTools.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="ErrorLogger">
-<<<<<<< HEAD
-    <Position X="28.5" Y="9.5" Width="2" />
-=======
-    <Position X="30" Y="2.25" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  <Class Name="Timer">
+    <Position X="16.25" Y="5.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Tools\ErrorLogger.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="GameObject">
-<<<<<<< HEAD
-    <Position X="0.5" Y="0.5" Width="3.5" />
-=======
-    <Position X="13.75" Y="0.5" Width="2.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>kABBAAREABAAQAACJAIAAIUCAAAAQggDJEAEAMAoBAA=</HashCode>
-      <FileName>Game\Graphics\Objects\GameObject.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="GraphicsHandler">
-<<<<<<< HEAD
-    <Position X="23.75" Y="0.5" Width="4.5" />
-=======
-    <Position X="23" Y="4.25" Width="3.25" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AACDCWQLAgAAABAAEmEgIQAAAAAQIQAkIxRGyAEAJIM=</HashCode>
-      <FileName>Game\Graphics\GraphicsHandler.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="IndexBuffer">
-<<<<<<< HEAD
-    <Position X="8.5" Y="1.25" Width="1.5" />
-    <InheritanceLine Type="Buffer" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="5.5" Y="2.632" />
-        <Point X="5.5" Y="3.125" />
-        <Point X="9.188" Y="3.125" />
-        <Point X="9.188" Y="2.675" />
-      </Path>
-    </InheritanceLine>
-=======
-    <Position X="18.75" Y="3.25" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAACAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\IndexBuffer.h</FileName>
+      <HashCode>EAAAAAAAACAAAABgAAAAAAAAAAAgAAABIAAAAAAEAAA=</HashCode>
+      <FileName>Tools\Timer.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Keyboard">
-<<<<<<< HEAD
-    <Position X="14" Y="0.5" Width="3" />
-=======
-    <Position X="26.5" Y="7" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <Compartments>
-      <Compartment Name="Nested Types" Collapsed="false" />
-    </Compartments>
+    <Position X="25.5" Y="6.75" Width="2.5" />
     <NestedTypes>
-      <Class Name="Keyboard::Event">
-        <NestedTypes>
-          <Enum Name="Keyboard::Event::Type" Collapsed="true">
-            <TypeIdentifier>
-              <NewMemberFileName>Windows\Keyboard.h</NewMemberFileName>
-            </TypeIdentifier>
-          </Enum>
-        </NestedTypes>
+      <Class Name="Keyboard::Event" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Windows\Keyboard.h</NewMemberFileName>
         </TypeIdentifier>
@@ -211,50 +42,10 @@
       <FileName>Windows\Keyboard.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Light">
-<<<<<<< HEAD
-    <Position X="4" Y="12.5" Width="2.5" />
-=======
-    <Position X="9.5" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAEAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\Light.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Mesh">
-<<<<<<< HEAD
-    <Position X="23.75" Y="10.75" Width="4.5" />
-=======
-    <Position X="33.25" Y="4" Width="1.75" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAASAAAAAEAQAgAAAAAAAAAAABgBAQAAAQAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\Mesh.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Model">
-<<<<<<< HEAD
-    <Position X="14" Y="9.5" Width="3.75" />
-    <TypeIdentifier>
-      <HashCode>AIAAACACAAAQAgAAAAAIAAACgAAAISACAAACAAAAAkA=</HashCode>
-      <FileName>Game\Graphics\Objects\Model.h</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="Mouse">
-    <Position X="21" Y="0.5" Width="2.5" />
-    <Compartments>
-      <Compartment Name="Nested Types" Collapsed="false" />
-    </Compartments>
+    <Position X="23" Y="6.75" Width="2.25" />
     <NestedTypes>
-      <Class Name="Mouse::Event">
-        <NestedTypes>
-          <Enum Name="Mouse::Event::Type" Collapsed="true">
-            <TypeIdentifier>
-              <NewMemberFileName>Windows\Mouse.h</NewMemberFileName>
-            </TypeIdentifier>
-          </Enum>
-        </NestedTypes>
+      <Class Name="Mouse::Event" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Windows\Mouse.h</NewMemberFileName>
         </TypeIdentifier>
@@ -263,187 +54,12 @@
     <TypeIdentifier>
       <HashCode>KAAAAAEICAAAAAAAEEBAEAwQADIAEACBBABgIAQBaAE=</HashCode>
       <FileName>Windows\Mouse.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="PixelShader">
-    <Position X="10.75" Y="5.5" Width="3" />
-=======
-    <Position X="32.75" Y="10.25" Width="2.25" />
-    <TypeIdentifier>
-      <HashCode>AIAAACACAAAQAgAAAAAIAAACgAAAISACAAACAAAAAkA=</HashCode>
-      <FileName>Game\Graphics\Objects\Model.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Mouse">
-    <Position X="28.25" Y="3.5" Width="1.5" />
-    <Compartments>
-      <Compartment Name="Nested Types" Collapsed="false" />
-    </Compartments>
-    <NestedTypes>
-      <Class Name="Mouse::Event">
-        <NestedTypes>
-          <Enum Name="Mouse::Event::Type" Collapsed="true">
-            <TypeIdentifier>
-              <NewMemberFileName>Windows\Mouse.h</NewMemberFileName>
-            </TypeIdentifier>
-          </Enum>
-        </NestedTypes>
-        <TypeIdentifier>
-          <NewMemberFileName>Windows\Mouse.h</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
-    <TypeIdentifier>
-      <HashCode>KAAAAAEICAAAAAAAEEBAEAwQADIAEACBBABgIAQBaAE=</HashCode>
-      <FileName>Windows\Mouse.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="PixelShader">
-    <Position X="17.75" Y="7.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCAEAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\PixelShader.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="PointLight">
-<<<<<<< HEAD
-    <Position X="6.75" Y="9.5" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAACAAAAAAAAAAAAAAAAEAAAQAACAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\PointLight.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="RenderableGameObject">
-    <Position X="10" Y="9.5" Width="2.25" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAgAAAAAAAAEAAAAAAAAAIAACAAAIAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\RenderableGameObject.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Shader">
-    <Position X="10.75" Y="3.5" Width="3" />
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\Shader.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="StringTools">
-    <Position X="20.75" Y="11.5" Width="2.75" />
-    <TypeIdentifier>
-=======
-    <Position X="9.5" Y="3" Width="2.25" />
-    <InheritanceLine Type="RenderableGameObject" FixedToPoint="true">
-      <Path>
-        <Point X="12.25" Y="2.761" />
-        <Point X="12.25" Y="4.062" />
-        <Point X="11.75" Y="4.062" />
-      </Path>
-    </InheritanceLine>
-    <InheritanceLine Type="Light" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="10.25" Y="1.796" />
-        <Point X="10.25" Y="2.171" />
-        <Point X="10.25" Y="2.171" />
-        <Point X="10.25" Y="3" />
-      </Path>
-    </InheritanceLine>
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAACAAAAAAAAAAAAAAAAEAAAQAACAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\PointLight.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="RenderableGameObject">
-    <Position X="11.5" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAgAAAAAAAAEAAAAAAAAAIAACAAAIAAA=</HashCode>
-      <FileName>Game\Graphics\Objects\RenderableGameObject.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Shader">
-    <Position X="18.75" Y="5.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\Shader.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="StringTools">
-    <Position X="30" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
->>>>>>> e2653c6... Normal Mapping etc.
-      <HashCode>AAAAAAAQAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAQE=</HashCode>
-      <FileName>Tools\StringTools.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Texture">
-<<<<<<< HEAD
-    <Position X="13.25" Y="13.75" Width="4.5" />
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAgAAABAgEAgAoAAAAAgAA=</HashCode>
-      <FileName>Game\Graphics\Objects\Texture.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Timer">
-    <Position X="18" Y="11.25" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>EAAAAAAAACAAAABgAAAAAAAAAAAgAAABIAAAAAAEAAA=</HashCode>
-      <FileName>Tools\Timer.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="VertexBuffer&lt;T&gt;">
-    <Position X="8" Y="3.5" Width="2.5" />
-    <InheritanceLine Type="Buffer" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="5.5" Y="2.632" />
-        <Point X="5.5" Y="3.125" />
-        <Point X="9.188" Y="3.125" />
-        <Point X="9.188" Y="3.5" />
-      </Path>
-    </InheritanceLine>
-=======
-    <Position X="32.5" Y="7.25" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAgAAABAgEAgAoAAAAAgAA=</HashCode>
-      <FileName>Game\Graphics\Objects\Texture.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Timer">
-    <Position X="30" Y="5.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>EAAAAAAAACAAAABgAAAAAAAAAAAgAAABIAAAAAAEAAA=</HashCode>
-      <FileName>Tools\Timer.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="VertexBuffer&lt;T&gt;">
-    <Position X="21" Y="3.25" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAABAAAAAAAAAAAAAAAQAAAAAAAAAAAAEiAAAAEAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexBuffer.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="VertexShader">
-<<<<<<< HEAD
-    <Position X="10.75" Y="0.5" Width="3" />
-=======
-    <Position X="19.75" Y="7.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAABCAEAAACA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexShader.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Window">
-<<<<<<< HEAD
-    <Position X="17.25" Y="0.5" Width="3.5" />
-=======
-    <Position X="26.5" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <Compartments>
-      <Compartment Name="Nested Types" Collapsed="false" />
-    </Compartments>
+    <Position X="20" Y="6.75" Width="2.75" />
     <NestedTypes>
-      <Class Name="Window::WindowClass">
+      <Class Name="Window::WindowClass" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Windows\Window.h</NewMemberFileName>
         </TypeIdentifier>
@@ -454,176 +70,227 @@
       <FileName>Windows\Window.h</FileName>
     </TypeIdentifier>
   </Class>
-<<<<<<< HEAD
-  <Struct Name="CB_pixelShader">
-    <Position X="30.75" Y="0.5" Width="1.5" />
-=======
-  <Struct Name="CB_pixelShader" Collapsed="true">
-    <Position X="0.5" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  <Class Name="Application">
+    <Position X="33" Y="0.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAABAAAgABgBBAAAQAAAQICAAJAIAAAACAAAAAAhAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
+      <HashCode>AAQAAAAIABAAgAAAAEAAAEAAAAAEAAAIAAACAAAAAAA=</HashCode>
+      <FileName>Game\Application.h</FileName>
     </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="CB_pixelShader_ADS_Lighting">
-    <Position X="32.5" Y="0.5" Width="1.5" />
-=======
-  <Struct Name="CB_pixelShader_ADS_Lighting" Collapsed="true">
-    <Position X="2.25" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  </Class>
+  <Class Name="AdapterData">
+    <Position X="15.5" Y="0.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAABAAAgABgBBAAAQAAAQICAABAAAAAACAAAAAAhAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAQAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\AdapterHandler.h</FileName>
     </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="CB_pixelShader_PosTexNorm">
-    <Position X="34.25" Y="0.5" Width="1.5" />
-=======
-  <Struct Name="CB_pixelShader_PosTexNorm" Collapsed="true">
-    <Position X="4" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  </Class>
+  <Class Name="AdapterReader">
+    <Position X="15.5" Y="2.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAABAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\AdapterHandler.h</FileName>
     </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="CB_vertexShader">
-    <Position X="36" Y="0.5" Width="1.5" />
-=======
-  <Struct Name="CB_vertexShader" Collapsed="true">
-    <Position X="5.75" Y="0.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  </Class>
+  <Class Name="Color">
+    <Position X="24.5" Y="16" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAEAAAAAEAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
+      <HashCode>AAAAAAAAAAAAkgAQAAAAAQAAAAAAAAAAAAAhqAEAAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\Color.h</FileName>
     </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="CB_vertexShader_PosCol_3D">
-    <Position X="30.75" Y="4.75" Width="1.5" />
-=======
-  <Struct Name="CB_vertexShader_PosCol_3D" Collapsed="true">
-    <Position X="0.5" Y="1.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  </Class>
+  <Class Name="DirectionalLight">
+    <Position X="3.25" Y="0.5" Width="3" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAEAAAAAEAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
+      <HashCode>AAAAAYAAAAAIAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\DirectionalLight.h</FileName>
     </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="CB_vertexShader_PosTex">
-    <Position X="32.5" Y="4.25" Width="1.5" />
-=======
-  <Struct Name="CB_vertexShader_PosTex" Collapsed="true">
-    <Position X="2.25" Y="1.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  </Class>
+  <Class Name="Camera">
+    <Position X="12.25" Y="0.5" Width="3" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAEAAAAAEAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
+      <HashCode>AAACBIAAACAAAABIBEggBgAAACQAAAgAIIAAAEAAAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\Camera.h</FileName>
     </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
+  </Class>
+  <Class Name="Light">
+    <Position X="0.5" Y="3.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAABAAAEAAAAACAAAgAAAEAAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\Light.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameObject">
+    <Position X="7.75" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>kABFAARGABAAQAACJAIAAZUCAAVQSwgHJEAFYMBoJAA=</HashCode>
+      <FileName>Game\Graphics\Objects\GameObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RenderableGameObject">
+    <Position X="4.25" Y="4.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAYAAAAAAEgAAAQAAQAECBYAIEAgAqAACQhAsEAY=</HashCode>
+      <FileName>Game\Graphics\Objects\RenderableGameObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Model">
+    <Position X="11.5" Y="16" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AIAAACACAAAQAgAAAAAIAAACgAAAISACAAACAAAAAkA=</HashCode>
+      <FileName>Game\Graphics\Objects\Model.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Mesh">
+    <Position X="15.5" Y="16" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAASAAAAAEAQAgAAAAAAAAAAABgBAQAAAQAAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\Mesh.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PointLight">
+    <Position X="0.5" Y="6.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAACAAAAAAAAAAAAAAgAkAABUAACIAIgAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\PointLight.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Texture">
+    <Position X="19.75" Y="16" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAgAAABAgEAgAoAAAAAgAA=</HashCode>
+      <FileName>Game\Graphics\Objects\Texture.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ConstantBuffer&lt;T&gt;">
+    <Position X="4.5" Y="16" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAKAAAAAAQAAAAASAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\ConstantBuffer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Buffer">
+    <Position X="5" Y="13" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAABABAAAAAAAAAAAAAAAAAFAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\Buffer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Shader">
+    <Position X="11.75" Y="10.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\Shader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PixelShader">
+    <Position X="13.5" Y="13" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCAEAAAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\PixelShader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IndexBuffer">
+    <Position X="1.5" Y="16" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\IndexBuffer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GraphicsHandler">
+    <Position X="28.75" Y="0.75" Width="4" />
+    <TypeIdentifier>
+      <HashCode>VICHIWIfAgOCABgAEncAaMFAgQQQoW4yQwRWACAANIE=</HashCode>
+      <FileName>Game\Graphics\GraphicsHandler.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VertexShader">
+    <Position X="10.25" Y="13" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAABCAEAAACA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\VertexShader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VertexBuffer&lt;T&gt;">
+    <Position X="8.5" Y="16" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAAAAAAAAAAQAAAAAAAAAAAAEiAAAAEAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\VertexBuffer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Bindable">
+    <Position X="0.5" Y="10.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAACAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Bindables\Bindable.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RasterizerState">
+    <Position X="0.5" Y="13" Width="3.5" />
+    <InheritanceLine Type="Bindable" FixedFromPoint="true">
+      <Path>
+        <Point X="2.25" Y="12.247" />
+        <Point X="2.25" Y="13" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAA=</HashCode>
+      <FileName>Game\Graphics\Bindables\RasterizerState.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Config">
+    <Position X="26" Y="2.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAwAQAAAgAAAAAAEAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Game\Resources\Config.h</FileName>
+    </TypeIdentifier>
+  </Class>
   <Struct Name="MousePoint">
-    <Position X="34.25" Y="3.75" Width="1.5" />
-=======
-  <Struct Name="MousePoint" Collapsed="true">
-    <Position X="4" Y="1.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+    <Position X="14.25" Y="7.75" Width="1.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAA=</HashCode>
       <FileName>Windows\Mouse.h</FileName>
     </TypeIdentifier>
   </Struct>
-<<<<<<< HEAD
-  <Struct Name="Vertex_PosCol">
-    <Position X="36" Y="4.25" Width="1.5" />
-=======
-  <Struct Name="Vertex_PosCol" Collapsed="true">
-    <Position X="5.75" Y="1.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  <Struct Name="CB_vertexShader">
+    <Position X="20.5" Y="11.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAEAAAAAEAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
-<<<<<<< HEAD
-  <Struct Name="Vertex_PosTex">
-    <Position X="34.25" Y="1.75" Width="1.5" />
-=======
-  <Struct Name="Vertex_PosTex" Collapsed="true">
-    <Position X="0.5" Y="2.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+  <Struct Name="CB_pixelShader">
+    <Position X="16.75" Y="11.25" Width="3.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQAAAAAAAIAAAAAAAAAAAAIAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
-    </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="Vertex_PosTexNorm">
-    <Position X="36" Y="2" Width="1.5" />
-=======
-  <Struct Name="Vertex_PosTexNorm" Collapsed="true">
-    <Position X="2.25" Y="2.5" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAAAAAAIAAAAAAAAAAAAAIgAAAAAAAAAAAIAAAAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
-    </TypeIdentifier>
-  </Struct>
-<<<<<<< HEAD
-  <Struct Name="Vertex_PosTexNormTan">
-    <Position X="37.75" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAABAAAAAAAAAAAIgAAAAAAAAAAAIAAgAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
+      <HashCode>AAADAAAgAAABBAAAAAAAQICAAJAIAAAACAAAAAIhAAA=</HashCode>
+      <FileName>Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Vertex_PosTexNormTanBinorm">
-    <Position X="37.75" Y="2.75" Width="1.5" />
+    <Position X="11.5" Y="7.75" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAIgAAAAAAAAgAAIAAgAAAAA=</HashCode>
       <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
-  <Enum Name="StyleType">
-    <Position X="30.75" Y="6.25" Width="1.5" />
-=======
-  <Struct Name="Vertex_PosTexNormTan" Collapsed="true">
-    <Position X="4" Y="2.5" Width="1.5" />
+  <Typedef Name="BYTE" Collapsed="true">
+    <Position X="11.5" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAABAAAAAAAAAAAIgAAAAAAAAAAAIAAgAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Game\Graphics\Objects\Color.h</FileName>
     </TypeIdentifier>
-  </Struct>
-  <Struct Name="Vertex_PosTexNormTanBinorm" Collapsed="true">
-    <Position X="5.75" Y="2.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEAAAAAIgAAAAAAAAgAAIAAgAAAAA=</HashCode>
-      <FileName>Game\Graphics\Shaders+Buffers\VertexTypes.h</FileName>
-    </TypeIdentifier>
-  </Struct>
-  <Enum Name="StyleType" Collapsed="true">
-    <Position X="0.5" Y="4.25" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
-    <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
-      <FileName>Game\Resources\Config.h</FileName>
-    </TypeIdentifier>
-  </Enum>
-<<<<<<< HEAD
+  </Typedef>
   <Enum Name="TextureStorageType">
-    <Position X="30.75" Y="7.5" Width="1.5" />
-=======
-  <Enum Name="TextureStorageType" Collapsed="true">
-    <Position X="2.25" Y="4.25" Width="1.5" />
->>>>>>> e2653c6... Normal Mapping etc.
+    <Position X="13.25" Y="5.5" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAAAAgABAAAAAAAAAQAAAAAAIAQAABAABAAAAAAAAAA=</HashCode>
       <FileName>Game\Graphics\Objects\Texture.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="StyleType">
+    <Position X="11.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Game\Resources\Config.h</FileName>
     </TypeIdentifier>
   </Enum>
   <Font Name="Segoe UI" Size="9" />

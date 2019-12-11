@@ -16,7 +16,7 @@ SamplerState objSamplerState : SAMPLER : register(s0);
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float3 sampleColor = objTexture.Sample(objSamplerState, input.inTexCoord);
+    float3 sampleColor = objTexture.Sample(objSamplerState, input.inTexCoord).xyz;
 	if (all(sampleColor == float3(0.8f, 0.8f, 0.8f)))
 		return float4(pointLightColor, 1.0f);
 	else

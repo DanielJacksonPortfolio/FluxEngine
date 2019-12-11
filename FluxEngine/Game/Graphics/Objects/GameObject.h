@@ -32,12 +32,12 @@ public:
 	const XMVECTOR& GetUpVector(bool omitY = false);
 	const XMVECTOR& GetDownVector(bool omitY = false);
 
-	const XMFLOAT3& GetForwardVectorFloat(bool omitY = false);
-	const XMFLOAT3& GetLeftVectorFloat(bool omitY = false);
-	const XMFLOAT3& GetRightVectorFloat(bool omitY = false);
-	const XMFLOAT3& GetBackwardVectorFloat(bool omitY = false);
-	const XMFLOAT3& GetUpVectorFloat(bool omitY = false);
-	const XMFLOAT3& GetDownVectorFloat(bool omitY = false);
+	const XMFLOAT3 GetForwardVectorFloat(bool omitY = false);
+	const XMFLOAT3 GetLeftVectorFloat(bool omitY = false);
+	const XMFLOAT3 GetRightVectorFloat(bool omitY = false);
+	const XMFLOAT3 GetBackwardVectorFloat(bool omitY = false);
+	const XMFLOAT3 GetUpVectorFloat(bool omitY = false);
+	const XMFLOAT3 GetDownVectorFloat(bool omitY = false);
 
 	bool& GetLockedPos(int dimension) { return this->lockedPos[dimension]; }
 	void SetLockedPos(bool lockVal, int dimension) { this->lockedPos[dimension] = lockVal; }
@@ -52,10 +52,10 @@ protected:
 	virtual void UpdateMatrix();
 	void UpdateDirectionVectors();
 
-	XMVECTOR posVector;
-	XMVECTOR rotVector;
-	XMFLOAT3 pos;
-	XMFLOAT3 rot;
+	XMVECTOR posVector = XMVECTOR();
+	XMVECTOR rotVector = XMVECTOR();
+	XMFLOAT3 pos = XMFLOAT3(0.0f,0.0f,0.0f);
+	XMFLOAT3 rot = XMFLOAT3(0.0f,0.0f,0.0f);
 
 	const XMVECTOR DEFAULT_FORWARD_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	const XMVECTOR DEFAULT_UP_VECTOR = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -64,19 +64,19 @@ protected:
 	const XMVECTOR DEFAULT_LEFT_VECTOR = XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
 	const XMVECTOR DEFAULT_RIGHT_VECTOR = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
-	XMVECTOR forwardVector;
-	XMVECTOR upVector;
-	XMVECTOR downVector;
-	XMVECTOR leftVector;
-	XMVECTOR rightVector;
-	XMVECTOR backwardVector;
+	XMVECTOR forwardVector = XMVECTOR();
+	XMVECTOR upVector = XMVECTOR();
+	XMVECTOR downVector	= XMVECTOR();
+	XMVECTOR leftVector	= XMVECTOR();
+	XMVECTOR rightVector = XMVECTOR();
+	XMVECTOR backwardVector = XMVECTOR();
 
-	XMVECTOR forwardVector_noY;
-	XMVECTOR upVector_noY;
-	XMVECTOR downVector_noY;
-	XMVECTOR leftVector_noY;
-	XMVECTOR rightVector_noY;
-	XMVECTOR backwardVector_noY;
+	XMVECTOR forwardVector_noY = XMVECTOR();
+	XMVECTOR upVector_noY = XMVECTOR();
+	XMVECTOR downVector_noY	= XMVECTOR();
+	XMVECTOR leftVector_noY	= XMVECTOR();
+	XMVECTOR rightVector_noY = XMVECTOR();
+	XMVECTOR backwardVector_noY = XMVECTOR();
 
 	float speed = 0.005f;
 	std::string objectName = "Null Object";

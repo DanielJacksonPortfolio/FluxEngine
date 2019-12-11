@@ -66,7 +66,7 @@ const XMVECTOR& GameObject::GetDownVector(bool omitY)
 		return this->downVector;
 }
 
-const XMFLOAT3& GameObject::GetForwardVectorFloat(bool omitY)
+const XMFLOAT3 GameObject::GetForwardVectorFloat(bool omitY)
 {
 	XMFLOAT3 val;
 	if (omitY)
@@ -76,7 +76,7 @@ const XMFLOAT3& GameObject::GetForwardVectorFloat(bool omitY)
 	return val;
 }
 ;
-const XMFLOAT3& GameObject::GetLeftVectorFloat(bool omitY)
+const XMFLOAT3 GameObject::GetLeftVectorFloat(bool omitY)
 {
 	XMFLOAT3 val;
 	if (omitY)
@@ -86,7 +86,7 @@ const XMFLOAT3& GameObject::GetLeftVectorFloat(bool omitY)
 	return val;
 }
 
-const XMFLOAT3& GameObject::GetRightVectorFloat(bool omitY)
+const XMFLOAT3 GameObject::GetRightVectorFloat(bool omitY)
 {
 	XMFLOAT3 val;
 	if (omitY)
@@ -96,7 +96,7 @@ const XMFLOAT3& GameObject::GetRightVectorFloat(bool omitY)
 	return val;
 }
 
-const XMFLOAT3& GameObject::GetBackwardVectorFloat(bool omitY)
+const XMFLOAT3 GameObject::GetBackwardVectorFloat(bool omitY)
 {
 	XMFLOAT3 val;
 	if (omitY)
@@ -105,7 +105,7 @@ const XMFLOAT3& GameObject::GetBackwardVectorFloat(bool omitY)
 		XMStoreFloat3(&val, this->backwardVector);
 	return val;
 }
-const XMFLOAT3& GameObject::GetUpVectorFloat(bool omitY)
+const XMFLOAT3 GameObject::GetUpVectorFloat(bool omitY)
 {
 	XMFLOAT3 val;
 	if (omitY)
@@ -114,7 +114,7 @@ const XMFLOAT3& GameObject::GetUpVectorFloat(bool omitY)
 		XMStoreFloat3(&val, this->upVector);
 	return val;
 }
-const XMFLOAT3& GameObject::GetDownVectorFloat(bool omitY)
+const XMFLOAT3 GameObject::GetDownVectorFloat(bool omitY)
 {
 	XMFLOAT3 val;
 	if (omitY)

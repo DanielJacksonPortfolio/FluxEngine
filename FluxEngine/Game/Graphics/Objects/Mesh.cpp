@@ -61,10 +61,10 @@ Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale
 			}
 		}
 
-		HRESULT hr = this->vertexBuffer.Init(device, vertices.data(), vertices.size());
+		HRESULT hr = this->vertexBuffer.Init(device, vertices.data(), static_cast<UINT>(vertices.size()));
 		EXCEPT_IF_FAILED(hr, "Failed to initialize vertex buffer for mesh");
 
-		hr = this->indexBuffer.Init(device, indices.data(), indices.size());
+		hr = this->indexBuffer.Init(device, indices.data(), static_cast<UINT>(indices.size()));
 		EXCEPT_IF_FAILED(hr, "Failed to initialize index buffer for mesh");
 
 	}
@@ -86,7 +86,6 @@ Mesh::Mesh(const Mesh& mesh)
 
 void Mesh::Draw()
 {
-
 	//Set Textures
 	for (size_t i = 0; i < textures.size(); ++i)
 	{

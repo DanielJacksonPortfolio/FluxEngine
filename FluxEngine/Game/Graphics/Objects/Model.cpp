@@ -103,7 +103,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* pMaterial, aiTextur
 				materialTextures.push_back(Texture(this->device, Colors::UnloadedTextureColor, textureType));
 				return materialTextures;
 			}
-			materialTextures.push_back(Texture(this->device, Color(aiColor.r * 255, aiColor.g * 255, aiColor.b * 255), textureType));
+			materialTextures.push_back(Texture(this->device, Color(static_cast<BYTE>(aiColor.r * 255), static_cast<BYTE>(aiColor.g * 255), static_cast<BYTE>(aiColor.b * 255)), textureType));
 			return materialTextures;
 
 		case aiTextureType_SPECULAR:

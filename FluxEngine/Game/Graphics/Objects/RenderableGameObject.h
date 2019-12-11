@@ -5,7 +5,7 @@ class RenderableGameObject : public GameObject
 {
 public:
 	RenderableGameObject() {}
-	RenderableGameObject(std::vector<std::string> data, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader);
+	bool Init(std::vector<std::string> data, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader);
 	bool Init(const std::string& filepath, float scale, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader, std::string name = "");
 	void Draw(const XMMATRIX& viewProjectionMatrix);
 
@@ -35,10 +35,10 @@ protected:
 	bool normalMap = false;
 	bool specularMap = false;
 	bool renderMode = true;
-	float initScale;
+	float initScale = 1.0f;
 	float scale = 1.0f;
 
-	std::string filepath = "";
+	std::string filepath;
 
 	XMMATRIX worldMatrix = XMMatrixIdentity();
 };
