@@ -29,11 +29,24 @@ public:
 	const XMVECTOR& GetLeftVector(bool omitY = false);
 	const XMVECTOR& GetRightVector(bool omitY = false);
 	const XMVECTOR& GetBackwardVector(bool omitY = false);
+	const XMVECTOR& GetUpVector(bool omitY = false);
+	const XMVECTOR& GetDownVector(bool omitY = false);
 
 	const XMFLOAT3& GetForwardVectorFloat(bool omitY = false);
 	const XMFLOAT3& GetLeftVectorFloat(bool omitY = false);
 	const XMFLOAT3& GetRightVectorFloat(bool omitY = false);
 	const XMFLOAT3& GetBackwardVectorFloat(bool omitY = false);
+	const XMFLOAT3& GetUpVectorFloat(bool omitY = false);
+	const XMFLOAT3& GetDownVectorFloat(bool omitY = false);
+
+	bool& GetLockedPos(int dimension) { return this->lockedPos[dimension]; }
+	void SetLockedPos(bool lockVal, int dimension) { this->lockedPos[dimension] = lockVal; }
+	bool& GetLockedRot(int dimension) { return this->lockedRot[dimension]; }
+	void SetLockedRot(bool lockVal, int dimension) { this->lockedRot[dimension] = lockVal; }
+	std::string& GetName() { return this->objectName; }
+	void SetName(std::string name) { this->objectName = name; }
+	float& GetSpeed() { return this->speed; }
+	void SetSpeed(float s) { this->speed = s; }
 
 protected:
 	virtual void UpdateMatrix();
@@ -46,17 +59,27 @@ protected:
 
 	const XMVECTOR DEFAULT_FORWARD_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	const XMVECTOR DEFAULT_UP_VECTOR = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	const XMVECTOR DEFAULT_DOWN_VECTOR = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
 	const XMVECTOR DEFAULT_BACKWARD_VECTOR = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
 	const XMVECTOR DEFAULT_LEFT_VECTOR = XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
 	const XMVECTOR DEFAULT_RIGHT_VECTOR = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
 	XMVECTOR forwardVector;
+	XMVECTOR upVector;
+	XMVECTOR downVector;
 	XMVECTOR leftVector;
 	XMVECTOR rightVector;
 	XMVECTOR backwardVector;
 
 	XMVECTOR forwardVector_noY;
+	XMVECTOR upVector_noY;
+	XMVECTOR downVector_noY;
 	XMVECTOR leftVector_noY;
 	XMVECTOR rightVector_noY;
 	XMVECTOR backwardVector_noY;
+
+	float speed = 0.005f;
+	std::string objectName = "Null Object";
+	bool lockedPos[3] = { false,false,false };
+	bool lockedRot[3] = { false,false,false };
 };

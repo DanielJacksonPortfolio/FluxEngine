@@ -25,58 +25,126 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 
 void GraphicsHandler::RenderFrame()
 {
-	camera.SetProjectionValues(fov, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
 
-	this->cb_pixelShader.data.directionalLightColor = directionalLight.lightColor;
-	this->cb_pixelShader.data.directionalLightStrength = directionalLight.lightStrength;
-	this->cb_pixelShader.data.directionalLightDirection = directionalLight.GetDirection();
-	this->cb_pixelShader.data.pointLightColor = pointLight.lightColor;
-	this->cb_pixelShader.data.pointLightStrength = pointLight.lightStrength;
-	this->cb_pixelShader.data.pointLightPosition = pointLight.GetPositionFloat3();
-	this->cb_pixelShader.data.pointLightConstantAttenuationFactor = pointLight.constantAttenuationFactor;
-	this->cb_pixelShader.data.pointLightLinearAttenuationFactor = pointLight.linearAttenuationFactor;
-	this->cb_pixelShader.data.pointLightExponentAttenuationFactor = pointLight.exponentAttenuationFactor;
-	this->cb_pixelShader.data.shininess = this->shininess;
-	this->cb_pixelShader.data.cameraPosition = this->camera.GetPositionFloat3();
-
-	this->cb_pixelShader.ApplyChanges();
-
-	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);
+	this->deviceContext->ClearRenderTargetView(this->renderTargetView.Get(), bgColor);		
 	this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	this->deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	//Rasterizer State
-	if (wireframe == false)
-		this->deviceContext->RSSetState(this->rasterizerState.Get());
-	else
-		this->deviceContext->RSSetState(this->rasterizerState_WireFrame.Get());
-
-	this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
-	this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
-	this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-
-	///Shader Stuff///
-
-	//Matrices
-	XMMATRIX viewProjectionMatrix = this->camera.GetViewMatrix() * this->camera.GetProjectionMatrix();
-
-	//Set Shader Layout
-	this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
-
-	//Set Shaders
-	this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
-	this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
-
-	//gObj.SetPosition(0.0f, 0.0f, 0.0f);
-
-	gObj.Draw(viewProjectionMatrix);
-
-	this->deviceContext->PSSetShader(this->pixelShader_noLight.GetShader(), NULL, 0);
-
+	if (camera != nullptr)
 	{
-		this->pointLight.Draw(this->camera.GetViewMatrix() * this->camera.GetProjectionMatrix());
-	}
+		static DWORD dwTimeStart = 0;
+		DWORD dwTimeCur = GetTickCount64();
 
+		if (dwTimeStart == 0)
+			dwTimeStart = dwTimeCur;
+
+		this->cb_vertexShader.data.elapsedTime = (dwTimeCur - dwTimeStart) / 1000.0f;
+
+		for(int i = 0; i < dLights.size(); ++i)
+		{
+			this->cb_pixelShader.data.directionalLightColor[i] = XMFLOAT4(dLights[i]->GetColor().x, dLights[i]->GetColor().y, dLights[i]->GetColor().z,1.0f);
+			this->cb_pixelShader.data.directionalLightStrength[i] = XMFLOAT4(dLights[i]->GetStrength(),1.0f,1.0f,1.0f);
+			this->cb_pixelShader.data.directionalLightDirection[i] = XMFLOAT4(dLights[i]->GetDirection().x, dLights[i]->GetDirection().y, dLights[i]->GetDirection().z,1.0f);
+		}
+		this->cb_pixelShader.data.numDLights = dLights.size();
+
+		for (int i = 0; i < pLights.size(); ++i)
+		{
+			this->cb_pixelShader.data.pointLightColor[i] = XMFLOAT4(pLights[i]->GetColor().x, pLights[i]->GetColor().y, pLights[i]->GetColor().z, 1.0f);
+			this->cb_pixelShader.data.pointLightFactors[i].x = pLights[i]->GetStrength();
+			this->cb_pixelShader.data.pointLightPosition[i] = XMFLOAT4(pLights[i]->GetPositionFloat3().x, pLights[i]->GetPositionFloat3().y, pLights[i]->GetPositionFloat3().z,1.0f);
+			this->cb_pixelShader.data.pointLightFactors[i].y = pLights[i]->GetCAttenuation();
+			this->cb_pixelShader.data.pointLightFactors[i].z = pLights[i]->GetLAttenuation();
+			this->cb_pixelShader.data.pointLightFactors[i].w = pLights[i]->GetEAttenuation();
+		}
+		this->cb_pixelShader.data.numPLights = pLights.size();
+
+		this->cb_pixelShader.data.shininess = this->shininess;
+		this->cb_pixelShader.data.cameraPosition = this->camera->GetPositionFloat3();
+		this->cb_pixelShader.ApplyChanges();
+
+		this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
+		this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
+		this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
+
+		///Shader Stuff///
+		camera->SetProjectionValues(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
+
+		//Matrices
+		XMMATRIX viewProjectionMatrix = this->camera->GetViewMatrix() * this->camera->GetProjectionMatrix();
+
+		//Set Shader Layout
+		this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
+
+		//Set Shaders
+		this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
+
+
+		std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+		while (it != objects.end())
+		{
+			RenderableGameObject* object = it->second;
+			if (object != nullptr)
+			{
+				//Rasterizer States
+				if (object->GetWireframeMode() == false)
+					bindables["RSDefault"]->Bind();
+				else
+					bindables["RSNoneWireframe"]->Bind();
+				this->cb_pixelShader.data.normalMap = object->GetNormalMapMode();
+				this->cb_pixelShader.data.specularMap = object->GetSpecularMapMode();
+				this->cb_pixelShader.data.grayscale = object->GetGrayscale();
+				this->cb_pixelShader.ApplyChanges();
+				if (object->GetName() == "Movable Boat")
+				{
+					XMFLOAT3 objectPos = object->GetPositionFloat3();
+					if (object != currentObject || !(camera->GetName() == "Boat 1" || camera->GetName() == "Boat 3"))
+					{
+						if (objects["Water"] != nullptr)
+						{
+							XMFLOAT3 waterPos = objects["Water"]->GetPositionFloat3();
+							waterPos.y += (sin(objectPos.x * 10 + this->cb_vertexShader.data.elapsedTime * 2.0) + sin(objectPos.z * 0.1 + this->cb_vertexShader.data.elapsedTime * 2.2)) * 0.5f;
+							objectPos.y = waterPos.y;
+							object->SetPosition(objectPos);
+						}
+					}
+					if (camera->GetName() == "Boat 1" || camera->GetName() == "Boat 3")
+					{
+						XMFLOAT3 cameraPos;
+						float xFactor = 0.0f, yFactor = 0.0f, zFactor = 0.0f;
+						if (camera->GetName() == "Boat 1")
+							yFactor = 4.0f;
+						if (camera->GetName() == "Boat 3")
+						{
+							yFactor = 12.0f;
+							zFactor = 20.0f;
+						}
+						cameraPos.x = objectPos.x + object->GetRightVectorFloat().x * xFactor + object->GetUpVectorFloat().x * yFactor + object->GetBackwardVectorFloat().x * zFactor;
+						cameraPos.y = objectPos.y + object->GetRightVectorFloat().y * xFactor + object->GetUpVectorFloat().y * yFactor + object->GetBackwardVectorFloat().y * zFactor;
+						cameraPos.z = objectPos.z + object->GetRightVectorFloat().z * xFactor + object->GetUpVectorFloat().z * yFactor + object->GetBackwardVectorFloat().z * zFactor;
+						camera->SetPosition(cameraPos);
+					}
+				}
+				this->deviceContext->VSSetShader(this->vertexShaderMovable.GetShader(), NULL, 0);
+				if (object->GetName() != "Water")
+					this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
+				object->Draw(viewProjectionMatrix);
+			}
+			it++;
+		}
+
+		if (showLights)
+		{
+			this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
+			this->deviceContext->PSSetShader(this->pixelShader_noLight.GetShader(), NULL, 0);
+			for (PointLight* light : pLights)
+			{
+				this->cb_pixelShader.data.pointLightColor[0] = XMFLOAT4(light->GetColor().x, light->GetColor().y, light->GetColor().z,1.0f);
+				this->cb_pixelShader.ApplyChanges();
+				light->Draw(viewProjectionMatrix);
+			}
+		}
+	}
 	///FPS Counter///
 
 	static int fpsCounter = 0;
@@ -100,44 +168,509 @@ void GraphicsHandler::RenderFrame()
 	this->swapChain->Present(config->vSync, NULL);
 }
 
+void GraphicsHandler::SaveScene(std::string sceneName)
+{
+	std::ofstream objectsFile(sceneName + "_objects.txt");
+	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	while (it != objects.end())
+	{
+		std::unordered_map<std::string, RenderableGameObject*>::iterator testIT = it;
+		std::string objectData = it->second->Save();
+		if (++testIT != objects.end())
+			objectData += "\n";
+		objectsFile << objectData;
+		it++;
+	}
+	objectsFile.close();
+
+	std::ofstream camerasFile(sceneName + "_cameras.txt");
+	for (int i = 0; i < cameras.size(); ++i)
+	{
+		std::string cameraData = cameras[i]->Save();
+		if (i != cameras.size() - 1)
+			cameraData += "\n";
+		camerasFile << cameraData;
+	}
+	camerasFile.close();
+
+	std::ofstream lightsFile(sceneName + "_lights.txt");
+	for (int i = 0; i < pLights.size(); ++i)
+	{
+		std::string lightData = pLights[i]->Save();
+		if (i != pLights.size() - 1 || dLights.size() != 0)
+			lightData += "\n";
+		lightsFile << lightData;
+	}
+
+	for (int i = 0; i < dLights.size(); ++i)
+	{
+		std::string lightData = dLights[i]->Save();
+		if (i != dLights.size() - 1)
+			lightData += "\n";
+		lightsFile << lightData;
+	}
+	lightsFile.close();
+
+	std::ofstream generalFile(sceneName + "_general.txt");
+	std::string generalData = "";
+	generalData += std::to_string(bgColor[0]) + ",";
+	generalData += std::to_string(bgColor[1]) + ",";
+	generalData += std::to_string(bgColor[2]) + ",";
+	generalData += std::to_string(shininess) + ",";
+	generalData += std::to_string(this->cb_pixelShader.data.ambientLightColor.x) + ",";
+	generalData += std::to_string(this->cb_pixelShader.data.ambientLightColor.y) + ",";
+	generalData += std::to_string(this->cb_pixelShader.data.ambientLightColor.z) + ",";
+	generalData += std::to_string(this->cb_pixelShader.data.ambientLightStrength);
+	generalFile << generalData;
+	generalFile.close();
+}
+
+void GraphicsHandler::LoadScene(std::string sceneName)
+{
+	objectID = -1;
+	cameraID = -1;
+	pLightID = -1;
+	dLightID = -1;
+	std::ifstream objectsFile(sceneName + "_objects.txt");
+	std::string line = "";
+	std::unordered_map<std::string, RenderableGameObject*> newObjects = {};
+	while (std::getline(objectsFile, line))
+	{
+		std::vector<std::string> data = {};
+		StringTools::SplitString(line, data, ',');
+		newObjects[data[0]] = new RenderableGameObject(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader);
+	}
+	objectsFile.close();
+	objects.clear();
+	objects = newObjects;
+	if(objects.size() > 0)
+		NextObject();
+	else
+		currentObject = nullptr;
+
+	std::ifstream camerasFile(sceneName + "_cameras.txt");
+	std::vector<Camera*> newCameras = {};
+	while (std::getline(camerasFile, line))
+	{
+		std::vector<std::string> data = {};
+		StringTools::SplitString(line, data, ',');
+		newCameras.push_back(new Camera(data));
+	}
+	camerasFile.close();
+	cameras.clear();
+	cameras = newCameras;
+	if(cameras.size() > 0)
+		NextCamera();
+	else
+		camera = nullptr;
+	
+	std::ifstream generalFile(sceneName + "_general.txt");
+	while (std::getline(generalFile, line))
+	{
+		std::vector<std::string> data = {};
+		StringTools::SplitString(line, data, ',');
+		bgColor[0] = std::stof(data[0]);
+		bgColor[1] = std::stof(data[1]);
+		bgColor[2] = std::stof(data[2]);
+		shininess = std::stof(data[3]);
+		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(std::stof(data[4]), std::stof(data[5]), std::stof(data[6]));
+		this->cb_pixelShader.data.ambientLightStrength = std::stof(data[7]);
+	}
+	generalFile.close();
+
+	std::ifstream lightsFile(sceneName + "_lights.txt");
+	std::vector<PointLight*> newPLights = {};
+	std::vector<DirectionalLight*> newDLights = {};
+	while (std::getline(lightsFile, line))
+	{
+		std::vector<std::string> data = {};
+		StringTools::SplitString(line, data, ',');
+		if (data[0] == "P")
+			newPLights.push_back(new PointLight(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader));
+		else
+			newDLights.push_back(new DirectionalLight(data, this->device.Get(), this->deviceContext.Get()));
+	}
+	lightsFile.close();
+	pLights.clear();
+	dLights.clear();
+	pLights = newPLights;
+	dLights = newDLights;
+	if(pLights.size() > 0)
+		NextPLight();
+	else
+		pointLight = nullptr;
+	if(dLights.size() > 0)
+		NextDLight();
+	else
+		directionalLight = nullptr;
+}
+
 void GraphicsHandler::RenderGUI()
 {
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Begin("Light Controls");
-	ImGui::DragFloat3("Background Color", bgColor, 0.01f, 0.0f, 1.0f);
-	ImGui::DragFloat3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x, 0.01f, 0.0f, 1.0f);
+
+	ImGui::Begin("Point Light Controls");
+	if (pointLight != nullptr)
+	{
+		ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
+		ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
+		XMFLOAT3 lightPos = this->pointLight->GetPositionFloat3();
+		ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
+		this->pointLight->SetPosition(lightPos);
+
+		ImGui::Text("Attenuation:");
+		ImGui::DragFloat("Constant", &this->pointLight->GetCAttenuation(), 0.01f, 0.01f, 10.0f);
+		ImGui::DragFloat("Linear", &this->pointLight-> GetLAttenuation(), 0.01f, 0.0f, 10.0f);
+		ImGui::DragFloat("Exponent", &this->pointLight->GetEAttenuation(), 0.01f, 0.0f, 10.0f);
+
+		if (pLights.size() > 1)
+		{
+			if (ImGui::Button("Previous Light"))
+				NextPLight(-1);
+			ImGui::SameLine();
+			if (ImGui::Button("Next Light"))
+				NextPLight();
+		}
+	}
+	if (ImGui::Button("New Point Light"))
+		NewPointLight();
+	if (pointLight != nullptr)
+	{
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Point Light"))
+			DeletePointLight();
+	}
+	ImGui::End();
+
+	ImGui::Begin("Directional Light Controls");
+	if (directionalLight != nullptr)
+	{
+		ImGui::ColorEdit3("Color", &this->directionalLight->GetColor().x);
+		ImGui::DragFloat("Strength", &this->directionalLight->GetStrength(), 0.01f, 0.0f, 10.0f);
+		ImGui::DragFloat3("Direction", &directionalLight->GetDirection().x, 0.01f, -1.0f, 1.0f);
+		if (dLights.size() > 1)
+		{
+			if (ImGui::Button("Previous Light"))
+				NextDLight(-1);
+			ImGui::SameLine();
+			if (ImGui::Button("Next Light"))
+				NextDLight();
+		}
+	}
+	if (ImGui::Button("New Directional Light"))
+		NewDirectionalLight();
+	if (directionalLight != nullptr)
+		if (ImGui::Button("Delete Directional Light"))
+			DeleteDirectionalLight();
+	ImGui::End();
+
+	ImGui::Begin("Camera Controls");
+	if (camera != nullptr)
+	{
+		ImGui::Text(camera->GetName().c_str());
+		ImGui::DragFloat("Move Speed", &camera->GetSpeed(), 0.005f, 0.0f, 5.0f);
+		ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
+		ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0)); 
+		if (!camera->GetLookAtMode())
+		{
+			ImGui::SameLine();
+			ImGui::Checkbox("Pitch Lock?", &camera->GetLockedRot(0));
+		}
+		ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
+		if (!camera->GetLookAtMode())
+		{
+			ImGui::SameLine();
+			ImGui::Checkbox("Yaw Lock?", &camera->GetLockedRot(1));
+		}
+		ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
+		if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
+		{
+			XMFLOAT3 camPos = this->camera->GetPositionFloat3();
+			if (!camera->GetLockedPos(0))
+			{
+				if (!camera->GetLockedPos(1))
+				{
+					if (!camera->GetLockedPos(2))
+						ImGui::DragFloat3("Position XYZ", &camPos.x, 0.1f, -80.0f, 80.0f);
+					else
+						ImGui::DragFloat2("Position XY", &camPos.x, 0.1f, -80.0f, 80.0f);
+				}
+				else
+				{
+					ImGui::DragFloat("Position X", &camPos.x, 0.1f, -80.0f, 80.0f);
+					if (!camera->GetLockedPos(2))
+						ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+				}
+			}
+			else
+			{
+				if (!camera->GetLockedPos(1))
+				{
+					if (!camera->GetLockedPos(2))
+						ImGui::DragFloat2("Position YZ", &camPos.y, 0.1f, -80.0f, 80.0f);
+					else
+						ImGui::DragFloat("Position Y", &camPos.y, 0.1f, -80.0f, 80.0f);
+				}
+				else
+					ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+			}
+			this->camera->SetPosition(camPos);
+		}
+		ImGui::Checkbox("Look At Fixed Position?", &camera->GetLookAtMode());
+		if (!camera->GetLookAtMode())
+		{
+			if (!camera->GetLockedRot(0) || !camera->GetLockedRot(1))
+			{
+				XMFLOAT3 camRot = this->camera->GetRotationFloat3();
+				if (!camera->GetLockedRot(0))
+					ImGui::DragFloat("Pitch", &camRot.x, 0.01f, -XM_PI, XM_PI);
+				if (!camera->GetLockedRot(1))
+					ImGui::DragFloat("Yaw", &camRot.y, 0.01f, -XM_PI, XM_PI);
+				this->camera->SetRotation(camRot);
+			}
+		}
+		else
+		{
+			ImGui::DragFloat3("Look At", &camera->GetLookAtPos().x, 0.1f, -50.0f, 50.0f);
+			this->camera->SetLookAtPos();
+		}
+		if (cameras.size() > 1)
+		{
+			if (ImGui::Button("Previous Camera"))
+				NextCamera(-1);
+			ImGui::SameLine();
+			if (ImGui::Button("Next Camera"))
+				NextCamera();
+		}
+	}
+	if (ImGui::Button("New Camera")) 
+		NewCamera();
+	if (camera != nullptr)
+	{
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Camera"))
+			DeleteCamera();
+	}
+	ImGui::End();
+
+	if (currentObject != nullptr)
+	{
+		ImGui::Begin("Object Controls");
+		ImGui::Text(currentObject->GetName().c_str());
+		ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
+		if (currentObject->GetRenderMode())
+		{
+			if (currentObject->GetMovable())
+				ImGui::DragFloat("Move Speed", &currentObject->GetSpeed(), 0.005f, 0.0f, 5.0f);
+			ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
+			ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
+			ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();
+			ImGui::Checkbox("Yaw Lock?", &currentObject->GetLockedRot(1));
+			ImGui::Checkbox("Move Lock Z?", &currentObject->GetLockedPos(2)); ImGui::SameLine();
+			ImGui::Checkbox("Roll Lock?", &currentObject->GetLockedRot(2));
+
+			if (!currentObject->GetLockedPos(0) || !currentObject->GetLockedPos(1) || !currentObject->GetLockedPos(2))
+			{
+				XMFLOAT3 objPos = this->currentObject->GetPositionFloat3();
+				if (!currentObject->GetLockedPos(0))
+				{
+					if (!currentObject->GetLockedPos(1))
+					{
+						if (!currentObject->GetLockedPos(2))
+							ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -80.0f, 80.0f);
+						else
+							ImGui::DragFloat2("Position XY", &objPos.x, 0.1f, -80.0f, 80.0f);
+					}
+					else
+					{
+						ImGui::DragFloat("Position X", &objPos.x, 0.1f, -80.0f, 80.0f);
+						if (!currentObject->GetLockedPos(2))
+							ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
+					}
+				}
+				else
+				{
+					if (!currentObject->GetLockedPos(1))
+					{
+						if (!currentObject->GetLockedPos(2))
+							ImGui::DragFloat2("Position YZ", &objPos.y, 0.1f, -80.0f, 80.0f);
+						else
+							ImGui::DragFloat("Position Y", &objPos.y, 0.1f, -80.0f, 80.0f);
+					}
+					else
+						ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
+				}
+				this->currentObject->SetPosition(objPos);
+			}
+			if (!currentObject->GetLockedRot(0) || !currentObject->GetLockedRot(1) || !currentObject->GetLockedRot(2))
+			{
+				XMFLOAT3 objRot = this->currentObject->GetRotationFloat3();
+				if (!currentObject->GetLockedRot(0))
+					ImGui::DragFloat("Pitch", &objRot.x, 0.01f, -XM_PI, XM_PI);
+				if (!currentObject->GetLockedRot(1))
+					ImGui::DragFloat("Yaw", &objRot.y, 0.01f, -XM_PI, XM_PI);
+				if (!currentObject->GetLockedRot(2))
+					ImGui::DragFloat("Roll", &objRot.z, 0.01f, -XM_PI, XM_PI);
+				this->currentObject->SetRotation(objRot);
+			}
+			ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
+			ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
+			ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode()); ImGui::SameLine();
+			ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
+			ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
+		}
+		if (objects.size() > 1)
+		{
+			if (ImGui::Button("Previous Object"))
+				NextObject(-1);
+			ImGui::SameLine();
+			if (ImGui::Button("Next Object"))
+				NextObject();
+		}
+		if (ImGui::Button("Duplicate Object"))
+			DuplicateObject();
+		if (ImGui::Button("Delete Object"))
+			DeleteObject();
+		if (camera != nullptr)
+		{
+			if (ImGui::Button("Lock Camera To This"))
+			{
+				camera->SetLookAtPos(currentObject->GetPositionFloat3());
+				camera->SetLookAtMode(true);
+			}
+		}
+		ImGui::End();
+	}
+
+	ImGui::Begin("Debug / General Controls");
+	ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
+	ImGui::Checkbox("Show Lights?", &showLights);
+	ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
+	ImGui::ColorEdit3("Background Color", bgColor);
+	ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
 	ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
 
-	ImGui::DragFloat3("Directional Light Color", &this->directionalLight.lightColor.x, 0.01f, 0.0f, 1.0f);
-	ImGui::DragFloat3("Directional Light Direction", &directionalLight.GetDirection().x, 0.01f, -1.0f, 1.0f);
-	ImGui::DragFloat("Directional Strength", &this->directionalLight.lightStrength, 0.01f, 0.0f, 10.0f);
-	
-	ImGui::DragFloat3("Point Light Color", &this->pointLight.lightColor.x, 0.01f, 0.0f, 1.0f);
-	ImGui::DragFloat("Point Light Strength", &this->pointLight.lightStrength, 0.01f, 0.0f, 10.0f);
-	ImGui::DragFloat("Point Constant Attenuation", &this->pointLight.constantAttenuationFactor, 0.01f, 0.01f, 10.0f);
-	ImGui::DragFloat("Point Linear Attenuation", &this->pointLight.linearAttenuationFactor, 0.01f, 0.0f, 10.0f);
-	ImGui::DragFloat("Point Exponent Attenuation", &this->pointLight.exponentAttenuationFactor, 0.01f, 0.0f, 10.0f);
-	
-	ImGui::DragFloat("Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
+	ImGui::InputText("Scene Name", &sceneName[0], 256);
+	if (ImGui::Button("Save Scene"))
+		SaveScene("data//scenes//"+std::string(sceneName));
+	ImGui::SameLine();
+	if (ImGui::Button("Load Scene"))
+		LoadScene("data//scenes//"+std::string(sceneName));
 	ImGui::End();
-	
-	ImGui::Begin("Debug");
-	ImGui::DragFloat("Camera Speed", &cameraSpeed, 0.005f, 0.0f, 5.0f);
-	ImGui::DragFloat("Camera FOV", &fov, 0.1f, 0.01f, 179.99f);
-	ImGui::DragInt("Grayscale Mode", &cb_pixelShader.data.grayscale, 0.01f, 0, 2);
-	ImGui::DragFloat3("Rotation Speed", modelRotationSpeed, 0.00001f, 0.0f, 1.0f);
-	ImGui::Checkbox("Wireframe?", &wireframe);
-	ImGui::End();
-
-
-
 
 	ImGui::Render();
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GraphicsHandler::NextCamera(int direction)
+{
+	cameraID = (cameraID + (direction >= 0 ? 1 : -1)) % static_cast<int>(cameras.size());
+	if (cameraID < 0)
+		cameraID += static_cast<int>(cameras.size());
+	camera = cameras[cameraID];
+}
+
+void GraphicsHandler::NextPLight(int direction)
+{
+	pLightID = (pLightID + (direction >= 0 ? 1 : -1)) % static_cast<int>(pLights.size());
+	if (pLightID < 0)
+		pLightID += static_cast<int>(pLights.size());
+	pointLight = pLights[pLightID];
+}
+void GraphicsHandler::NextDLight(int direction)
+{
+	dLightID = (dLightID + (direction >= 0 ? 1 : -1)) % static_cast<int>(dLights.size());
+	if (dLightID < 0)
+		dLightID += static_cast<int>(dLights.size());
+	directionalLight = dLights[dLightID];
+}
+void GraphicsHandler::NextObject(int direction)
+{
+	objectID = (objectID + (direction >= 0 ? 1 : -1)) % static_cast<int>(objects.size());
+	if (objectID < 0)
+		objectID += static_cast<int>(objects.size());
+	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	for(int i = 0; i < objectID; ++i)
+		it++;
+	currentObject = it->second;
+}
+
+void GraphicsHandler::NewCamera()
+{
+	Camera* camera = new Camera();
+	cameras.insert(cameras.begin() + cameraID, camera);
+	this->camera = cameras[cameraID];
+}
+
+void GraphicsHandler::DeleteCamera()
+{
+	camera = nullptr;
+	cameras.erase(cameras.begin() + (cameraID < 0 ? 0 : cameraID--));
+	if (cameras.size() > 0)
+		NextCamera();
+	else
+		cameraID = 0;
+}
+void GraphicsHandler::DeleteObject()
+{
+	currentObject = nullptr;
+	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	for (int i = 0; i < (objectID < 0 ? 0 : objectID); ++i)
+		it++;
+	objectID--;
+	objects.erase(it);
+	if (objects.size() > 0)
+		NextObject();
+	else
+		objectID = 0;
+}
+void GraphicsHandler::DuplicateObject()
+{
+	RenderableGameObject* object = new RenderableGameObject(*currentObject);
+	object->GetName() += " - Copy";
+	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	for (int i = 0; i < objectID; ++i)
+		it++;
+	objects.insert(it, { object->GetName(), object });
+	this->currentObject = object;
+}
+void GraphicsHandler::NewPointLight()
+{
+	PointLight* pLight = new PointLight();
+	pLight->Init(this->device.Get(), this->deviceContext.Get(), this->cb_vertexShader, this->cb_pixelShader);
+	pLights.insert(pLights.begin() + pLightID, pLight);
+	this->pointLight = pLights[pLightID];
+}
+
+void GraphicsHandler::DeletePointLight()
+{
+	pointLight = nullptr;
+	pLights.erase(pLights.begin() + (pLightID < 0 ? 0 : pLightID--));
+	if (pLights.size() > 0)
+		NextPLight();
+	else
+		pLightID = 0;
+}
+void GraphicsHandler::NewDirectionalLight()
+{
+	DirectionalLight* dLight = new DirectionalLight();
+	dLight->Init(this->device.Get(), this->deviceContext.Get());
+	dLights.insert(dLights.begin() + dLightID, dLight);
+	this->directionalLight = dLights[dLightID];
+}
+
+void GraphicsHandler::DeleteDirectionalLight()
+{
+	directionalLight = nullptr;
+	dLights.erase(dLights.begin() + (dLightID < 0 ? 0 : dLightID--));
+	if (dLights.size() > 0)
+		NextDLight();
+	else
+		dLightID = 0;
 }
 
 bool GraphicsHandler::InitDirectX()
@@ -226,29 +759,12 @@ bool GraphicsHandler::InitDirectX()
 		CD3D11_VIEWPORT viewport(0.0f, 0.0f, static_cast<float>(this->windowWidth), static_cast<float>(this->windowHeight));
 		this->deviceContext->RSSetViewports(1, &viewport);
 
-		//Rasterizer State - Default
-		CD3D11_RASTERIZER_DESC rasterizerDesc(D3D11_DEFAULT);
-		hr = this->device->CreateRasterizerState(&rasterizerDesc, this->rasterizerState.GetAddressOf());
-		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
-
-		//Rasterizer State - Cull Front
-		CD3D11_RASTERIZER_DESC rasterizerDesc_CullFront(D3D11_DEFAULT);
-		rasterizerDesc_CullFront.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
-		hr = this->device->CreateRasterizerState(&rasterizerDesc_CullFront, this->rasterizerState_CullFront.GetAddressOf());
-		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
-
-		//Rasterizer State - Wireframe
-		CD3D11_RASTERIZER_DESC rasterizerDesc_WireFrame(D3D11_DEFAULT);
-		rasterizerDesc_WireFrame.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-		hr = this->device->CreateRasterizerState(&rasterizerDesc_WireFrame, this->rasterizerState_WireFrame.GetAddressOf());
-		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
-		
-		//Rasterizer State - Cull Front Wireframe
-		CD3D11_RASTERIZER_DESC rasterizerDesc_CullFront_WireFrame(D3D11_DEFAULT);
-		rasterizerDesc_CullFront_WireFrame.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
-		rasterizerDesc_CullFront_WireFrame.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-		hr = this->device->CreateRasterizerState(&rasterizerDesc_CullFront_WireFrame, this->rasterizerState_CullFront_WireFrame.GetAddressOf());
-		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
+		bindables["RSDefault"] = new RasterizerState(this->device, this->deviceContext);
+		bindables["RSWireframe"] = new RasterizerState(this->device, this->deviceContext, D3D11_CULL_BACK, D3D11_FILL_WIREFRAME);
+		bindables["RSFront"] = new RasterizerState(this->device, this->deviceContext, D3D11_CULL_FRONT);
+		bindables["RSFrontWireframe"] = new RasterizerState(this->device, this->deviceContext, D3D11_CULL_FRONT, D3D11_FILL_WIREFRAME);
+		bindables["RSNone"] = new RasterizerState(this->device, this->deviceContext, D3D11_CULL_NONE);
+		bindables["RSNoneWireframe"] = new RasterizerState(this->device, this->deviceContext, D3D11_CULL_NONE, D3D11_FILL_WIREFRAME);
 
 		//Blend State
 		D3D11_BLEND_DESC blendDesc = { 0 };
@@ -279,6 +795,7 @@ bool GraphicsHandler::InitDirectX()
 		samplerStateDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		hr = this->device->CreateSamplerState(&samplerStateDesc, this->samplerState.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateSamplerState Failed");
+
 	}
 	catch (CustomException & e)
 	{
@@ -324,12 +841,17 @@ bool GraphicsHandler::InitShaders()
 	{
 		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 		{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"NORMAL",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"TANGENT",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"BINORMAL",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
+
 	UINT numElements = ARRAYSIZE(layout);
 
 	//Vertex Shaders
 	if (!vertexShader.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular.cso", layout, numElements))
+		return false;
+	if (!vertexShaderMovable.Init(this->device, shaderFolder + L"vertexShader_ADS_Specular_Move.cso", layout, numElements))
 		return false;
 
 	//Pixel Shaders
@@ -352,27 +874,10 @@ bool GraphicsHandler::InitScene()
 		hr = cb_pixelShader.Init(this->device.Get(), this->deviceContext.Get());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_pixelShader");
 
-
 		//Model Load
-		if (!gObj.Init("data//objects//nanosuit//nanosuit.obj", 1, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader))
-			return false;
-		
-		if (!pointLight.Init(this->device.Get(), this->deviceContext.Get(), this->cb_vertexShader, this->cb_pixelShader))
-			return false;
-
-		if (!directionalLight.Init(this->device.Get(), this->deviceContext.Get()))
-			return false;
-
-		directionalLight.SetDirection(0.25f, 0.5f, -1.0f);
-
+		LoadScene("data//scenes//initial");
 		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
 		this->cb_pixelShader.data.ambientLightStrength = 0.2f;
-		this->cb_pixelShader.data.directionalLightDirection = directionalLight.GetDirection();
-		this->cb_pixelShader.data.grayscale = 0;
-
-		//Camera(s)
-		camera.SetPosition(0.0f, 0.0f, -2.0f);
-		camera.SetProjectionValues(fov, static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
 	}
 	catch (CustomException & e)
 	{

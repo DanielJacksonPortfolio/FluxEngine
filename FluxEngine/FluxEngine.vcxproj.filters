@@ -70,6 +70,9 @@
     <Filter Include="Source Files\Game\Graphics\Shaders&amp;Buffers">
       <UniqueIdentifier>{1b19b919-ab46-43b0-9316-b8ccc2b901d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Graphics\Bindables">
+      <UniqueIdentifier>{ca13637c-06b1-4e21-b94f-6f0139fb0289}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
@@ -278,6 +281,12 @@
     <ClInclude Include="Game\Graphics\Objects\Color.h">
       <Filter>Header Files\Game\Graphics\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Graphics\Bindables\Bindable.h">
+      <Filter>Header Files\Game\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Bindables\RasterizerState.h">
+      <Filter>Header Files\Game\Graphics\Bindables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FluxEngine.rc">
@@ -290,40 +299,16 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="data\shaders\vertexShader_PosCol_3D.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_PosCol_2D.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\pixelShader_PosTex.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\pixelShader_PosCol.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_PosTex.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_PosTexNorm.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\pixelShader_PosTexNorm.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\vertexShader_ADS_Lighting.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\pixelShader_ADS_Lighting.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
-    </FxCompile>
     <FxCompile Include="data\shaders\pixelShader_NoLight.hlsl">
       <Filter>Resource Files\Shaders\Pixel</Filter>
     </FxCompile>
-    <FxCompile Include="pixelShader_ADS_Specular.hlsl">
+    <FxCompile Include="data\shaders\pixelShader_ADS_Specular.hlsl">
       <Filter>Resource Files\Shaders\Pixel</Filter>
     </FxCompile>
-    <FxCompile Include="vertexShader_ADS_Specular.hlsl">
+    <FxCompile Include="data\shaders\vertexShader_ADS_Specular.hlsl">
+      <Filter>Resource Files\Shaders\Vertex</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\vertexShader_ADS_Specular_Move.hlsl">
       <Filter>Resource Files\Shaders\Vertex</Filter>
     </FxCompile>
   </ItemGroup>

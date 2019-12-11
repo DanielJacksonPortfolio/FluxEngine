@@ -1,3 +1,8 @@
+cbuffer lightBuffer : register(b0)
+{
+	float3 pointLightColor;
+}
+
 struct PS_INPUT
 {
     float4 inPos : SV_POSITION;
@@ -12,5 +17,8 @@ SamplerState objSamplerState : SAMPLER : register(s0);
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float3 sampleColor = objTexture.Sample(objSamplerState, input.inTexCoord);
-    return float4(sampleColor, 1.0f);
+	if (all(sampleColor == float3(0.8f, 0.8f, 0.8f)))
+		return float4(pointLightColor, 1.0f);
+	else
+		return float4(sampleColor, 1.0f);
 }

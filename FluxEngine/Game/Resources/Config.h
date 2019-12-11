@@ -12,7 +12,7 @@ public:
 	int height;
 	std::string name = "";
 	StyleType styleFlag;
-	UINT vSync;
+	bool vSync;
 
 	bool Load(std::string configLocation)
 	{

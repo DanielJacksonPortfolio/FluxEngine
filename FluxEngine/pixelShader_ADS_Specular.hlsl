@@ -20,6 +20,8 @@ cbuffer lightBuffer : register(b0)
 
     int grayscale;
     float pointLightExponentAttenuationFactor;
+    bool normalMap;
+    bool specularMap;
 
 }
 
@@ -29,6 +31,9 @@ struct PS_INPUT
     float2 inTexCoord : TEXCOORD;
     float3 inNormal : NORMAL;
     float3 inWorldPos : WORLD_POSITION;
+    float3x3 inTBN : TBN;
+    //float3 inTangent : TANGENT;
+    //float3 inBinormal : BINORMAL;
 };
 
 Texture2D objTexture : TEXTURE : register(t0);
@@ -43,8 +48,12 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 specularSample = specTexture.Sample(objSamplerState, input.inTexCoord);
     float3 normalSample = normTexture.Sample(objSamplerState, input.inTexCoord);
 
-    normalSample = normalize(normalSample * 2.0 - 1.0);
-    //input.inNormal = normalSample;
+	if(normalMap)
+    {
+		normalSample = normalize((normalSample * 2.0) - 1.0);
+		//input.inNormal = (normalSample.x * input.inTangent) + (normalSample.y * input.inBinormal) + (normalSample.z * input.inNormal);
+        input.inNormal = normalize(mul(normalSample,input.inTBN));
+    }
 
     float3 ambientLight = ambientLightColor * ambientLightStrength;
     float3 appliedLight = ambientLight;
@@ -70,7 +79,10 @@ float4 main(PS_INPUT input) : SV_TARGET
     float specularPEffect = pow(max(dot(pointR, vectorToEye), 0.0f), shininess);
     float3 specularP = specularPEffect * pointLightIntensity * pointLightColor * pointLightStrength;
 
-    appliedLight += (specularD + specularP) * specularSample;
+	if(specularMap)
+		appliedLight += (specularD + specularP) * specularSample;
+    else
+        appliedLight += (specularD + specularP);
 
     float3 finalColor = textureColor * appliedLight;
 
@@ -90,6 +102,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     }
       
     //return float4(specularSample, 1.0f);
+    //return float4(normalSample, 1.0f);
     //return float4(input.inNormal, 1.0f);
     return float4(finalColor, 1.0f);
 }

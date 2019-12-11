@@ -32,3 +32,15 @@ std::string StringTools::GetFileExtension(const std::string& filename)
 
 	return std::string(filename.substr(offset + 1)); //Extension
 }
+
+void StringTools::SplitString(const std::string& string, std::vector<std::string>& container, char delim)
+{
+	std::size_t current, previous = 0;
+	current = string.find(delim);
+	while (current != std::string::npos) {
+		container.push_back(string.substr(previous, current - previous));
+		previous = current + 1;
+		current = string.find(delim, previous);
+	}
+	container.push_back(string.substr(previous, current - previous));
+}

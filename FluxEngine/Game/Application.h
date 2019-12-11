@@ -23,6 +23,5 @@ public:
 
 private:
 	Timer timer;
-
 };
 

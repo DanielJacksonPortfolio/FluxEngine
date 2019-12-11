@@ -9,17 +9,27 @@ Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale
 	this->directory = directory;
 	try
 	{
-		std::vector<Vertex_PosTexNorm> vertices;
+		std::vector<Vertex_PosTexNormTanBinorm> vertices;
 
 		for (UINT i = 0; i < mesh->mNumVertices; ++i)
 		{
-			Vertex_PosTexNorm vertex;
+			Vertex_PosTexNormTanBinorm vertex;
 
 			vertex.pos.x = mesh->mVertices[i].x * scale;
 			vertex.pos.y = mesh->mVertices[i].y * scale;
 			vertex.pos.z = mesh->mVertices[i].z * scale;
 
-			vertex.normal = *reinterpret_cast<XMFLOAT3*>(&mesh->mNormals[i]);
+			if (mesh->mNormals != nullptr) //index 0 is main texture
+			{
+				vertex.normal.x = mesh->mNormals[i].x;
+				vertex.normal.y = mesh->mNormals[i].y;
+				vertex.normal.z = mesh->mNormals[i].z;
+				//vertex.normal = *reinterpret_cast<XMFLOAT3*>(&mesh->mNormals[i]);
+			}
+			else
+			{
+				vertex.normal = { 0,0,0 };
+			}
 
 			if (mesh->mTextureCoords[0]) //index 0 is main texture
 			{
@@ -27,6 +37,17 @@ Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale
 				vertex.texCoord.y = static_cast<float>(mesh->mTextureCoords[0][i].y);
 			}
 
+			//vertex.tangent.x = mesh->mTangents[i].x;
+			//vertex.tangent.y = mesh->mTangents[i].y;
+			//vertex.tangent.z = mesh->mTangents[i].z;
+			if (mesh->mTangents != nullptr)
+				vertex.tangent = *reinterpret_cast<XMFLOAT3*>(&mesh->mTangents[i]);
+			else
+				vertex.tangent = { 0.0f,0.0f,0.0f };
+			if (mesh->mBitangents != nullptr)
+				vertex.binormal = *reinterpret_cast<XMFLOAT3*>(&mesh->mBitangents[i]);
+			else
+				vertex.binormal = { 0.0f,0.0f,0.0f };
 			vertices.push_back(vertex);
 		}
 
@@ -46,27 +67,6 @@ Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale
 		hr = this->indexBuffer.Init(device, indices.data(), indices.size());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize index buffer for mesh");
 
-		////std::vector<Texture> textures;
-		//if (mesh->mMaterialIndex >= 0)
-		//{
-		//	using namespace std::string_literals;
-		//	auto& material = pMaterials[mesh->mMaterialIndex];
-		//	aiString path;
-		//	material->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-		//	if (path.length != 0)
-		//	{
-		//		std::string filePath = this->directory + '\\' + path.C_Str();
-
-		//		HRESULT hr;
-		//		if (StringTools::GetFileExtension(filePath) == ".dds")
-		//			hr = CreateDDSTextureFromFile(device, StringTools::StandardToWide(filePath).c_str(), this->diffuseMap.GetAddressOf(), this->diffuseView.GetAddressOf());
-		//		else
-		//			hr = CreateWICTextureFromFile(device, StringTools::StandardToWide(filePath).c_str(), this->diffuseMap.GetAddressOf(), this->diffuseView.GetAddressOf());
-		//		EXCEPT_IF_FAILED(hr, "Failed to create texture from file");
-		//	}
-		//}
-
-
 	}
 	catch (CustomException & exception)
 	{
@@ -81,8 +81,6 @@ Mesh::Mesh(const Mesh& mesh)
 	this->indexBuffer = mesh.indexBuffer;
 	this->vertexBuffer = mesh.vertexBuffer;
 	this->textures = mesh.textures;
-	//this->diffuseMap = mesh.diffuseMap;
-	//this->diffuseView = mesh.diffuseView;
 	this->transformMatrix = mesh.transformMatrix;
 }
 
@@ -90,7 +88,6 @@ void Mesh::Draw()
 {
 
 	//Set Textures
-	//this->deviceContext->PSSetShaderResources(0, 1, diffuseView.GetAddressOf());
 	for (size_t i = 0; i < textures.size(); ++i)
 	{
 		if (textures[i].GetType() == aiTextureType::aiTextureType_DIFFUSE)

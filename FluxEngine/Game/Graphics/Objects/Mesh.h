@@ -19,7 +19,7 @@ public:
 	void Draw();
 	const XMMATRIX& GetTransformMatrix();
 private:
-	VertexBuffer<Vertex_PosTexNorm> vertexBuffer;
+	VertexBuffer<Vertex_PosTexNormTanBinorm> vertexBuffer;
 	IndexBuffer indexBuffer;
 	ID3D11DeviceContext* deviceContext;
 	XMMATRIX transformMatrix;

@@ -146,7 +146,7 @@ LRESULT WINAPI Window::HandleMessageSetup(HWND hWnd, UINT msg, WPARAM wParam, LP
 	}
 }
 
-LRESULT WINAPI Window::HandleMessageRedirect(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) // Redirects to member fucntion
+LRESULT WINAPI Window::HandleMessageRedirect(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) // Redirects to member function
 {
 	switch (msg)
 	{
