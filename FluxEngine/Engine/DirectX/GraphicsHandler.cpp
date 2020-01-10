@@ -401,7 +401,7 @@ void GraphicsHandler::RenderGUI()
 		if (camera != nullptr)
 		{
 			ImGui::Text(camera->GetName().c_str());
-			ImGui::DragFloat("Move Speed", &camera->GetSpeed(), 0.005f, 0.0f, 5.0f);
+			ImGui::DragFloat("Move Speed", &camera->GetVelocity().x, 0.005f, 0.0f, 5.0f);
 			ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
 			ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0));
 			if (!camera->GetLookAtMode())
@@ -501,7 +501,7 @@ void GraphicsHandler::RenderGUI()
 				ImGui::SameLine();
 				ImGui::Checkbox("Movable?", &currentObject->GetMovable());
 				if (currentObject->GetMovable())
-					ImGui::DragFloat("Move Speed", &currentObject->GetSpeed(), 0.005f, 0.0f, 5.0f);
+					ImGui::DragFloat("Move Speed", &currentObject->GetVelocity().x, 0.005f, 0.0f, 5.0f);
 				ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
 				ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
 				ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();

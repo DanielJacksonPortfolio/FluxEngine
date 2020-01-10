@@ -39,14 +39,16 @@ public:
 	const XMFLOAT3 GetUpVectorFloat(bool omitY = false);
 	const XMFLOAT3 GetDownVectorFloat(bool omitY = false);
 
-	bool& GetLockedPos(int dimension) { return this->lockedPos[dimension]; }
-	void SetLockedPos(bool lockVal, int dimension) { this->lockedPos[dimension] = lockVal; }
-	bool& GetLockedRot(int dimension) { return this->lockedRot[dimension]; }
-	void SetLockedRot(bool lockVal, int dimension) { this->lockedRot[dimension] = lockVal; }
-	std::string& GetName() { return this->objectName; }
-	void SetName(std::string name) { this->objectName = name; }
-	float& GetSpeed() { return this->speed; }
-	void SetSpeed(float s) { this->speed = s; }
+	bool& GetLockedPos(int dimension);
+	void SetLockedPos(bool lockVal, int dimension);
+	bool& GetLockedRot(int dimension);
+	void SetLockedRot(bool lockVal, int dimension);
+	std::string& GetName();
+	void SetName(std::string name);
+	XMFLOAT3& GetVelocity();
+	void SetVelocity(XMFLOAT3 v);
+	float& GetAcceleration();
+	void SetAcceleration(float a);
 
 protected:
 	virtual void UpdateMatrix();
@@ -78,7 +80,8 @@ protected:
 	XMVECTOR rightVector_noY = XMVECTOR();
 	XMVECTOR backwardVector_noY = XMVECTOR();
 
-	float speed = 0.005f;
+	XMFLOAT3 velocity = XMFLOAT3(0.005f,0.005f,0.005f);
+	float acceleration = 0.0f;
 	std::string objectName = "Null Object";
 	bool lockedPos[3] = { false,false,false };
 	bool lockedRot[3] = { false,false,false };

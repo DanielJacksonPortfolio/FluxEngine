@@ -124,9 +124,58 @@ const XMFLOAT3 GameObject::GetDownVectorFloat(bool omitY)
 	return val;
 }
 
+bool& GameObject::GetLockedPos(int dimension) 
+{ 
+	return this->lockedPos[dimension]; 
+}
+
+void GameObject::SetLockedPos(bool lockVal, int dimension) 
+{
+	this->lockedPos[dimension] = lockVal;
+}
+
+bool& GameObject::GetLockedRot(int dimension)
+{
+	return this->lockedRot[dimension];
+}
+
+void GameObject::SetLockedRot(bool lockVal, int dimension)
+{
+	this->lockedRot[dimension] = lockVal;
+}
+
+std::string& GameObject::GetName()
+{
+	return this->objectName;
+}
+
+void GameObject::SetName(std::string name)
+{
+	this->objectName = name;
+}
+
+XMFLOAT3& GameObject::GetVelocity()
+{
+	return this->velocity;
+}
+
+void GameObject::SetVelocity(XMFLOAT3 v) 
+{
+	this->velocity = v;
+}
+float& GameObject::GetAcceleration()
+{
+	return this->acceleration;
+}
+
+void GameObject::SetAcceleration(float a)
+{
+	this->acceleration = a;
+}
+
 void GameObject::UpdateMatrix()
 {
-	assert("Update Matrix must be overriden");
+	assert("Update Matrix must be overridden");
 }
 
 void GameObject::UpdateDirectionVectors()
