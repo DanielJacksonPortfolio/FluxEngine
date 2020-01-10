@@ -1,9 +1,9 @@
 #pragma once
 #include "Texture.h"
 
-#include "../Shaders+Buffers/VertexBuffer.h"
-#include "../Shaders+Buffers/IndexBuffer.h"	
-#include "../Shaders+Buffers/ConstantBuffer.h"
+#include "../../Buffers and Shaders/VertexBuffer.h"
+#include "../../Buffers and Shaders/IndexBuffer.h"	
+#include "../../Buffers and Shaders/ConstantBuffer.h"
 #include <vector>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

@@ -1,15 +1,17 @@
 #pragma once
 
 #include "AdapterHandler.h"
-#include "Shaders+Buffers/VertexShader.h"
-#include "Shaders+Buffers/PixelShader.h"
+#include "../Buffers and Shaders/VertexShader.h"
+#include "../Buffers and Shaders/PixelShader.h"
 #include "../../Tools/Timer.h"
-#include "../Resources/Config.h"
+#include "../../Resources/Config.h"
 
-#include "Objects/Camera.h"
-#include "Objects/RenderableGameObject.h"
-#include "Objects/PointLight.h"
-#include "Objects/DirectionalLight.h"
+#include "../Game Objects/Camera.h"
+#include "../Game Objects/RenderableGameObject.h"
+#include "../Game Objects/Lights/PointLight.h"
+#include "../Game Objects/Lights/DirectionalLight.h"
+
+#include "../Bindables/RasterizerState.h"
 
 #include <ImGUI/imgui.h>
 #include <ImGUI/imgui_impl_win32.h>
@@ -19,8 +21,6 @@
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
 #include <unordered_map>
-
-#include "Bindables/RasterizerState.h"
 
 class GraphicsHandler
 {

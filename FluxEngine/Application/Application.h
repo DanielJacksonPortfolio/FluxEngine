@@ -1,7 +1,7 @@
 #pragma once
 #include "../Windows/Window.h"
 #include "../Windows/Keyboard.h"
-#include "Graphics/GraphicsHandler.h"
+#include "../Engine/DirectX/GraphicsHandler.h"
 #include "../Windows/Mouse.h"
 #include "../Tools/Timer.h"
 

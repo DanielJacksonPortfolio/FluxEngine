@@ -1,5 +1,5 @@
 #pragma once
-#include "Model.h"
+#include "Model Data/Model.h"
 
 class GameObject
 {

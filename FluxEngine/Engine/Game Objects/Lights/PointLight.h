@@ -1,5 +1,5 @@
 #pragma once
-#include "RenderableGameObject.h"
+#include "../RenderableGameObject.h"
 #include "Light.h"
 class PointLight : public RenderableGameObject, public Light
 {

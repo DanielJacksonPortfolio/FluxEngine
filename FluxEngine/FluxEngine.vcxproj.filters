@@ -18,12 +18,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game\Application.cpp">
-      <Filter>Source\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source\Application</Filter>
-    </ClCompile>
     <ClCompile Include="Windows\Window.cpp">
       <Filter>Source\Windows</Filter>
     </ClCompile>
@@ -45,61 +39,67 @@
     <ClCompile Include="Tools\ExceptionHandler.cpp">
       <Filter>Source\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp">
+    <ClCompile Include="Application\WinMain.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Application.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Externals\ImGUI\imgui.cpp">
       <Filter>Source\Engine\Externals\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp">
+    <ClCompile Include="Engine\Externals\ImGUI\imgui_draw.cpp">
       <Filter>Source\Engine\Externals\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp">
+    <ClCompile Include="Engine\Externals\ImGUI\imgui_impl_dx11.cpp">
       <Filter>Source\Engine\Externals\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp">
+    <ClCompile Include="Engine\Externals\ImGUI\imgui_impl_win32.cpp">
       <Filter>Source\Engine\Externals\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp">
+    <ClCompile Include="Engine\Externals\ImGUI\imgui_widgets.cpp">
       <Filter>Source\Engine\Externals\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
+    <ClCompile Include="Engine\Buffers and Shaders\PixelShader.cpp">
+      <Filter>Source\Engine\Buffers and Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Buffers and Shaders\Shader.cpp">
+      <Filter>Source\Engine\Buffers and Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Buffers and Shaders\VertexShader.cpp">
+      <Filter>Source\Engine\Buffers and Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DirectX\AdapterHandler.cpp">
       <Filter>Source\Engine\DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\GraphicsHandler.cpp">
+    <ClCompile Include="Engine\DirectX\GraphicsHandler.cpp">
       <Filter>Source\Engine\DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp">
-      <Filter>Source\Engine\Buffers and Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Shaders+Buffers\Shader.cpp">
-      <Filter>Source\Engine\Buffers and Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Shaders+Buffers\VertexShader.cpp">
-      <Filter>Source\Engine\Buffers and Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Camera.cpp">
+    <ClCompile Include="Engine\Game Objects\Camera.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\GameObject.cpp">
+    <ClCompile Include="Engine\Game Objects\GameObject.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp">
+    <ClCompile Include="Engine\Game Objects\RenderableGameObject.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Color.cpp">
+    <ClCompile Include="Engine\Game Objects\Model Data\Color.cpp">
       <Filter>Source\Engine\Game Objects\Model Data</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Mesh.cpp">
+    <ClCompile Include="Engine\Game Objects\Model Data\Mesh.cpp">
       <Filter>Source\Engine\Game Objects\Model Data</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Model.cpp">
+    <ClCompile Include="Engine\Game Objects\Model Data\Model.cpp">
       <Filter>Source\Engine\Game Objects\Model Data</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Texture.cpp">
+    <ClCompile Include="Engine\Game Objects\Model Data\Texture.cpp">
       <Filter>Source\Engine\Game Objects\Model Data</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\DirectionalLight.cpp">
+    <ClCompile Include="Engine\Game Objects\Lights\DirectionalLight.cpp">
       <Filter>Source\Engine\Game Objects\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\PointLight.cpp">
+    <ClCompile Include="Engine\Game Objects\Lights\PointLight.cpp">
       <Filter>Source\Engine\Game Objects\Lights</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,20 +107,11 @@
     <ClInclude Include="Windows\Window.h">
       <Filter>Headers\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Resources\Config.h">
-      <Filter>Headers\Application</Filter>
-    </ClInclude>
     <ClInclude Include="Windows\Keyboard.h">
       <Filter>Headers\Windows</Filter>
     </ClInclude>
     <ClInclude Include="Windows\Mouse.h">
       <Filter>Headers\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Application.h">
-      <Filter>Headers\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Resources\resource.h">
-      <Filter>Headers\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Tools\ErrorLogger.h">
       <Filter>Headers\Tools</Filter>
@@ -137,73 +128,82 @@
     <ClInclude Include="Tools\Timer.h">
       <Filter>Headers\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\Buffer.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    <ClInclude Include="Application\Application.h">
+      <Filter>Headers\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBuffer.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    <ClInclude Include="Resources\Config.h">
+      <Filter>Headers\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    <ClInclude Include="Resources\resource.h">
+      <Filter>Headers\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\IndexBuffer.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\PixelShader.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexBuffer.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexShader.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexTypes.h">
-      <Filter>Headers\Engine\Buffers and Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Bindables\Bindable.h">
+    <ClInclude Include="Engine\Bindables\Bindable.h">
       <Filter>Headers\Engine\Bindables</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Bindables\RasterizerState.h">
+    <ClInclude Include="Engine\Bindables\RasterizerState.h">
       <Filter>Headers\Engine\Bindables</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\AdapterHandler.h">
-      <Filter>Headers\Engine\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\GraphicsHandler.h">
-      <Filter>Headers\Engine\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Camera.h">
-      <Filter>Headers\Engine\Game Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\GameObject.h">
-      <Filter>Headers\Engine\Game Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\RenderableGameObject.h">
-      <Filter>Headers\Engine\Game Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\Shader.h">
+    <ClInclude Include="Engine\Buffers and Shaders\Buffer.h">
       <Filter>Headers\Engine\Buffers and Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Color.h">
+    <ClInclude Include="Engine\Buffers and Shaders\ConstantBuffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\ConstantBufferTypes.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\IndexBuffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\PixelShader.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\Shader.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\VertexBuffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\VertexShader.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Buffers and Shaders\VertexTypes.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DirectX\AdapterHandler.h">
+      <Filter>Headers\Engine\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DirectX\GraphicsHandler.h">
+      <Filter>Headers\Engine\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\Camera.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\GameObject.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\RenderableGameObject.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\Model Data\Color.h">
       <Filter>Headers\Engine\Game Objects\Model Data</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Mesh.h">
+    <ClInclude Include="Engine\Game Objects\Model Data\Mesh.h">
       <Filter>Headers\Engine\Game Objects\Model Data</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Model.h">
+    <ClInclude Include="Engine\Game Objects\Model Data\Model.h">
       <Filter>Headers\Engine\Game Objects\Model Data</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Texture.h">
+    <ClInclude Include="Engine\Game Objects\Model Data\Texture.h">
       <Filter>Headers\Engine\Game Objects\Model Data</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Light.h">
+    <ClInclude Include="Engine\Game Objects\Lights\DirectionalLight.h">
       <Filter>Headers\Engine\Game Objects\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\PointLight.h">
+    <ClInclude Include="Engine\Game Objects\Lights\Light.h">
       <Filter>Headers\Engine\Game Objects\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\DirectionalLight.h">
+    <ClInclude Include="Engine\Game Objects\Lights\PointLight.h">
       <Filter>Headers\Engine\Game Objects\Lights</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 #include <wrl/client.h>
 #include <d3d11.h>
-#include "../../../Tools/ErrorLogger.h"
+#include "../../Tools/ErrorLogger.h"
 class Bindable
 {
 protected:

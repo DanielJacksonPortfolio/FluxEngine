@@ -1,7 +1,7 @@
 #pragma once
 #include <fstream>
 #include <iostream>
-#include "../../Tools/ErrorLogger.h"
+#include "../Tools/ErrorLogger.h"
 
 enum class StyleType {WINDOWED,FULLSCREEN};
 

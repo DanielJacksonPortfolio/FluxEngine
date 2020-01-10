@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include <d3d11.h>
-#include "../Shaders+Buffers/ConstantBuffer.h"
+#include "../../Buffers and Shaders/ConstantBuffer.h"
 using namespace DirectX;
 
 class Light

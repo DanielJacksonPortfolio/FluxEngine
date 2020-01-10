@@ -1,6 +1,6 @@
 #pragma once
-#include "../Game/Resources/Config.h"
-#include "../Game/Resources/resource.h"
+#include "../Resources/Config.h"
+#include "../Resources/resource.h"
 
 class Application;
 
