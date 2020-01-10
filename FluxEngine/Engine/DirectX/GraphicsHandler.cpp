@@ -103,39 +103,6 @@ void GraphicsHandler::RenderFrame()
 				this->cb_pixelShader.data.specularMap = object->GetSpecularMapMode();
 				this->cb_pixelShader.data.grayscale = object->GetGrayscale();
 				this->cb_pixelShader.ApplyChanges();
-				if(object->GetMovable())
-				{
-					XMFLOAT3 objectPos = object->GetPositionFloat3();
-					if (object->GetName() == "Boat") // Water Bobbing
-					{
-						if (object != currentObject || !(camera->GetName() == object->GetName() + " 1" || camera->GetName() == object->GetName() + " 3"))
-						{
-							if (objects["Water"] != nullptr)
-							{
-								XMFLOAT3 waterPos = objects["Water"]->GetPositionFloat3();
-								waterPos.y += static_cast<float>(sin(static_cast<double>(objectPos.x) * 10.0 + this->cb_vertexShader.data.elapsedTime * 2.0) + sin(static_cast<double>(objectPos.z) * 0.1 + this->cb_vertexShader.data.elapsedTime * 2.2)) * 0.5f;
-								objectPos.y = waterPos.y;
-								object->SetPosition(objectPos);
-							}
-						}
-					}
-					if (camera->GetName() == object->GetName()+" 1" || camera->GetName() == object->GetName() + " 3")
-					{
-						XMFLOAT3 cameraPos;
-						float xFactor = 0.0f, yFactor = 0.0f, zFactor = 0.0f;
-						if (camera->GetName() == object->GetName() + " 1")
-							yFactor = 4.0f;
-						if (camera->GetName() == object->GetName() + " 3")
-						{
-							yFactor = 12.0f;
-							zFactor = 20.0f;
-						}
-						cameraPos.x = objectPos.x + object->GetRightVectorFloat().x * xFactor + object->GetUpVectorFloat().x * yFactor + object->GetBackwardVectorFloat().x * zFactor;
-						cameraPos.y = objectPos.y + object->GetRightVectorFloat().y * xFactor + object->GetUpVectorFloat().y * yFactor + object->GetBackwardVectorFloat().y * zFactor;
-						cameraPos.z = objectPos.z + object->GetRightVectorFloat().z * xFactor + object->GetUpVectorFloat().z * yFactor + object->GetBackwardVectorFloat().z * zFactor;
-						camera->SetPosition(cameraPos);
-					}
-				}
 				if (object->GetName() == "Water")
 				{
 					this->deviceContext->VSSetShader(this->vertexShaderMovable.GetShader(), NULL, 0);
