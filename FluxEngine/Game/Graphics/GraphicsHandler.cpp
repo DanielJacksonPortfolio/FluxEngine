@@ -239,10 +239,10 @@ void GraphicsHandler::SaveScene(std::string sceneName)
 
 void GraphicsHandler::LoadScene(std::string sceneName)
 {
-	objectID = -1;
-	cameraID = -1;
-	pLightID = -1;
-	dLightID = -1;
+	objectID = 0;
+	cameraID = 0;
+	pLightID = 0;
+	dLightID = 0;
 
 	DeleteObjects();
 	std::ifstream objectsFile(sceneName + "_objects.txt");
@@ -284,9 +284,9 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	{
 		std::vector<std::string> data = {};
 		StringTools::SplitString(line, data, ',');
-		shininess = std::stof(data[3]);
-		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(std::stof(data[4]), std::stof(data[5]), std::stof(data[6]));
-		this->cb_pixelShader.data.ambientLightStrength = std::stof(data[7]);
+		shininess = std::stof(data[0]);
+		this->cb_pixelShader.data.ambientLightColor = XMFLOAT3(std::stof(data[1]), std::stof(data[2]), std::stof(data[3]));
+		this->cb_pixelShader.data.ambientLightStrength = std::stof(data[4]);
 	}
 	generalFile.close();
 
@@ -567,6 +567,7 @@ void GraphicsHandler::RenderGUI()
 				if (ImGui::Button("Next Object"))
 					NextObject();
 			}
+
 		}
 		if (ImGui::Button("New Object"))
 			showNewObjectWindow = true;
@@ -602,7 +603,7 @@ void GraphicsHandler::RenderGUI()
 	{
 		ImGui::Begin("General Controls");
 		ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
-		ImGui::Checkbox("Show Lights?", &showLights); ImGui::SameLine();
+		ImGui::Checkbox("Show Lights?", &showLights);
 		ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
 		ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
 		ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);

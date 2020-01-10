@@ -164,17 +164,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp" />
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Game\Graphics\Objects\Color.cpp" />
     <ClCompile Include="Game\Graphics\Objects\DirectionalLight.cpp" />
     <ClCompile Include="Game\Graphics\Objects\Camera.cpp" />
     <ClCompile Include="Game\Graphics\Objects\GameObject.cpp" />
     <ClCompile Include="Game\Graphics\AdapterHandler.cpp" />
     <ClCompile Include="Game\Application.cpp" />
-    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp" />
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp" />
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp" />
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp" />
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Game\Graphics\Shaders+Buffers\Shader.cpp" />
     <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp" />
     <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp" />
@@ -228,9 +228,6 @@
     <ClInclude Include="Tools\StrippedWindows.h" />
     <ClInclude Include="Tools\Timer.h" />
     <ClInclude Include="Windows\Window.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="FluxEngine.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\images\icon.ico" />
@@ -288,8 +285,10 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
     <None Include="data\config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FluxEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

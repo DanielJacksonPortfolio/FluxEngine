@@ -1,300 +1,305 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Header Files\Tools">
-      <UniqueIdentifier>{146970e2-beae-45e8-9b6e-e3d296f20443}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Tools">
-      <UniqueIdentifier>{26c33df6-c81d-456b-a4d5-d8c4cd01e71b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Windows">
-      <UniqueIdentifier>{da9e57eb-f440-4b88-a3f9-1c32ea9891e7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Windows">
-      <UniqueIdentifier>{9d6b3524-ffdd-4b73-8bab-41122b603bf4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game">
-      <UniqueIdentifier>{1f4b06b4-17c2-4544-8b6e-4b1f2c326096}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\Graphics">
-      <UniqueIdentifier>{117a1854-a649-410a-a79d-f8641749b736}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game">
-      <UniqueIdentifier>{bae4b0c6-6b94-4172-bfc8-87a3edeb9adf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game\Graphics">
-      <UniqueIdentifier>{e710b4ea-37a9-4fe4-ad71-49bfd8fd8d46}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game\Resources">
-      <UniqueIdentifier>{43f8aabb-dd4d-456b-ae7f-19ffbc6f0f3c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\Graphics\ImGUI">
-      <UniqueIdentifier>{35bad92f-f261-4177-b4d0-2bbfa99246d4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders">
-      <UniqueIdentifier>{ccd6d062-eaa9-43c1-aa23-e008603c48df}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\Pixel">
-      <UniqueIdentifier>{9fc8bfbc-5562-4f3b-9b31-9fd0462b7af2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders\Vertex">
-      <UniqueIdentifier>{92902930-29fe-4241-ad50-827606c32d35}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Config">
-      <UniqueIdentifier>{177facc7-9619-4e35-a028-d326488c570c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\Graphics\Objects">
-      <UniqueIdentifier>{baf64bd7-48bd-4952-afc8-30031d770793}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game\Graphics\Objects">
-      <UniqueIdentifier>{d272444f-ae76-480a-b5ad-7b0e55914835}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game\Graphics\Shaders+Buffers">
-      <UniqueIdentifier>{61d631ee-0230-4ff4-a0cd-314af738c0bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\Graphics\Shaders&amp;Buffers">
-      <UniqueIdentifier>{1b19b919-ab46-43b0-9316-b8ccc2b901d6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game\Graphics\Bindables">
-      <UniqueIdentifier>{ca13637c-06b1-4e21-b94f-6f0139fb0289}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Game\Graphics\ImGUI">
-      <UniqueIdentifier>{01bd2466-1eb4-4de0-933a-2b2d955b8543}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Application.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Tools\ErrorLogger.cpp">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="Tools\ExceptionHandler.cpp">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\GraphicsHandler.cpp">
-      <Filter>Source Files\Game\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\Keyboard.cpp">
-      <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\Mouse.cpp">
-      <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\Window.cpp">
-      <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Tools\StringTools.cpp">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="Tools\Timer.cpp">
-      <Filter>Source Files\Tools</Filter>
-    </ClCompile>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp">
-      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp">
-      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp">
-      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp">
-      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp">
-      <Filter>Source Files\Game\Graphics\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Camera.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\GameObject.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Shaders+Buffers\VertexShader.cpp">
-      <Filter>Source Files\Game\Graphics\Shaders&amp;Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp">
-      <Filter>Source Files\Game\Graphics\Shaders&amp;Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Shaders+Buffers\Shader.cpp">
-      <Filter>Source Files\Game\Graphics\Shaders&amp;Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Model.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Mesh.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\PointLight.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\DirectionalLight.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Texture.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Graphics\Objects\Color.cpp">
-      <Filter>Source Files\Game\Graphics\Objects</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Game\Graphics\AdapterHandler.h">
-      <Filter>Header Files\Game\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Application.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Tools\ExceptionHandler.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Tools\ErrorLogger.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Tools\StrippedWindows.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\Keyboard.h">
-      <Filter>Header Files\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\Mouse.h">
-      <Filter>Header Files\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\Window.h">
-      <Filter>Header Files\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Tools\Timer.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Tools\StringTools.h">
-      <Filter>Header Files\Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Resources\Config.h">
-      <Filter>Header Files\Game\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Resources\resource.h">
-      <Filter>Header Files\Game\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Camera.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\GameObject.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\RenderableGameObject.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\Buffer.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBuffer.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\GraphicsHandler.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\IndexBuffer.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\PixelShader.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\Shader.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexBuffer.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexShader.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexTypes.h">
-      <Filter>Header Files\Game\Graphics\Shaders+Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Model.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Mesh.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\PointLight.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\DirectionalLight.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Texture.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Light.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Objects\Color.h">
-      <Filter>Header Files\Game\Graphics\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Bindables\Bindable.h">
-      <Filter>Header Files\Game\Graphics\Bindables</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Graphics\Bindables\RasterizerState.h">
-      <Filter>Header Files\Game\Graphics\Bindables</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="FluxEngine.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="data\images\icon.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="data\shaders\pixelShader_NoLight.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
-    </FxCompile>
     <FxCompile Include="data\shaders\vertexShader_ADS_Specular_Move.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
-    </FxCompile>
-    <FxCompile Include="data\shaders\pixelShader_Skybox.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
+      <Filter>Resources\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="data\shaders\pixelShader_ADS_Specular.hlsl">
-      <Filter>Resource Files\Shaders\Pixel</Filter>
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_NoLight.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shaders\pixelShader_Skybox.hlsl">
+      <Filter>Resources\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="data\shaders\vertexShader_ADS_Specular.hlsl">
-      <Filter>Resource Files\Shaders\Vertex</Filter>
+      <Filter>Resources\Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Game\Application.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>Source\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Window.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\Timer.cpp">
+      <Filter>Source\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\StringTools.cpp">
+      <Filter>Source\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Mouse.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Keyboard.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\ErrorLogger.cpp">
+      <Filter>Source\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools\ExceptionHandler.cpp">
+      <Filter>Source\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui.cpp">
+      <Filter>Source\Engine\Externals\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_draw.cpp">
+      <Filter>Source\Engine\Externals\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_dx11.cpp">
+      <Filter>Source\Engine\Externals\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_impl_win32.cpp">
+      <Filter>Source\Engine\Externals\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\ImGUI\imgui_widgets.cpp">
+      <Filter>Source\Engine\Externals\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\AdapterHandler.cpp">
+      <Filter>Source\Engine\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\GraphicsHandler.cpp">
+      <Filter>Source\Engine\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\PixelShader.cpp">
+      <Filter>Source\Engine\Buffers and Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\Shader.cpp">
+      <Filter>Source\Engine\Buffers and Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Shaders+Buffers\VertexShader.cpp">
+      <Filter>Source\Engine\Buffers and Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Camera.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\GameObject.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\RenderableGameObject.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Color.cpp">
+      <Filter>Source\Engine\Game Objects\Model Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Mesh.cpp">
+      <Filter>Source\Engine\Game Objects\Model Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Model.cpp">
+      <Filter>Source\Engine\Game Objects\Model Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\Texture.cpp">
+      <Filter>Source\Engine\Game Objects\Model Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\DirectionalLight.cpp">
+      <Filter>Source\Engine\Game Objects\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Graphics\Objects\PointLight.cpp">
+      <Filter>Source\Engine\Game Objects\Lights</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Windows\Window.h">
+      <Filter>Headers\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Resources\Config.h">
+      <Filter>Headers\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Keyboard.h">
+      <Filter>Headers\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Mouse.h">
+      <Filter>Headers\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Application.h">
+      <Filter>Headers\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Resources\resource.h">
+      <Filter>Headers\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\ErrorLogger.h">
+      <Filter>Headers\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\ExceptionHandler.h">
+      <Filter>Headers\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\StringTools.h">
+      <Filter>Headers\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\StrippedWindows.h">
+      <Filter>Headers\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools\Timer.h">
+      <Filter>Headers\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\Buffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBuffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\ConstantBufferTypes.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\IndexBuffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\PixelShader.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexBuffer.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexShader.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\VertexTypes.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Bindables\Bindable.h">
+      <Filter>Headers\Engine\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Bindables\RasterizerState.h">
+      <Filter>Headers\Engine\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\AdapterHandler.h">
+      <Filter>Headers\Engine\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\GraphicsHandler.h">
+      <Filter>Headers\Engine\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Camera.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\GameObject.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\RenderableGameObject.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Shaders+Buffers\Shader.h">
+      <Filter>Headers\Engine\Buffers and Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Color.h">
+      <Filter>Headers\Engine\Game Objects\Model Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Mesh.h">
+      <Filter>Headers\Engine\Game Objects\Model Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Model.h">
+      <Filter>Headers\Engine\Game Objects\Model Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Texture.h">
+      <Filter>Headers\Engine\Game Objects\Model Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\Light.h">
+      <Filter>Headers\Engine\Game Objects\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\PointLight.h">
+      <Filter>Headers\Engine\Game Objects\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Graphics\Objects\DirectionalLight.h">
+      <Filter>Headers\Engine\Game Objects\Lights</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{82dfda49-16d9-42ef-b2c5-9f9ee86a1ea0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{aaf31d25-b779-4257-ac20-f1a4d9f751cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Windows">
+      <UniqueIdentifier>{65a2fe9c-8de6-47f1-8ed3-90bbeb5b19f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Application">
+      <UniqueIdentifier>{24b1a4b7-51b4-4877-872d-5ddb5b539f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine">
+      <UniqueIdentifier>{5e83d0f4-4767-4a50-9aba-0f10080dc797}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Tools">
+      <UniqueIdentifier>{ecb04f80-c9d8-45c9-b588-9a3160044bc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Resources">
+      <UniqueIdentifier>{3b0438ae-c118-4666-90ba-3e249e994009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\DirectX">
+      <UniqueIdentifier>{7d5ae58a-19e8-469c-bf0b-5ad281289be8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Game Objects">
+      <UniqueIdentifier>{6cf05262-1f8b-4c42-a940-1b6f5cb7931a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Game Objects\Model Data">
+      <UniqueIdentifier>{9fc99261-b863-4b9f-83ec-dd23dcc091f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Application">
+      <UniqueIdentifier>{e186bf86-a345-4d2d-b4d8-656bdf661052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine">
+      <UniqueIdentifier>{ad56c100-1369-4790-8472-8ed8c65c9585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tools">
+      <UniqueIdentifier>{7c946046-e20d-4267-8226-a7737f5e9f09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Windows">
+      <UniqueIdentifier>{46d20a55-91c6-4b99-8fa0-414a3f3e5d68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Externals">
+      <UniqueIdentifier>{49d4bd3f-241d-4a74-bab7-3bba5c445dd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Externals\ImGUI">
+      <UniqueIdentifier>{88a7abaa-d7bc-4292-987a-8335c3fe36d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Bindables">
+      <UniqueIdentifier>{913da456-e2b0-4801-96c7-8843a299e959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Buffers and Shaders">
+      <UniqueIdentifier>{b89e73da-6c5b-4198-8f7f-fcd81b47a5ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Buffers and Shaders">
+      <UniqueIdentifier>{f98ab9e2-c895-4f9b-baad-ed7393ca376c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\DirectX">
+      <UniqueIdentifier>{64983cba-469c-4066-961b-307a05857e8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Game Objects">
+      <UniqueIdentifier>{9e783377-1f72-48cd-9b56-4ef05a8edd44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Game Objects\Model Data">
+      <UniqueIdentifier>{09a0b422-3b82-4a78-b7de-636ae582b900}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Game Objects\Lights">
+      <UniqueIdentifier>{48c0e407-5118-44f0-aa96-67f2a56450a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Game Objects\Lights">
+      <UniqueIdentifier>{6918de7b-a184-4336-aaf1-793f27bef179}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{a0e543c4-34b8-4ed6-8cef-a754ed849d25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders">
+      <UniqueIdentifier>{d6607cdb-a31e-4850-9376-3edf13298f48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\config">
-      <Filter>Resource Files\Config</Filter>
+      <Filter>Resources</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\images\icon.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FluxEngine.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

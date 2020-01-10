@@ -29,6 +29,8 @@ public:
 protected:
 	Model model;
 	void UpdateMatrix() override;
+	XMMATRIX worldMatrix = XMMatrixIdentity();
+private:
 	bool movable = false;
 	bool wireframe = false;
 	int grayscale = 0;
@@ -40,6 +42,5 @@ protected:
 
 	std::string filepath;
 
-	XMMATRIX worldMatrix = XMMatrixIdentity();
 };
 
