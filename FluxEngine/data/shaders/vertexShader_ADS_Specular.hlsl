@@ -30,10 +30,10 @@ VS_OUTPUT main(VS_INPUT input)
     VS_OUTPUT output;
     output.outPos = mul(float4(input.inPos, 1.0f), wvpMatrix);
     output.outTexCoord = input.inTexCoord;
-    output.outWorldPos = mul(float4(input.inPos, 1.0f), worldMatrix);
+    output.outWorldPos = mul(float4(input.inPos, 1.0f), worldMatrix).xyz;
 
-    output.outNormal = normalize(mul(float4(input.inNormal, 0.0f), worldMatrix));
-    float3 tangent = normalize(mul(float4(input.inTangent, 0.0f), worldMatrix)); //output.outTangent
+    output.outNormal = normalize(mul(float4(input.inNormal, 0.0f), worldMatrix).xyz);
+    float3 tangent = normalize(mul(float4(input.inTangent, 0.0f), worldMatrix).xyz); //output.outTangent
     tangent = normalize(tangent - dot(tangent, output.outNormal) * output.outNormal);
     float3 binormal = cross(output.outNormal, tangent);
     output.outTBN = transpose(float3x3(tangent, binormal, output.outNormal));

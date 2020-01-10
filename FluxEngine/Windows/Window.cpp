@@ -1,4 +1,4 @@
-#include "../Game/Application.h"
+#include "../Application/Application.h"
 
 Window::WindowClass Window::WindowClass::wndClass;
 

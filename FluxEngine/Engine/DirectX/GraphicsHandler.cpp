@@ -763,7 +763,7 @@ void GraphicsHandler::NewObject()
 	}
 	catch(std::exception& e)
 	{
-		ErrorLogger::Log("Error: No filepath given when creating New Object");
+		ErrorLogger::Log(e, "No filepath given when creating New Object");
 	}
 	memset(newObjectPath, 0, sizeof(newObjectPath));
 }

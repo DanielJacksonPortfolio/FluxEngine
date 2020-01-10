@@ -3,16 +3,16 @@
 #include <iostream>
 #include "../Tools/ErrorLogger.h"
 
-enum class StyleType {WINDOWED,FULLSCREEN};
+enum class StyleType {INVALID, WINDOWED,FULLSCREEN};
 
 class Config
 {
 public:
-	int width;
-	int height;
+	int width = 0;
+	int height = 0;
 	std::string name = "";
-	StyleType styleFlag;
-	bool vSync;
+	StyleType styleFlag = StyleType::INVALID;
+	bool vSync = false;
 
 	bool Load(std::string configLocation)
 	{
@@ -62,6 +62,6 @@ public:
 		return true;
 	}
 private:
-	int rawWidth;
-	int rawHeight;
+	int rawWidth = 0;
+	int rawHeight = 0;
 };

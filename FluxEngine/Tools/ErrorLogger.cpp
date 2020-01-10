@@ -8,7 +8,6 @@ void ErrorLogger::Log(std::string message)
 	std::string errorMessage = "Error: " + message;
 	ERROR_LOG += errorMessage + "\n";
 	showErrorLog = true;
-	//MessageBoxA(nullptr, errorMessage.c_str(), "Error", MB_ICONERROR);
 }
 
 void ErrorLogger::Log(HRESULT hr, std::string message)
@@ -17,7 +16,6 @@ void ErrorLogger::Log(HRESULT hr, std::string message)
 	std::string errorMessage = "Error: " + message + "\n" + error.ErrorMessage();
 	ERROR_LOG += errorMessage + "\n";
 	showErrorLog = true;
-	//MessageBoxA(nullptr, errorMessage.c_str(), "HRESULT Error", MB_ICONERROR);
 }
 
 void ErrorLogger::Log(HRESULT hr, std::wstring message)
@@ -26,21 +24,20 @@ void ErrorLogger::Log(HRESULT hr, std::wstring message)
 	std::string errorMessage = "Error: " + StringTools::WideToStandard(message) + "\n" + error.ErrorMessage();
 	ERROR_LOG += errorMessage + "\n";
 	showErrorLog = true;
-	//MessageBoxA(nullptr, errorMessage.c_str(), "wHRESULT Error", MB_ICONERROR);
 }
 
-void ErrorLogger::Log(const CustomException& exception)
+void ErrorLogger::Log(const CustomException& exception, std::string message)
 {
 	ERROR_LOG += exception.what();
+	ERROR_LOG += ": " + message;
 	ERROR_LOG += "\n";
 	showErrorLog = true;
-	//MessageBoxA(nullptr, exception.what(), "Custom Exception", MB_ICONERROR);
 }
 
-void ErrorLogger::Log(const std::exception & exception)
+void ErrorLogger::Log(const std::exception & exception, std::string message)
 {
 	ERROR_LOG += exception.what();
+	ERROR_LOG += ": " + message;
 	ERROR_LOG += "\n";
 	showErrorLog = true;
-	//MessageBoxA(nullptr, exception.what(), "Standard Exception", MB_ICONERROR);
 }

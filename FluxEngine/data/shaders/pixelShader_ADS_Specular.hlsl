@@ -40,9 +40,9 @@ SamplerState objSamplerState : SAMPLER : register(s0);
 float4 main(PS_INPUT input) : SV_TARGET
 {
 
-    float3 textureColor = objTexture.Sample(objSamplerState, input.inTexCoord);
-    float3 specularSample = specTexture.Sample(objSamplerState, input.inTexCoord);
-    float3 normalSample = normTexture.Sample(objSamplerState, input.inTexCoord);
+    float3 textureColor = objTexture.Sample(objSamplerState, input.inTexCoord).rgb;
+	float3 specularSample = specTexture.Sample(objSamplerState, input.inTexCoord).rgb;
+	float3 normalSample = normTexture.Sample(objSamplerState, input.inTexCoord).rgb;
 
 	if(normalMap)
     {
@@ -102,7 +102,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     }
     if (grayscale != 0)
     {
-        finalColor = (gray, gray, gray);
+        finalColor = float3(gray, gray, gray);
     }
     return float4(finalColor, 1.0f);
 }
