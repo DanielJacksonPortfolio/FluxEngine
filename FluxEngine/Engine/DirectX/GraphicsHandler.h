@@ -28,6 +28,8 @@ public:
 
 	bool Init(HWND hWnd, int width, int height, Config* config);
 	void RenderFrame();
+	RenderableGameObject* SelectObject(float x, float y);
+
 	Camera* camera;
 	RenderableGameObject* currentObject;
 	RenderableGameObject* skybox;
@@ -41,6 +43,7 @@ private:
 	bool InitShaders();
 	bool InitScene();
 	void InitImGUI();
+
 
 	void RenderGUI();
 
@@ -120,6 +123,9 @@ private:
 	PixelShader pixelShader;
 	PixelShader pixelShader_noLight;
 	PixelShader pixelShader_skybox;
+
+	XMMATRIX viewMatrix = XMMatrixIdentity();
+	XMMATRIX projectionMatrix = XMMatrixIdentity();
 
 	ConstantBuffer<CB_vertexShader> cb_vertexShader;
 	ConstantBuffer<CB_pixelShader> cb_pixelShader;

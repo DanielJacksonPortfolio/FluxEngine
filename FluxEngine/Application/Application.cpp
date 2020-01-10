@@ -188,6 +188,17 @@ void Application::Update()
 	while (!mouse.EventBufferIsEmpty())
 	{
 		Mouse::Event me = mouse.ReadEvent();
+		if (mouse.IsLeftPressed())
+		{
+			if (this->gfx.camera != nullptr)
+			{
+ 				RenderableGameObject* object = gfx.SelectObject(mouse.GetPosX(), mouse.GetPosY());
+				if (object != nullptr)
+				{
+					gfx.currentObject = object;
+				}
+			}
+		}
 		if (mouse.IsRightPressed())
 		{
 			if (me.GetType() == Mouse::Event::Type::RAW_MOVE)

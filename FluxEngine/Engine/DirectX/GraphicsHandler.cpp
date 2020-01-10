@@ -23,6 +23,56 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 	return true;
 }
 
+RenderableGameObject* GraphicsHandler::SelectObject(float x, float y)
+{
+	XMMATRIX inverseProjection = XMMatrixInverse(nullptr, projectionMatrix);
+	XMMATRIX inverseView = XMMatrixInverse(nullptr, viewMatrix);
+
+	float normalizedCoordinateX = x / (windowWidth * 0.5f) - 1.0f;
+	float normalizedCoordinateY = y / (windowHeight * 0.5f) - 1.0f;
+
+	XMVECTOR coordinateVector = XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, 0, 0); // Projection Space
+	coordinateVector = XMVector3Transform(coordinateVector, inverseProjection); // View Space
+	coordinateVector = XMVector3Transform(coordinateVector, inverseView); // World Space
+
+	XMFLOAT3 selectVector = XMFLOAT3();
+	XMStoreFloat3(&selectVector, XMVector3Normalize(coordinateVector - this->camera->GetPositionVector()));
+
+	std::vector<std::pair<RenderableGameObject*, float>> selectedObjects = {};
+
+	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin(); // Iterate Objects
+	while (it != objects.end())
+	{
+		RenderableGameObject* object = it->second;
+		bool intersect = false;
+		float nearestIntersect = INT_MAX;
+		std::vector<Mesh*> meshes = object->GetMeshes();
+		for (int i =0; i < meshes.size(); ++i)
+		{
+			if (meshes[i]->RayMeshIntersect(this->camera->GetPositionFloat3(), selectVector, &nearestIntersect))
+				intersect = true;
+		}
+		if (intersect)
+			selectedObjects.push_back({ object, nearestIntersect });
+	}
+
+	if (selectedObjects.size() > 0)
+	{
+		RenderableGameObject* closestObject = nullptr;
+		float closestObjectDistance = INT_MAX;
+		for (size_t i = 0; i < selectedObjects.size(); ++i)
+		{
+			if (selectedObjects[i].second < closestObjectDistance)
+			{
+				closestObject = selectedObjects[i].first;
+				closestObjectDistance = selectedObjects[i].second;
+			}
+		}
+		return closestObject;
+	}
+	return nullptr;
+}
+
 void GraphicsHandler::RenderFrame()
 {
 	float bgColor[3] = {0.0f, 0.0f, 0.0f};
@@ -71,13 +121,14 @@ void GraphicsHandler::RenderFrame()
 		camera->SetProjectionValues(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
 
 		//Matrices
-		XMMATRIX viewProjectionMatrix = this->camera->GetViewMatrix() * this->camera->GetProjectionMatrix();
+		this->viewMatrix = this->camera->GetViewMatrix();
+		this->projectionMatrix = this->camera->GetProjectionMatrix();
+		XMMATRIX viewProjectionMatrix = viewMatrix * projectionMatrix;
 
 		//Set Shader Layout
 		this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
 
 		//Set Shaders
-
 
 		if (camera != nullptr)
 			skybox->SetPosition(camera->GetPositionFloat3());
@@ -89,7 +140,7 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-		while (it != objects.end())
+		while (it != objects.end())		//// SetUp Shader Bindable
 		{
 			RenderableGameObject* object = it->second;
 			if (object != nullptr)

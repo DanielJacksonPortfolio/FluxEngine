@@ -20,6 +20,18 @@ bool Model::Init(const std::string& filepath, float scale, ID3D11Device* device,
 	return true;
 }
 
+Model::Model(const Model& model)
+{
+	this->meshes = model.meshes;
+	this->scale = model.scale;
+	this->device = model.device;
+	this->deviceContext = model.deviceContext;
+	this->cb_vertexShader = model.cb_vertexShader;
+	this->cb_pixelShader = model.cb_pixelShader;
+	this->directory = model.directory;
+}
+
+
 void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	//Update & Set CBuffers
@@ -33,7 +45,7 @@ void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatr
 		this->cb_vertexShader->data.worldMatrix = worldMatrix;
 		this->cb_vertexShader->ApplyChanges();
 		this->cb_pixelShader->ApplyChanges();
-		meshes[i].Draw();
+		meshes[i]->Draw();
 	}
 }
 
@@ -69,7 +81,7 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene, const XMMATRIX& pare
 	}
 }
 
-Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const XMMATRIX& transformMatrix)
+Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const XMMATRIX& transformMatrix)
 {
 	std::vector<Texture> textures;
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -80,7 +92,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const XMMATRIX& tran
 	std::vector<Texture> normalTextures = LoadMaterialTextures(material, aiTextureType::aiTextureType_HEIGHT, scene);
 	textures.insert(textures.end(), normalTextures.begin(), normalTextures.end());
 
-	return Mesh(this->device, this->deviceContext, scale, mesh, textures, transformMatrix, this->directory);
+	return new Mesh(this->device, this->deviceContext, scale, mesh, textures, transformMatrix, this->directory);
 }
 
 

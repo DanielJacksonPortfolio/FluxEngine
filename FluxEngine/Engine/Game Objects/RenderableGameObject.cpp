@@ -22,6 +22,33 @@ bool RenderableGameObject::Init(std::vector<std::string> data, ID3D11Device* dev
 	return true;
 }
 
+RenderableGameObject::RenderableGameObject(const RenderableGameObject& obj)
+{
+	Model model;
+	XMMATRIX worldMatrix = XMMatrixIdentity();
+	bool movable = false;
+	bool wireframe = false;
+	int grayscale = 0;
+	bool normalMap = false;
+	bool specularMap = false;
+	bool renderMode = true;
+	float initScale = 1.0f;
+	float scale = 1.0f;
+	std::string filepath;
+
+	this->model = obj.model;
+	this->worldMatrix = obj.worldMatrix;
+	this->movable = obj.movable;
+	this->wireframe = obj.wireframe;
+	this->grayscale = obj.grayscale;
+	this->normalMap = obj.normalMap;
+	this->specularMap = obj.specularMap;
+	this->renderMode = obj.renderMode;
+	this->initScale = obj.initScale;
+	this->scale = obj.scale;
+	this->filepath = obj.filepath;
+}
+
 std::string RenderableGameObject::Save()
 {
 	std::string output = "";

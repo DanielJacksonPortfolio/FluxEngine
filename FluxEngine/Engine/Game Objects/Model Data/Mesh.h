@@ -18,7 +18,10 @@ public:
 	Mesh(const Mesh& mesh);
 	void Draw();
 	const XMMATRIX& GetTransformMatrix();
+	bool RayMeshIntersect(XMFLOAT3 rayOrigin, XMFLOAT3 rayDir, float* nearestIntersect);
 private:
+	bool RayTriangleIntersect(XMFLOAT3 rayOrigin, XMFLOAT3 rayDir, float* triangleIntersect, int faceIndex);
+
 	VertexBuffer<Vertex_PosTexNormTanBinorm> vertexBuffer;
 	IndexBuffer indexBuffer;
 	ID3D11DeviceContext* deviceContext;
@@ -27,8 +30,5 @@ private:
 	aiMesh* mesh;
 
 	std::string directory;
-
-	//Microsoft::WRL::ComPtr<ID3D11Resource> diffuseMap = nullptr;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseView = nullptr;
 };
 
