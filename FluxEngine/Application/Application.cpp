@@ -188,18 +188,7 @@ void Application::Update()
 	while (!mouse.EventBufferIsEmpty())
 	{
 		Mouse::Event me = mouse.ReadEvent();
-		if (mouse.IsLeftPressed())
-		{
-			if (this->gfx.camera != nullptr)
-			{
- 				RenderableGameObject* object = gfx.SelectObject(mouse.GetPosX(), mouse.GetPosY());
-				if (object != nullptr)
-				{
-					gfx.currentObject = object;
-				}
-			}
-		}
-		if (mouse.IsRightPressed())
+		if (!keyboard.KeyIsPressed('C'))
 		{
 			if (me.GetType() == Mouse::Event::Type::RAW_MOVE)
 			{
@@ -219,9 +208,28 @@ void Application::Update()
 
 	if (this->gfx.camera != nullptr)
 	{
+		if (keyboard.KeyIsPressed('E'))
+		{
+			RenderableGameObject* object = gfx.SelectObject(mouse.GetPosX(), mouse.GetPosY());
+
+			gfx.SetObject(object);
+			//if (object != nullptr)
+			//{
+			//	gfx.SetObject(object);
+			//}
+
+		}
 		if (keyboard.KeyIsPressed('W'))
 		{
 			this->gfx.camera->AdjustPosition(this->gfx.camera->GetForwardVector() * gfx.camera->GetVelocity().x * dt);
+		}
+		if (keyboard.KeyIsPressed('C'))
+		{
+			this->gfx.showUI = true;
+		}
+		if (!keyboard.KeyIsPressed('C'))
+		{
+			this->gfx.showUI = false;
 		}
 		if (keyboard.KeyIsPressed('A'))
 		{

@@ -45,7 +45,7 @@ void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatr
 		this->cb_vertexShader->data.worldMatrix = worldMatrix;
 		this->cb_vertexShader->ApplyChanges();
 		this->cb_pixelShader->ApplyChanges();
-		meshes[i]->Draw();
+		meshes[i]->Draw(worldMatrix);
 	}
 }
 

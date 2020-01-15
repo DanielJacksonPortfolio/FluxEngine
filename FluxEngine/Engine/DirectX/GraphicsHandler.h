@@ -28,6 +28,7 @@ public:
 
 	bool Init(HWND hWnd, int width, int height, Config* config);
 	void RenderFrame();
+	void SetObject(RenderableGameObject* obj);
 	RenderableGameObject* SelectObject(float x, float y);
 
 	Camera* camera;
@@ -36,14 +37,15 @@ public:
 
 	PointLight* pointLight;
 	DirectionalLight* directionalLight;
-
 	std::unordered_map<std::string, Bindable*> bindables = {};
+
+	bool showUI = false;
+
 private:
 	bool InitDirectX();
 	bool InitShaders();
 	bool InitScene();
 	void InitImGUI();
-
 
 	void RenderGUI();
 
@@ -78,7 +80,7 @@ private:
 	std::vector<Camera*> cameras = {};
 	std::vector<PointLight*> pLights = {};
 	std::vector<DirectionalLight*> dLights = {};
-	std::unordered_map<std::string, RenderableGameObject*> objects = {};
+	std::vector<std::pair<std::string, RenderableGameObject*>> objects = {};
 
 	int cameraID = 0;
 	int pLightID = 0;
@@ -96,6 +98,9 @@ private:
 	float shininess = 8.0f;
 	char sceneName[256] = "main";
 	char newObjectPath[256] = "data//objects//";
+
+	XMVECTOR PickRayOrigin = XMVECTOR();
+	XMVECTOR PickRayDirection = XMVECTOR();
 
 	int windowWidth, windowHeight = 0;
 	Timer fpsTimer;

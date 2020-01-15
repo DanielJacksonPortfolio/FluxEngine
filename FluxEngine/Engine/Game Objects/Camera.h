@@ -18,7 +18,7 @@ public:
 
 	XMFLOAT3& GetLookAtPos() { return lookAtPos; }
 	void SetLookAtPos() { GameObject::SetLookAtPos(lookAtPos); }
-	void SetLookAtPos(XMFLOAT3 lookAtPos) { this->lookAtPos = lookAtPos;  GameObject::SetLookAtPos(lookAtPos); }
+	void SetLookAtPos(XMFLOAT3 lookAtPos) { this->lookAtPos = lookAtPos;  if(lookAtMode) GameObject::SetLookAtPos(lookAtPos); }
 
 	std::string Save();
 private:

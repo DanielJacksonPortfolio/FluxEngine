@@ -23,33 +23,34 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 	return true;
 }
 
-RenderableGameObject* GraphicsHandler::SelectObject(float x, float y)
+RenderableGameObject* GraphicsHandler::SelectObject(float mouseX, float mouseY)
 {
+	float normalizedCoordinateX = (2.0f * mouseX) / windowWidth - 1.0f;
+	float normalizedCoordinateY = 1.0f - (2.0f * mouseY) / windowHeight;
+	normalizedCoordinateX = 0.0f; // Lock to Center
+	normalizedCoordinateY = 0.0f;
+
 	XMMATRIX inverseProjection = XMMatrixInverse(nullptr, projectionMatrix);
 	XMMATRIX inverseView = XMMatrixInverse(nullptr, viewMatrix);
 
-	float normalizedCoordinateX = x / (windowWidth * 0.5f) - 1.0f;
-	float normalizedCoordinateY = y / (windowHeight * 0.5f) - 1.0f;
+	XMVECTOR eyePos = this->camera->GetPositionVector();
+	XMVECTOR rayOriginVector = XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, 0, 0), inverseProjection), inverseView); // World Space
+	XMVECTOR rayDirection = XMVector3Normalize(rayOriginVector - eyePos);
 
-	XMVECTOR coordinateVector = XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, 0, 0); // Projection Space
-	coordinateVector = XMVector3Transform(coordinateVector, inverseProjection); // View Space
-	coordinateVector = XMVector3Transform(coordinateVector, inverseView); // World Space
-
-	XMFLOAT3 selectVector = XMFLOAT3();
-	XMStoreFloat3(&selectVector, XMVector3Normalize(coordinateVector - this->camera->GetPositionVector()));
+	PickRayDirection = rayDirection;
+	PickRayOrigin = eyePos;
 
 	std::vector<std::pair<RenderableGameObject*, float>> selectedObjects = {};
 
-	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin(); // Iterate Objects
-	while (it != objects.end())
+	for(int i = 0; i < objects.size(); ++i)
 	{
-		RenderableGameObject* object = it->second;
+		RenderableGameObject* object = objects[i].second;
 		bool intersect = false;
 		float nearestIntersect = INT_MAX;
 		std::vector<Mesh*> meshes = object->GetMeshes();
-		for (int i =0; i < meshes.size(); ++i)
+		for (int i = 0; i < meshes.size(); ++i)
 		{
-			if (meshes[i]->RayMeshIntersect(this->camera->GetPositionFloat3(), selectVector, &nearestIntersect))
+			if (meshes[i]->RayMeshIntersect(eyePos, rayDirection, &nearestIntersect))
 				intersect = true;
 		}
 		if (intersect)
@@ -139,10 +140,11 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 		this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-		while (it != objects.end())		//// SetUp Shader Bindable
+		//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+		//while (it != objects.end())		//// SetUp Shader Bindable
+		for(int i =0; i < objects.size(); ++i)
 		{
-			RenderableGameObject* object = it->second;
+			RenderableGameObject* object = objects[i].second;
 			if (object != nullptr)
 			{
 				//Rasterizer States
@@ -163,7 +165,7 @@ void GraphicsHandler::RenderFrame()
 				else
 					object->Draw(viewProjectionMatrix);
 			}
-			it++;
+			//it++;
 		}
 
 		if (showLights)
@@ -201,18 +203,20 @@ void GraphicsHandler::RenderFrame()
 	this->swapChain->Present(config->vSync, NULL);
 }
 
+void GraphicsHandler::SetObject(RenderableGameObject* obj)
+{
+	currentObject = obj;
+}
+
 void GraphicsHandler::SaveScene(std::string sceneName)
 {
 	std::ofstream objectsFile(sceneName + "_objects.txt");
-	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	while (it != objects.end())
+	for(size_t i = 0; i < objects.size(); ++i)
 	{
-		std::unordered_map<std::string, RenderableGameObject*>::iterator testIT = it;
-		std::string objectData = it->second->Save();
-		if (++testIT != objects.end())
+		std::string objectData = objects[i].second->Save();
+		if (i+1 != objects.size())
 			objectData += "\n";
 		objectsFile << objectData;
-		it++;
 	}
 	objectsFile.close();
 
@@ -265,21 +269,23 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	DeleteObjects();
 	std::ifstream objectsFile(sceneName + "_objects.txt");
 	std::string line = "";
-	std::unordered_map<std::string, RenderableGameObject*> newObjects = {};
+	//std::unordered_map<std::string, RenderableGameObject*> newObjects = {};
+	std::vector<std::pair<std::string, RenderableGameObject*>> newObjects = {};
 	while (std::getline(objectsFile, line))
 	{
 		std::vector<std::string> data = {};
 		StringTools::SplitString(line, data, ',');
 		RenderableGameObject* newObject = new RenderableGameObject();
 		if (newObject->Init(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader))
-			newObjects[data[0]] = newObject;
+			newObjects.push_back(std::make_pair(data[0], newObject));
+			//newObjects[data[0]] = newObject;
 	}
 	objectsFile.close();
 	objects = newObjects;
-	if(objects.size() > 0)
-		NextObject();
-	else
-		currentObject = nullptr;
+	//if (objects.size() > 0)
+	//	currentObject = objects[0].second; // NextObject();
+	//else
+	currentObject = nullptr;
 
 	DeleteCameras();
 	std::ifstream camerasFile(sceneName + "_cameras.txt");
@@ -292,8 +298,8 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	}
 	camerasFile.close();
 	cameras = newCameras;
-	if(cameras.size() > 0)
-		NextCamera();
+	if (cameras.size() > 0)
+		camera = cameras[0];//NextCamera();
 	else
 		camera = nullptr;
 	
@@ -342,316 +348,326 @@ void GraphicsHandler::RenderGUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	if (showPLControls)
-	{
-		ImGui::Begin("Point Light Controls");
-		if (pointLight != nullptr)
-		{
-			ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
-			ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
-			XMFLOAT3 lightPos = this->pointLight->GetPositionFloat3();
-			ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
-			this->pointLight->SetPosition(lightPos);
 
-			ImGui::Text("Attenuation:");
-			ImGui::DragFloat("Constant", &this->pointLight->GetCAttenuation(), 0.01f, 0.01f, 10.0f);
-			ImGui::DragFloat("Linear", &this->pointLight->GetLAttenuation(), 0.01f, 0.0f, 10.0f);
-			ImGui::DragFloat("Exponent", &this->pointLight->GetEAttenuation(), 0.01f, 0.0f, 10.0f);
+	ImGui::Begin("Debug Data");
+	std::string originString = "3D Pick Ray Origin: " + std::to_string(XMVectorGetX(PickRayOrigin)) + ", " + std::to_string(XMVectorGetY(PickRayOrigin)) + ", " + std::to_string(XMVectorGetZ(PickRayOrigin));
+	std::string dirString = "3D Pick Ray Direction: " + std::to_string(XMVectorGetX(PickRayDirection)) + ", " + std::to_string(XMVectorGetY(PickRayDirection)) + ", " + std::to_string(XMVectorGetZ(PickRayDirection));
+	ImGui::Text(originString.c_str());
+	ImGui::Text(dirString.c_str());
+	ImGui::End();
 
-			if (pLights.size() > 1)
-			{
-				if (ImGui::Button("Previous Light"))
-					NextPLight(-1);
-				ImGui::SameLine();
-				if (ImGui::Button("Next Light"))
-					NextPLight();
-			}
-		}
-		if (ImGui::Button("New Point Light"))
-			NewPointLight();
-		if (pointLight != nullptr)
+	if (showUI)
+	{
+		if (showPLControls)
 		{
-			ImGui::SameLine();
-			if (ImGui::Button("Duplicate Light"))
-				DuplicatePointLight();
-			if (ImGui::Button("Delete Light"))
-				DeletePointLight();
-			ImGui::SameLine();
-			if (ImGui::Button("Move To Camera"))
-				pointLight->SetPosition(camera->GetPositionVector() + camera->GetForwardVector());
-		}
-		ImGui::End();
-	}
+			ImGui::Begin("Point Light Controls");
+			if (pointLight != nullptr)
+			{
+				ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
+				ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
+				XMFLOAT3 lightPos = this->pointLight->GetPositionFloat3();
+				ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
+				this->pointLight->SetPosition(lightPos);
 
-	if (showDLControls)
-	{
-		ImGui::Begin("Directional Light Controls");
-		if (directionalLight != nullptr)
-		{
-			ImGui::ColorEdit3("Color", &this->directionalLight->GetColor().x);
-			ImGui::DragFloat("Strength", &this->directionalLight->GetStrength(), 0.01f, 0.0f, 10.0f);
-			ImGui::DragFloat3("Direction", &directionalLight->GetDirection().x, 0.01f, -1.0f, 1.0f);
-			if (dLights.size() > 1)
-			{
-				if (ImGui::Button("Previous Light"))
-					NextDLight(-1);
-				ImGui::SameLine();
-				if (ImGui::Button("Next Light"))
-					NextDLight();
-			}
-		}
-		if (ImGui::Button("New Directional Light"))
-			NewDirectionalLight();
-		if (directionalLight != nullptr)
-		{
-			if (ImGui::Button("Duplicate Light"))
-				DuplicateDirectionalLight();
-			if (ImGui::Button("Delete Light"))
-				DeleteDirectionalLight();
-			if (ImGui::Button("Set to Camera Direction"))
-				directionalLight->SetPosition(camera->GetForwardVector()*-1);
-		}
-		ImGui::End();
-	}
-	if (showCamControls)
-	{
-		ImGui::Begin("Camera Controls");
-		if (camera != nullptr)
-		{
-			ImGui::Text(camera->GetName().c_str());
-			ImGui::DragFloat("Move Speed", &camera->GetVelocity().x, 0.005f, 0.0f, 5.0f);
-			ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
-			ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0));
-			if (!camera->GetLookAtMode())
-			{
-				ImGui::SameLine();
-				ImGui::Checkbox("Pitch Lock?", &camera->GetLockedRot(0));
-			}
-			ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
-			if (!camera->GetLookAtMode())
-			{
-				ImGui::SameLine();
-				ImGui::Checkbox("Yaw Lock?", &camera->GetLockedRot(1));
-			}
-			ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
-			if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
-			{
-				XMFLOAT3 camPos = this->camera->GetPositionFloat3();
-				if (!camera->GetLockedPos(0))
+				ImGui::Text("Attenuation:");
+				ImGui::DragFloat("Constant", &this->pointLight->GetCAttenuation(), 0.01f, 0.01f, 10.0f);
+				ImGui::DragFloat("Linear", &this->pointLight->GetLAttenuation(), 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat("Exponent", &this->pointLight->GetEAttenuation(), 0.01f, 0.0f, 10.0f);
+
+				if (pLights.size() > 1)
 				{
-					if (!camera->GetLockedPos(1))
+					if (ImGui::Button("Previous Light"))
+						NextPLight(-1);
+					ImGui::SameLine();
+					if (ImGui::Button("Next Light"))
+						NextPLight();
+				}
+			}
+			if (ImGui::Button("New Point Light"))
+				NewPointLight();
+			if (pointLight != nullptr)
+			{
+				ImGui::SameLine();
+				if (ImGui::Button("Duplicate Light"))
+					DuplicatePointLight();
+				if (ImGui::Button("Delete Light"))
+					DeletePointLight();
+				ImGui::SameLine();
+				if (ImGui::Button("Move To Camera"))
+					pointLight->SetPosition(camera->GetPositionVector() + camera->GetForwardVector());
+			}
+			ImGui::End();
+		}
+
+		if (showDLControls)
+		{
+			ImGui::Begin("Directional Light Controls");
+			if (directionalLight != nullptr)
+			{
+				ImGui::ColorEdit3("Color", &this->directionalLight->GetColor().x);
+				ImGui::DragFloat("Strength", &this->directionalLight->GetStrength(), 0.01f, 0.0f, 10.0f);
+				ImGui::DragFloat3("Direction", &directionalLight->GetDirection().x, 0.01f, -1.0f, 1.0f);
+				if (dLights.size() > 1)
+				{
+					if (ImGui::Button("Previous Light"))
+						NextDLight(-1);
+					ImGui::SameLine();
+					if (ImGui::Button("Next Light"))
+						NextDLight();
+				}
+			}
+			if (ImGui::Button("New Directional Light"))
+				NewDirectionalLight();
+			if (directionalLight != nullptr)
+			{
+				if (ImGui::Button("Duplicate Light"))
+					DuplicateDirectionalLight();
+				if (ImGui::Button("Delete Light"))
+					DeleteDirectionalLight();
+				if (ImGui::Button("Set to Camera Direction"))
+					directionalLight->SetPosition(camera->GetForwardVector() * -1);
+			}
+			ImGui::End();
+		}
+		if (showCamControls)
+		{
+			ImGui::Begin("Camera Controls");
+			if (camera != nullptr)
+			{
+				ImGui::Text(camera->GetName().c_str());
+				ImGui::DragFloat("Move Speed", &camera->GetVelocity().x, 0.005f, 0.0f, 5.0f);
+				ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
+				ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0));
+				if (!camera->GetLookAtMode())
+				{
+					ImGui::SameLine();
+					ImGui::Checkbox("Pitch Lock?", &camera->GetLockedRot(0));
+				}
+				ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
+				if (!camera->GetLookAtMode())
+				{
+					ImGui::SameLine();
+					ImGui::Checkbox("Yaw Lock?", &camera->GetLockedRot(1));
+				}
+				ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
+				if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
+				{
+					XMFLOAT3 camPos = this->camera->GetPositionFloat3();
+					if (!camera->GetLockedPos(0))
 					{
-						if (!camera->GetLockedPos(2))
-							ImGui::DragFloat3("Position XYZ", &camPos.x, 0.1f, -80.0f, 80.0f);
+						if (!camera->GetLockedPos(1))
+						{
+							if (!camera->GetLockedPos(2))
+								ImGui::DragFloat3("Position XYZ", &camPos.x, 0.1f, -80.0f, 80.0f);
+							else
+								ImGui::DragFloat2("Position XY", &camPos.x, 0.1f, -80.0f, 80.0f);
+						}
 						else
-							ImGui::DragFloat2("Position XY", &camPos.x, 0.1f, -80.0f, 80.0f);
+						{
+							ImGui::DragFloat("Position X", &camPos.x, 0.1f, -80.0f, 80.0f);
+							if (!camera->GetLockedPos(2))
+								ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+						}
 					}
 					else
 					{
-						ImGui::DragFloat("Position X", &camPos.x, 0.1f, -80.0f, 80.0f);
-						if (!camera->GetLockedPos(2))
+						if (!camera->GetLockedPos(1))
+						{
+							if (!camera->GetLockedPos(2))
+								ImGui::DragFloat2("Position YZ", &camPos.y, 0.1f, -80.0f, 80.0f);
+							else
+								ImGui::DragFloat("Position Y", &camPos.y, 0.1f, -80.0f, 80.0f);
+						}
+						else
 							ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+					}
+					this->camera->SetPosition(camPos);
+				}
+				ImGui::Checkbox("Look At Fixed Position?", &camera->GetLookAtMode());
+				if (!camera->GetLookAtMode())
+				{
+					if (!camera->GetLockedRot(0) || !camera->GetLockedRot(1))
+					{
+						XMFLOAT3 camRot = this->camera->GetRotationFloat3();
+						if (!camera->GetLockedRot(0))
+							ImGui::DragFloat("Pitch", &camRot.x, 0.01f, -XM_PI, XM_PI);
+						if (!camera->GetLockedRot(1))
+							ImGui::DragFloat("Yaw", &camRot.y, 0.01f, -XM_PI, XM_PI);
+						this->camera->SetRotation(camRot);
 					}
 				}
 				else
 				{
-					if (!camera->GetLockedPos(1))
-					{
-						if (!camera->GetLockedPos(2))
-							ImGui::DragFloat2("Position YZ", &camPos.y, 0.1f, -80.0f, 80.0f);
-						else
-							ImGui::DragFloat("Position Y", &camPos.y, 0.1f, -80.0f, 80.0f);
-					}
-					else
-						ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
+					ImGui::DragFloat3("Look At", &camera->GetLookAtPos().x, 0.1f, -50.0f, 50.0f);
+					this->camera->SetLookAtPos();
 				}
-				this->camera->SetPosition(camPos);
-			}
-			ImGui::Checkbox("Look At Fixed Position?", &camera->GetLookAtMode());
-			if (!camera->GetLookAtMode())
-			{
-				if (!camera->GetLockedRot(0) || !camera->GetLockedRot(1))
+				if (cameras.size() > 1)
 				{
-					XMFLOAT3 camRot = this->camera->GetRotationFloat3();
-					if (!camera->GetLockedRot(0))
-						ImGui::DragFloat("Pitch", &camRot.x, 0.01f, -XM_PI, XM_PI);
-					if (!camera->GetLockedRot(1))
-						ImGui::DragFloat("Yaw", &camRot.y, 0.01f, -XM_PI, XM_PI);
-					this->camera->SetRotation(camRot);
+					if (ImGui::Button("Previous Camera"))
+						NextCamera(-1);
+					ImGui::SameLine();
+					if (ImGui::Button("Next Camera"))
+						NextCamera();
 				}
 			}
-			else
-			{
-				ImGui::DragFloat3("Look At", &camera->GetLookAtPos().x, 0.1f, -50.0f, 50.0f);
-				this->camera->SetLookAtPos();
-			}
-			if (cameras.size() > 1)
-			{
-				if (ImGui::Button("Previous Camera"))
-					NextCamera(-1);
-				ImGui::SameLine();
-				if (ImGui::Button("Next Camera"))
-					NextCamera();
-			}
-		}
-		if (ImGui::Button("New Camera"))
-			NewCamera();
-		if (camera != nullptr)
-		{
-			ImGui::SameLine();
-			if (ImGui::Button("Duplicate Camera"))
-				DuplicateCamera();
-			if (ImGui::Button("Delete Camera"))
-				DeleteCamera();
-		}
-		ImGui::End();
-	}
-
-	if (showObjectControls)
-	{
-		ImGui::Begin("Object Controls");
-		if (currentObject != nullptr)
-		{
-			ImGui::Text(currentObject->GetName().c_str());
-			ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
-			if (currentObject->GetRenderMode())
+			if (ImGui::Button("New Camera"))
+				NewCamera();
+			if (camera != nullptr)
 			{
 				ImGui::SameLine();
-				ImGui::Checkbox("Movable?", &currentObject->GetMovable());
-				if (currentObject->GetMovable())
-					ImGui::DragFloat("Move Speed", &currentObject->GetVelocity().x, 0.005f, 0.0f, 5.0f);
-				ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
-				ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
-				ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();
-				ImGui::Checkbox("Yaw Lock?", &currentObject->GetLockedRot(1));
-				ImGui::Checkbox("Move Lock Z?", &currentObject->GetLockedPos(2)); ImGui::SameLine();
-				ImGui::Checkbox("Roll Lock?", &currentObject->GetLockedRot(2));
+				if (ImGui::Button("Duplicate Camera"))
+					DuplicateCamera();
+				if (ImGui::Button("Delete Camera"))
+					DeleteCamera();
+			}
+			ImGui::End();
+		}
 
-				if (!currentObject->GetLockedPos(0) || !currentObject->GetLockedPos(1) || !currentObject->GetLockedPos(2))
+		if (showObjectControls)
+		{
+			ImGui::Begin("Object Controls");
+			if (currentObject != nullptr)
+			{
+				ImGui::Text(currentObject->GetName().c_str());
+				ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
+				if (currentObject->GetRenderMode())
 				{
-					XMFLOAT3 objPos = this->currentObject->GetPositionFloat3();
-					if (!currentObject->GetLockedPos(0))
+					ImGui::SameLine();
+					ImGui::Checkbox("Movable?", &currentObject->GetMovable());
+					if (currentObject->GetMovable())
+						ImGui::DragFloat("Move Speed", &currentObject->GetVelocity().x, 0.005f, 0.0f, 5.0f);
+					ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
+					ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
+					ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();
+					ImGui::Checkbox("Yaw Lock?", &currentObject->GetLockedRot(1));
+					ImGui::Checkbox("Move Lock Z?", &currentObject->GetLockedPos(2)); ImGui::SameLine();
+					ImGui::Checkbox("Roll Lock?", &currentObject->GetLockedRot(2));
+
+					if (!currentObject->GetLockedPos(0) || !currentObject->GetLockedPos(1) || !currentObject->GetLockedPos(2))
 					{
-						if (!currentObject->GetLockedPos(1))
+						XMFLOAT3 objPos = this->currentObject->GetPositionFloat3();
+						if (!currentObject->GetLockedPos(0))
 						{
-							if (!currentObject->GetLockedPos(2))
-								ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -80.0f, 80.0f);
+							if (!currentObject->GetLockedPos(1))
+							{
+								if (!currentObject->GetLockedPos(2))
+									ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -80.0f, 80.0f);
+								else
+									ImGui::DragFloat2("Position XY", &objPos.x, 0.1f, -80.0f, 80.0f);
+							}
 							else
-								ImGui::DragFloat2("Position XY", &objPos.x, 0.1f, -80.0f, 80.0f);
+							{
+								ImGui::DragFloat("Position X", &objPos.x, 0.1f, -80.0f, 80.0f);
+								if (!currentObject->GetLockedPos(2))
+									ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
+							}
 						}
 						else
 						{
-							ImGui::DragFloat("Position X", &objPos.x, 0.1f, -80.0f, 80.0f);
-							if (!currentObject->GetLockedPos(2))
+							if (!currentObject->GetLockedPos(1))
+							{
+								if (!currentObject->GetLockedPos(2))
+									ImGui::DragFloat2("Position YZ", &objPos.y, 0.1f, -80.0f, 80.0f);
+								else
+									ImGui::DragFloat("Position Y", &objPos.y, 0.1f, -80.0f, 80.0f);
+							}
+							else
 								ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
 						}
+						this->currentObject->SetPosition(objPos);
 					}
-					else
+					if (!currentObject->GetLockedRot(0) || !currentObject->GetLockedRot(1) || !currentObject->GetLockedRot(2))
 					{
-						if (!currentObject->GetLockedPos(1))
-						{
-							if (!currentObject->GetLockedPos(2))
-								ImGui::DragFloat2("Position YZ", &objPos.y, 0.1f, -80.0f, 80.0f);
-							else
-								ImGui::DragFloat("Position Y", &objPos.y, 0.1f, -80.0f, 80.0f);
-						}
-						else
-							ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
+						XMFLOAT3 objRot = this->currentObject->GetRotationFloat3();
+						if (!currentObject->GetLockedRot(0))
+							ImGui::DragFloat("Pitch", &objRot.x, 0.01f, -XM_PI, XM_PI);
+						if (!currentObject->GetLockedRot(1))
+							ImGui::DragFloat("Yaw", &objRot.y, 0.01f, -XM_PI, XM_PI);
+						if (!currentObject->GetLockedRot(2))
+							ImGui::DragFloat("Roll", &objRot.z, 0.01f, -XM_PI, XM_PI);
+						this->currentObject->SetRotation(objRot);
 					}
-					this->currentObject->SetPosition(objPos);
+					ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
+					ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
+					ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode()); ImGui::SameLine();
+					ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
+					ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
 				}
-				if (!currentObject->GetLockedRot(0) || !currentObject->GetLockedRot(1) || !currentObject->GetLockedRot(2))
+				if (objects.size() > 1)
 				{
-					XMFLOAT3 objRot = this->currentObject->GetRotationFloat3();
-					if (!currentObject->GetLockedRot(0))
-						ImGui::DragFloat("Pitch", &objRot.x, 0.01f, -XM_PI, XM_PI);
-					if (!currentObject->GetLockedRot(1))
-						ImGui::DragFloat("Yaw", &objRot.y, 0.01f, -XM_PI, XM_PI);
-					if (!currentObject->GetLockedRot(2))
-						ImGui::DragFloat("Roll", &objRot.z, 0.01f, -XM_PI, XM_PI);
-					this->currentObject->SetRotation(objRot);
+					if (ImGui::Button("Previous Object"))
+						NextObject(-1);
+					ImGui::SameLine();
+					if (ImGui::Button("Next Object"))
+						NextObject();
 				}
-				ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
-				ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
-				ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode()); ImGui::SameLine();
-				ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
-				ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
+
 			}
-			if (objects.size() > 1)
+			if (ImGui::Button("New Object"))
+				showNewObjectWindow = true;
+			if (currentObject != nullptr)
 			{
-				if (ImGui::Button("Previous Object"))
-					NextObject(-1);
 				ImGui::SameLine();
-				if (ImGui::Button("Next Object"))
-					NextObject();
+				if (ImGui::Button("Duplicate Object"))
+					DuplicateObject();
+				if (ImGui::Button("Delete Object"))
+					DeleteObject();
+				if (ImGui::Button("Lock Camera To This"))
+				{
+					camera->SetLookAtPos(currentObject->GetPositionFloat3());
+					camera->SetLookAtMode(true);
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Move To Camera"))
+					currentObject->SetPosition(camera->GetPositionVector() + camera->GetForwardVector() * 10);
 			}
-
+			ImGui::End();
 		}
-		if (ImGui::Button("New Object"))
-			showNewObjectWindow = true;
-		if (currentObject != nullptr)
+
+		if (showNewObjectWindow)
 		{
-			ImGui::SameLine();
-			if (ImGui::Button("Duplicate Object"))
-				DuplicateObject();
-			if (ImGui::Button("Delete Object"))
-				DeleteObject();
-			if (ImGui::Button("Lock Camera To This"))
-			{
-				camera->SetLookAtPos(currentObject->GetPositionFloat3());
-				camera->SetLookAtMode(true);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Move To Camera"))
-				currentObject->SetPosition(camera->GetPositionVector() + camera->GetForwardVector()*10);
+			ImGui::Begin("Create a New Object");
+			ImGui::InputText("Object Filepath", &newObjectPath[0], ARRAYSIZE(newObjectPath));
+			if (ImGui::Button("New Object"))
+				NewObject();
+			ImGui::End();
 		}
+
+		if (showGeneralControls)
+		{
+			ImGui::Begin("General Controls");
+			ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
+			ImGui::Checkbox("Show Lights?", &showLights);
+			ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
+			ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
+			ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
+			ImGui::InputText("Scene Name", &sceneName[0], ARRAYSIZE(sceneName));
+			if (ImGui::Button("Save Scene"))
+				SaveScene("data//scenes//" + std::string(sceneName));
+			ImGui::SameLine();
+			if (ImGui::Button("Load Scene"))
+				LoadScene("data//scenes//" + std::string(sceneName));
+			ImGui::End();
+		}
+
+
+		ImGui::Begin("Show/Hide Windows");
+		ImGui::Checkbox("Show Error Log?", &ErrorLogger::showErrorLog);
+		ImGui::Checkbox("Show Point Light Controls?", &showPLControls);
+		ImGui::Checkbox("Show Directional Light Controls?", &showDLControls);
+		ImGui::Checkbox("Show Camera Controls?", &showCamControls);
+		ImGui::Checkbox("Show Object Controls?", &showObjectControls);
+		ImGui::Checkbox("Show General Controls?", &showGeneralControls);
 		ImGui::End();
+
+		if (ErrorLogger::showErrorLog)
+		{
+			ImGui::Begin("Error Log");
+			ImGui::Text(ErrorLogger::ERROR_LOG.c_str());
+			ImGui::AlignTextToFramePadding();
+			ImGui::End();
+		}
 	}
-
-	if (showNewObjectWindow)
-	{
-		ImGui::Begin("Create a New Object");
-		ImGui::InputText("Object Filepath", &newObjectPath[0], ARRAYSIZE(newObjectPath));
-		if (ImGui::Button("New Object"))
-			NewObject();
-		ImGui::End();
-	}
-
-	if (showGeneralControls)
-	{
-		ImGui::Begin("General Controls");
-		ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
-		ImGui::Checkbox("Show Lights?", &showLights);
-		ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
-		ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
-		ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
-		ImGui::InputText("Scene Name", &sceneName[0], ARRAYSIZE(sceneName));
-		if (ImGui::Button("Save Scene"))
-			SaveScene("data//scenes//" + std::string(sceneName));
-		ImGui::SameLine();
-		if (ImGui::Button("Load Scene"))
-			LoadScene("data//scenes//" + std::string(sceneName));
-		ImGui::End();
-	}
-
-
-	ImGui::Begin("Show/Hide Windows");
-	ImGui::Checkbox("Show Error Log?", &ErrorLogger::showErrorLog);
-	ImGui::Checkbox("Show Point Light Controls?", &showPLControls);
-	ImGui::Checkbox("Show Directional Light Controls?", &showDLControls);
-	ImGui::Checkbox("Show Camera Controls?", &showCamControls);
-	ImGui::Checkbox("Show Object Controls?", &showObjectControls);
-	ImGui::Checkbox("Show General Controls?", &showGeneralControls);
-	ImGui::End();
-
-	if (ErrorLogger::showErrorLog)
-	{
-		ImGui::Begin("Error Log");
-		ImGui::Text(ErrorLogger::ERROR_LOG.c_str());
-		ImGui::AlignTextToFramePadding();
-		ImGui::End();
-	}
-
 	ImGui::Render();
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -684,10 +700,10 @@ void GraphicsHandler::NextObject(int direction)
 	objectID = (objectID + (direction >= 0 ? 1 : -1)) % static_cast<int>(objects.size());
 	if (objectID < 0)
 		objectID += static_cast<int>(objects.size());
-	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	for(int i = 0; i < objectID; ++i)
-		it++;
-	currentObject = it->second;
+	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	//for(int i = 0; i < objectID; ++i)
+	//	it++;
+	currentObject = objects[objectID].second;//it->second;
 }
 
 void GraphicsHandler::NewCamera()
@@ -725,11 +741,13 @@ void GraphicsHandler::DeleteCameras()
 }
 void GraphicsHandler::DeleteObjects()
 {
-	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	while (it != objects.end())
+	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	//while (it != objects.end())
+	for(int i = 0; i < objects.size(); ++i)
 	{
-		delete it->second;
-		it++;
+		delete objects[i].second;
+		//delete it->second;
+		//it++;
 	}
 	objects.clear();
 }
@@ -748,12 +766,16 @@ void GraphicsHandler::DeleteDirectionalLights()
 
 void GraphicsHandler::DeleteObject()
 {
-	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	while (it->first != currentObject->GetName())
-		it++;
+	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	//while (it->first != currentObject->GetName())
+	//	it++;
+	int deleteObjectID = 0;
+	for (deleteObjectID; deleteObjectID < objects.size(); ++deleteObjectID)
+		if (objects[deleteObjectID].first == currentObject->GetName())
+			break;
 	delete currentObject;
 	currentObject = nullptr;
-	objects.erase(it);
+	objects.erase(objects.begin() + deleteObjectID);
 	if (objects.size() > 0)
 		NextObject();
 	else
@@ -771,10 +793,10 @@ void GraphicsHandler::NewObject()
 		std::string name = std::string(newObjectPath).substr(directory.length() + 1, std::string(newObjectPath).length() - directory.length() - fileExtension.length() - 2);
 		if (newObject->Init(newObjectPath, 1.0f, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader, name))
 		{
-			std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-			for (int i = 0; i < objectID; ++i)
-				it++;
-			objects.insert(it, { newObject->GetName(), newObject });
+			//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+			//for (int i = 0; i < objectID; ++i)
+			//	it++;
+			objects.insert(objects.begin() + objectID, { newObject->GetName(), newObject });
 			objectID--;
 			this->currentObject = newObject;
 		}
@@ -790,10 +812,10 @@ void GraphicsHandler::DuplicateObject()
 {
 	RenderableGameObject* object = new RenderableGameObject(*currentObject);
 	object->GetName() += " - Copy";
-	std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	for (int i = 0; i < objectID; ++i)
-		it++;
-	objects.insert(it, { object->GetName(), object });
+	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
+	//for (int i = 0; i < objectID; ++i)
+	//	it++;
+	objects.insert(objects.begin() + objectID, { object->GetName(), object });
 	objectID--;
 	this->currentObject = object;
 }
