@@ -29,39 +29,35 @@ RenderableGameObject* GraphicsHandler::SelectObject(float mouseX, float mouseY)
 	float normalizedCoordinateY = 1.0f - (2.0f * mouseY) / windowHeight;
 	normalizedCoordinateX = 0.0f; // Lock to Center
 	normalizedCoordinateY = 0.0f;
-
-	XMMATRIX inverseProjection = XMMatrixInverse(nullptr, projectionMatrix);
-	XMMATRIX inverseView = XMMatrixInverse(nullptr, viewMatrix);
+	
+	XMVECTOR determinant = XMVECTOR();
+	XMMATRIX inverseProjection = XMMatrixInverse(&determinant, projectionMatrix);
+	XMMATRIX inverseView = XMMatrixInverse(&determinant, viewMatrix);
 
 	XMVECTOR eyePos = this->camera->GetPositionVector();
-	XMVECTOR rayOriginVector = XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, 0, 0), inverseProjection), inverseView); // World Space
+	XMVECTOR rayOriginVector = XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, -1, 0), inverseProjection), inverseView); // World Space
 	XMVECTOR rayDirection = XMVector3Normalize(rayOriginVector - eyePos);
 
-	PickRayDirection = rayDirection;
-	PickRayOrigin = eyePos;
+	pickRayDirection = rayDirection;
+	pickRayOrigin = eyePos;
 
 	std::vector<std::pair<RenderableGameObject*, float>> selectedObjects = {};
 
 	for(int i = 0; i < objects.size(); ++i)
 	{
 		RenderableGameObject* object = objects[i].second;
-		bool intersect = false;
 		float nearestIntersect = INT_MAX;
-		std::vector<Mesh*> meshes = object->GetMeshes();
-		for (int i = 0; i < meshes.size(); ++i)
-		{
-			if (meshes[i]->RayMeshIntersect(eyePos, rayDirection, &nearestIntersect))
-				intersect = true;
-		}
-		if (intersect)
+		if (object->RayModelIntersect(eyePos, rayDirection, nearestIntersect))
 			selectedObjects.push_back({ object, nearestIntersect });
 	}
 
+	numObjectsSelected = selectedObjects.size();
+
 	if (selectedObjects.size() > 0)
 	{
-		RenderableGameObject* closestObject = nullptr;
-		float closestObjectDistance = INT_MAX;
-		for (size_t i = 0; i < selectedObjects.size(); ++i)
+		RenderableGameObject* closestObject = selectedObjects[0].first;
+		float closestObjectDistance = selectedObjects[0].second;
+		for (size_t i = 1; i < selectedObjects.size(); ++i)
 		{
 			if (selectedObjects[i].second < closestObjectDistance)
 			{
@@ -69,8 +65,10 @@ RenderableGameObject* GraphicsHandler::SelectObject(float mouseX, float mouseY)
 				closestObjectDistance = selectedObjects[i].second;
 			}
 		}
+		objectSelectedID = "Object Selected: " + closestObject->GetName();
 		return closestObject;
 	}
+	objectSelectedID = "No Object Selected";
 	return nullptr;
 }
 
@@ -119,7 +117,7 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
 
 		///Shader Stuff///
-		camera->SetProjectionValues(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.1f, 3000.0f);
+		camera->SetProjectionValues(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.5f, 5000.0f);
 
 		//Matrices
 		this->viewMatrix = this->camera->GetViewMatrix();
@@ -140,9 +138,8 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 		this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-		//while (it != objects.end())		//// SetUp Shader Bindable
-		for(int i =0; i < objects.size(); ++i)
+		//// SetUp Shader Bindable
+		for(int i = 0; i < objects.size(); ++i)
 		{
 			RenderableGameObject* object = objects[i].second;
 			if (object != nullptr)
@@ -164,8 +161,9 @@ void GraphicsHandler::RenderFrame()
 				}
 				else
 					object->Draw(viewProjectionMatrix);
+				if(debugMode || object->GetMovable())
+					object->DrawDebug(viewProjectionMatrix, &debugSphere->GetModel());
 			}
-			//it++;
 		}
 
 		if (showLights)
@@ -195,6 +193,7 @@ void GraphicsHandler::RenderFrame()
 	//Render Font
 	this->spriteBatch->Begin();
 	this->spriteFont->DrawString(this->spriteBatch.get(), StringTools::StandardToWide(fpsString).c_str(), XMFLOAT2(10, 10), DirectX::Colors::White, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
+	this->spriteFont->DrawString(this->spriteBatch.get(), StringTools::StandardToWide("X").c_str(), XMFLOAT2(windowWidth*0.5f - 10, windowHeight * 0.5f - 16), DirectX::Colors::White, 0.0f, XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f));
 	this->spriteBatch->End();
 
 	//GUI
@@ -350,10 +349,14 @@ void GraphicsHandler::RenderGUI()
 
 
 	ImGui::Begin("Debug Data");
-	std::string originString = "3D Pick Ray Origin: " + std::to_string(XMVectorGetX(PickRayOrigin)) + ", " + std::to_string(XMVectorGetY(PickRayOrigin)) + ", " + std::to_string(XMVectorGetZ(PickRayOrigin));
-	std::string dirString = "3D Pick Ray Direction: " + std::to_string(XMVectorGetX(PickRayDirection)) + ", " + std::to_string(XMVectorGetY(PickRayDirection)) + ", " + std::to_string(XMVectorGetZ(PickRayDirection));
+	std::string originString = "3D Pick Ray Origin: " + std::to_string(XMVectorGetX(pickRayOrigin)) + ", " +	std::to_string(XMVectorGetY(pickRayOrigin)) + ", " +	std::to_string(XMVectorGetZ(pickRayOrigin));
+	std::string dirString = "3D Pick Ray Direction: " + std::to_string(XMVectorGetX(pickRayDirection)) + ", " + std::to_string(XMVectorGetY(pickRayDirection)) + ", " + std::to_string(XMVectorGetZ(pickRayDirection));
+	std::string numSelectedString = "Number of Objects Selected: " + std::to_string(numObjectsSelected);
+	ImGui::Checkbox("Debug Mode", &debugMode);
 	ImGui::Text(originString.c_str());
 	ImGui::Text(dirString.c_str());
+	ImGui::Text(objectSelectedID.c_str());
+	ImGui::Text(numSelectedString.c_str());
 	ImGui::End();
 
 	if (showUI)
@@ -700,10 +703,7 @@ void GraphicsHandler::NextObject(int direction)
 	objectID = (objectID + (direction >= 0 ? 1 : -1)) % static_cast<int>(objects.size());
 	if (objectID < 0)
 		objectID += static_cast<int>(objects.size());
-	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	//for(int i = 0; i < objectID; ++i)
-	//	it++;
-	currentObject = objects[objectID].second;//it->second;
+	currentObject = objects[objectID].second;
 }
 
 void GraphicsHandler::NewCamera()
@@ -741,13 +741,9 @@ void GraphicsHandler::DeleteCameras()
 }
 void GraphicsHandler::DeleteObjects()
 {
-	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	//while (it != objects.end())
 	for(int i = 0; i < objects.size(); ++i)
 	{
 		delete objects[i].second;
-		//delete it->second;
-		//it++;
 	}
 	objects.clear();
 }
@@ -766,9 +762,6 @@ void GraphicsHandler::DeleteDirectionalLights()
 
 void GraphicsHandler::DeleteObject()
 {
-	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	//while (it->first != currentObject->GetName())
-	//	it++;
 	int deleteObjectID = 0;
 	for (deleteObjectID; deleteObjectID < objects.size(); ++deleteObjectID)
 		if (objects[deleteObjectID].first == currentObject->GetName())
@@ -791,13 +784,9 @@ void GraphicsHandler::NewObject()
 	try
 	{
 		std::string name = std::string(newObjectPath).substr(directory.length() + 1, std::string(newObjectPath).length() - directory.length() - fileExtension.length() - 2);
-		if (newObject->Init(newObjectPath, 1.0f, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader, name))
+		if (newObject->Init(newObjectPath, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader, name))
 		{
-			//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-			//for (int i = 0; i < objectID; ++i)
-			//	it++;
 			objects.insert(objects.begin() + objectID, { newObject->GetName(), newObject });
-			objectID--;
 			this->currentObject = newObject;
 		}
 	}
@@ -812,11 +801,7 @@ void GraphicsHandler::DuplicateObject()
 {
 	RenderableGameObject* object = new RenderableGameObject(*currentObject);
 	object->GetName() += " - Copy";
-	//std::unordered_map<std::string, RenderableGameObject*>::iterator it = objects.begin();
-	//for (int i = 0; i < objectID; ++i)
-	//	it++;
 	objects.insert(objects.begin() + objectID, { object->GetName(), object });
-	objectID--;
 	this->currentObject = object;
 }
 void GraphicsHandler::NewPointLight()
@@ -1043,7 +1028,6 @@ bool GraphicsHandler::InitShaders()
 		{"TEXCOORD",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 		{"NORMAL",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 		{"TANGENT",		0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"BINORMAL",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -1072,9 +1056,14 @@ bool GraphicsHandler::InitScene()
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_pixelShader");
 
 		//Model Load
-		LoadScene("data//scenes//initial");
+		LoadScene("data//scenes//" + std::string(sceneName));
 		skybox = new RenderableGameObject();
-		skybox->Init("data//skies//desert.fbx",10.0f, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"SKYBOX");
+		debugSphere = new RenderableGameObject();
+		skybox->Init("data//skies//desert.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"SKYBOX");
+		skybox->SetScale(10.0f);
+		debugSphere->Init("data//objects//sphere.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"DEBUG SPHERE");
+
+		currentObject = objects[0].second;
 	}
 	catch (CustomException & e)
 	{

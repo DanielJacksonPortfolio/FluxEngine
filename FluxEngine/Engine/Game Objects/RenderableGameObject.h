@@ -7,9 +7,13 @@ public:
 	RenderableGameObject() {}
 	RenderableGameObject(const RenderableGameObject& obj);
 	bool Init(std::vector<std::string> data, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader);
-	bool Init(const std::string& filepath, float scale, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader, std::string name = "");
+	bool Init(const std::string& filepath, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader, std::string name = "");
 	void Draw(const XMMATRIX& viewProjectionMatrix);
+	void DrawDebug(const XMMATRIX& viewProjectionMatrix, Model* sphere);
 
+	bool RayModelIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect);
+
+	Model& GetModel() { return this->model; }
 	bool& GetMovable() { return this->movable; }
 	void SetMovable(bool movable) { this->movable = movable; }
 	int& GetGrayscale() { return this->grayscale; }
@@ -24,7 +28,6 @@ public:
 	void SetScale(float scale) { this->scale = scale; }
 	bool& GetRenderMode() { return this->renderMode; }
 	void SetRenderMode(bool mode) { this->renderMode = mode; }
-	std::vector<Mesh*> GetMeshes() { return this->model.GetMeshes(); }
 	std::string Save();
 
 protected:
@@ -38,7 +41,6 @@ private:
 	bool normalMap = false;
 	bool specularMap = false;
 	bool renderMode = true;
-	float initScale = 1.0f;
 	float scale = 1.0f;
 
 	std::string filepath;

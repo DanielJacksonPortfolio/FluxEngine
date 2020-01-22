@@ -23,5 +23,6 @@ public:
 
 private:
 	Timer timer;
+	bool qPressed = false;
 };
 

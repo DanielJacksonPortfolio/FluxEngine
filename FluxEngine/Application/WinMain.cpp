@@ -14,7 +14,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			ErrorLogger::Log("Failed to Load config file");
 			return -1;
 		}
-
 		Application app;
 		if (app.Init(&config))
 		{

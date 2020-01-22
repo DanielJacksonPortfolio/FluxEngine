@@ -34,6 +34,7 @@ public:
 	Camera* camera;
 	RenderableGameObject* currentObject;
 	RenderableGameObject* skybox;
+	RenderableGameObject* debugSphere;
 
 	PointLight* pointLight;
 	DirectionalLight* directionalLight;
@@ -96,13 +97,16 @@ private:
 	bool showNewObjectWindow = false;
 
 	float shininess = 8.0f;
-	char sceneName[256] = "main";
+	char sceneName[256] = "testing";
 	char newObjectPath[256] = "data//objects//";
 
-	XMVECTOR PickRayOrigin = XMVECTOR();
-	XMVECTOR PickRayDirection = XMVECTOR();
+	XMVECTOR pickRayOrigin = XMVECTOR();
+	XMVECTOR pickRayDirection = XMVECTOR();
+	std::string objectSelectedID = "No Object Selected";
+	int numObjectsSelected = 0;
 
 	int windowWidth, windowHeight = 0;
+	bool debugMode = false;
 	Timer fpsTimer;
 	HWND hWnd = NULL;
 	std::unique_ptr<Config> config = nullptr;
@@ -120,7 +124,6 @@ private:
 
 	std::unique_ptr<SpriteBatch> spriteBatch;
 	std::unique_ptr<SpriteFont> spriteFont;
-
 
 	VertexShader vertexShader;
 	VertexShader vertexShaderMovable;

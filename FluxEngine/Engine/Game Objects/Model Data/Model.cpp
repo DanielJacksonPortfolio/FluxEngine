@@ -1,12 +1,11 @@
 #include "Model.h"
 
-bool Model::Init(const std::string& filepath, float scale, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader)
+bool Model::Init(const std::string& filepath, ID3D11Device* device, ID3D11DeviceContext* deviceContext, ConstantBuffer<CB_vertexShader>& cb_vertexShader, ConstantBuffer<CB_pixelShader>& cb_pixelShader)
 {
 	this->device = device;
 	this->deviceContext = deviceContext;
 	this->cb_vertexShader = &cb_vertexShader;
 	this->cb_pixelShader = &cb_pixelShader;
-	this->scale = scale;
 	try
 	{
 		if (!this->LoadModel(filepath))
@@ -23,7 +22,6 @@ bool Model::Init(const std::string& filepath, float scale, ID3D11Device* device,
 Model::Model(const Model& model)
 {
 	this->meshes = model.meshes;
-	this->scale = model.scale;
 	this->device = model.device;
 	this->deviceContext = model.deviceContext;
 	this->cb_vertexShader = model.cb_vertexShader;
@@ -31,22 +29,92 @@ Model::Model(const Model& model)
 	this->directory = model.directory;
 }
 
+void Model::SetOrigin()
+{
+	XMFLOAT3 origin = XMFLOAT3();
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		origin.x += vertices[i].pos.x;
+		origin.y += vertices[i].pos.y;
+		origin.z += vertices[i].pos.z;
+	}
+	origin.x = origin.x / vertices.size();
+	origin.y = origin.y / vertices.size();
+	origin.z = origin.z / vertices.size();
+	this->originVector = XMLoadFloat3(&origin);
+	SetBoundingRadius();
+}
+
+void Model::SetBoundingRadius()
+{
+	this->modelBoundingSphereRadius = 0.0f;
+	float minDistance = INT_MAX;
+	float maxDistance = 0.0f;
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		float x = abs(vertices[i].pos.x - XMVectorGetX(this->originVector));
+		float y = abs(vertices[i].pos.y - XMVectorGetY(this->originVector));
+		float z = abs(vertices[i].pos.z - XMVectorGetZ(this->originVector));
+		float distanceFromOrigin = sqrt(x * x + y * y + z * z);
+		if (distanceFromOrigin < minDistance) minDistance = distanceFromOrigin;
+		if (distanceFromOrigin > maxDistance) maxDistance = distanceFromOrigin;
+	}
+	modelBoundingSphereRadius = maxDistance;
+}
 
 void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	//Update & Set CBuffers
-
 	this->deviceContext->VSSetConstantBuffers(0, 1, this->cb_vertexShader->GetAddressOf());
 	this->deviceContext->PSSetConstantBuffers(0, 1, this->cb_pixelShader->GetAddressOf());
-
+	
 	for (size_t i = 0; i < meshes.size(); ++i)
 	{
-		this->cb_vertexShader->data.wvpMatrix = worldMatrix * viewProjectionMatrix;
-		this->cb_vertexShader->data.worldMatrix = worldMatrix;
+		this->cb_vertexShader->data.wvpMatrix = meshes[i]->GetTransformMatrix() * XMMatrixTranslationFromVector(-originVector) * worldMatrix * viewProjectionMatrix;
+		this->cb_vertexShader->data.worldMatrix = meshes[i]->GetTransformMatrix() * XMMatrixTranslationFromVector(-originVector) * worldMatrix;
 		this->cb_vertexShader->ApplyChanges();
 		this->cb_pixelShader->ApplyChanges();
-		meshes[i]->Draw(worldMatrix);
+		meshes[i]->Draw();
 	}
+}
+
+void Model::DrawDebug(XMVECTOR position, float scale, const XMMATRIX& viewProjectionMatrix, Model* sphere)
+{
+	objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
+	XMMATRIX newWorld = XMMatrixScaling(objectBoundingSphereRadius, objectBoundingSphereRadius, objectBoundingSphereRadius) * XMMatrixTranslationFromVector(position);
+	sphere->Draw(newWorld, viewProjectionMatrix);
+}
+
+bool Model::RayModelIntersect(XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect)
+{
+	objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
+	if (RaySphereIntersect(position, rayOrigin, rayDir))
+	{
+		bool intersect = false;
+		for (int i = 0; i < meshes.size(); ++i)
+		{
+			float intersectDistance = INT_MAX;
+			if (meshes[i]->RayMeshIntersect(XMMatrixTranslationFromVector(-originVector) * worldMatrix, rayOrigin, rayDir, intersectDistance))
+			{
+				intersect = true;
+				if (nearestIntersect > intersectDistance)
+					nearestIntersect = intersectDistance;
+			}
+		}
+		if (intersect)
+			return true;
+	}
+	return false;
+}
+
+bool Model::RaySphereIntersect(XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR rayDir)
+{
+	XMVECTOR oc = rayOrigin - position;
+	float a = XMVectorGetX(XMVector3Dot(rayDir, rayDir));
+	float b = 2 * XMVectorGetX(XMVector3Dot(oc, rayDir));
+	float c = XMVectorGetX(XMVector3Dot(oc, oc)) - (objectBoundingSphereRadius * objectBoundingSphereRadius);
+	return 0 < ((b * b) - (4 * a * c));
+
 }
 
 
@@ -62,6 +130,7 @@ bool Model::LoadModel(const std::string& filepath)
 		return false;
 
 	this->ProcessNode(pScene->mRootNode, pScene, DirectX::XMMatrixIdentity());
+	SetOrigin();
 	return true;
 }
 
@@ -92,7 +161,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const XMMATRIX& tra
 	std::vector<Texture> normalTextures = LoadMaterialTextures(material, aiTextureType::aiTextureType_HEIGHT, scene);
 	textures.insert(textures.end(), normalTextures.begin(), normalTextures.end());
 
-	return new Mesh(this->device, this->deviceContext, scale, mesh, textures, transformMatrix, this->directory);
+	return new Mesh(this->device, this->deviceContext, mesh, textures, transformMatrix, this->directory, &vertices);
 }
 
 

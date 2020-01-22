@@ -359,6 +359,16 @@ void GameObject::AdjustRotation(float x, float y, float z)
 	this->UpdateMatrix();
 }
 
+void GameObject::SetOrientation(const XMQUATERNION& orient)
+{
+	this->orientation = orient;
+}
+
+void GameObject::AdjustOrientation(const XMQUATERNION& orient, float dt)
+{
+	this->orientation = XMQuaternionSlerp(this->orientation, orient, dt);
+}
+
 void GameObject::SetLookAtPos(XMFLOAT3 lookAtPos)
 {
 	if (lookAtPos.x == this->pos.x && lookAtPos.y == this->pos.y && lookAtPos.z == this->pos.z)

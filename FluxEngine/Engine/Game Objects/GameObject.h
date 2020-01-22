@@ -9,6 +9,8 @@ public:
 	const XMFLOAT3& GetPositionFloat3() const;
 	const XMVECTOR& GetRotationVector() const;
 	const XMFLOAT3& GetRotationFloat3() const;
+	const XMFLOAT3& GetOrientationQuaternion() const;
+	const XMFLOAT3& GetOrientationMatrix() const;
 
 	void SetPosition(const XMVECTOR& pos);
 	void SetPosition(const XMFLOAT3& pos);
@@ -22,6 +24,8 @@ public:
 	void AdjustRotation(const XMVECTOR& rot);
 	void AdjustRotation(const XMFLOAT3& rot);
 	void AdjustRotation(float x, float y, float z);
+	void SetOrientation(const XMQUATERNION& orient);
+	void AdjustOrientation(const XMQUATERNION& orient, float dt);
 	void SetLookAtPos(XMFLOAT3 lookAtPos);
 	void SetLookAtPos(float x, float y, float z);
 
@@ -56,6 +60,7 @@ protected:
 
 	XMVECTOR posVector = XMVECTOR();
 	XMVECTOR rotVector = XMVECTOR();
+	XMQUATERNION orientation = XMQuaternionIdentity();
 	XMFLOAT3 pos = XMFLOAT3(0.0f,0.0f,0.0f);
 	XMFLOAT3 rot = XMFLOAT3(0.0f,0.0f,0.0f);
 
@@ -82,6 +87,8 @@ protected:
 
 	XMFLOAT3 velocity = XMFLOAT3(0.005f,0.005f,0.005f);
 	float acceleration = 0.0f;
+	float mass = 0.0f;
+
 	std::string objectName = "Null Object";
 	bool lockedPos[3] = { false,false,false };
 	bool lockedRot[3] = { false,false,false };

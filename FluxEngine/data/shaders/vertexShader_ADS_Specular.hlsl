@@ -13,7 +13,6 @@ struct VS_INPUT
     float2 inTexCoord : TEXCOORD;
     float3 inNormal : NORMAL;
     float3 inTangent : TANGENT;
-    float3 inBinormal : BINORMAL;
 };
 
 struct VS_OUTPUT
@@ -33,7 +32,7 @@ VS_OUTPUT main(VS_INPUT input)
     output.outWorldPos = mul(float4(input.inPos, 1.0f), worldMatrix).xyz;
 
     output.outNormal = normalize(mul(float4(input.inNormal, 0.0f), worldMatrix).xyz);
-    float3 tangent = normalize(mul(float4(input.inTangent, 0.0f), worldMatrix).xyz); //output.outTangent
+    float3 tangent = normalize(mul(float4(input.inTangent, 0.0f), worldMatrix).xyz);
     tangent = normalize(tangent - dot(tangent, output.outNormal) * output.outNormal);
     float3 binormal = cross(output.outNormal, tangent);
     output.outTBN = transpose(float3x3(tangent, binormal, output.outNormal));

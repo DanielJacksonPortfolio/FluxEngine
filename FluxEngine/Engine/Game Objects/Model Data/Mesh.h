@@ -14,29 +14,27 @@ using namespace DirectX;
 class Mesh
 {
 public:
-	struct Face
-	{
-		std::vector<XMFLOAT3> vertices;
-	};
 
-	Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale, aiMesh* mesh, std::vector<Texture>& textures, const XMMATRIX& transformMatrix, std::string directory);
+	Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, aiMesh* mesh, std::vector<Texture>& textures, const XMMATRIX& transformMatrix, std::string directory, std::vector<Vertex_PosTexNormTan>* modelVertices);
 	Mesh(const Mesh& mesh);
-	void Draw(const XMMATRIX& worldMatrix);
+	void Draw();
 	const XMMATRIX& GetTransformMatrix();
-	bool RayMeshIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float* nearestIntersect);
+	size_t GetNumFaces() { return faces.size(); }
+	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace traingle , float& intersectDistance);
+	bool RayMeshIntersect( XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance);
 private:
-	bool RayTriangleIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float* intersectDistance, int faceIndex);
-	bool RaySphereIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float* intersectDistance);
 
-	VertexBuffer<Vertex_PosTexNormTanBinorm> vertexBuffer;
+
+	VertexBuffer<Vertex_PosTexNormTan> vertexBuffer;
 	IndexBuffer indexBuffer;
 	ID3D11DeviceContext* deviceContext;
 	XMMATRIX transformMatrix;
-	XMMATRIX worldMatrix;
 	std::vector<Texture> textures;
 	aiMesh* mesh = nullptr;
-	std::vector<Face*> faces = {};
-	float boundingSphereRadius = 0.0f;
+	std::vector<aiFace> faces = {};
 	std::string directory;
+
+	std::vector<Vertex_PosTexNormTan> vertices;
+	std::vector<DWORD> indices;
 };
 

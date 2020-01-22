@@ -13,7 +13,6 @@ struct VS_INPUT
 	float2 inTexCoord : TEXCOORD;
 	float3 inNormal : NORMAL;
 	float3 inTangent : TANGENT;
-	float3 inBinormal : BINORMAL;
 };
 
 struct VS_OUTPUT
@@ -29,15 +28,14 @@ VS_OUTPUT main(VS_INPUT input)
 {
 	VS_OUTPUT output;
 	float3 newPos = input.inPos;
-	newPos.y += (sin(newPos.x * 10 + elapsedTime * 2.0) + sin(newPos.z * 0.1 + elapsedTime * 2.2)) * 0.5f;
+	newPos.y += (sin(newPos.x * 10 + elapsedTime * 2.0) + sin(newPos.z * 0.1 + elapsedTime * 2.2)) * 0.5f * 0.025;
 	output.outPos = mul(float4(newPos, 1.0f), wvpMatrix);
 	output.outWorldPos = mul(float4(newPos, 1.0f), worldMatrix).xyz;
 	output.outTexCoord = input.inTexCoord;
-	output.outNormal = normalize(mul(float4(input.inNormal, 0.0f), worldMatrix)).xyz;
-	float3 tangent = normalize(mul(float4(input.inTangent, 0.0f), worldMatrix)).xyz; //output.outTangent
+	output.outNormal = normalize(mul(float4(input.inNormal, 0.0f), worldMatrix).xyz);
+	float3 tangent = normalize(mul(float4(input.inTangent, 0.0f), worldMatrix).xyz);
 	tangent = normalize(tangent - dot(tangent, output.outNormal) * output.outNormal);
-	float3 binormal = normalize(mul(float4(input.inBinormal, 0.0f), worldMatrix)).xyz; //output.outTangent
-	binormal = normalize(binormal - dot(binormal, output.outNormal) * output.outNormal);
-	output.outTBN = float3x3(tangent, binormal, output.outNormal);
+	float3 binormal = cross(output.outNormal, tangent);
+	output.outTBN = transpose(float3x3(tangent, binormal, output.outNormal));
 	return output;
 }

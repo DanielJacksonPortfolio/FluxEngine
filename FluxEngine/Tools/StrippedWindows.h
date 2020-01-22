@@ -104,4 +104,6 @@
 #define NOMINMAX
 //#define STRICT
 
+#define XMQUATERNION XMVECTOR
+
 #include <Windows.h>

@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale, aiMesh* mesh, std::vector<Texture>& textures, const XMMATRIX& transformMatrix, std::string directory)
+Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, aiMesh* mesh, std::vector<Texture>& textures, const XMMATRIX& transformMatrix, std::string directory, std::vector<Vertex_PosTexNormTan>* modelVertices)
 {
 	this->deviceContext = deviceContext;
 	this->textures = textures;
@@ -10,27 +10,18 @@ Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale
 	this->directory = directory;
 	try
 	{
-		std::vector<Vertex_PosTexNormTanBinorm> vertices;
-
 		for (UINT i = 0; i < mesh->mNumVertices; ++i)
 		{
-			Vertex_PosTexNormTanBinorm vertex;
+			Vertex_PosTexNormTan vertex;
 
-			vertex.pos.x = mesh->mVertices[i].x * scale;
-			vertex.pos.y = mesh->mVertices[i].y * scale;
-			vertex.pos.z = mesh->mVertices[i].z * scale;
+			vertex.pos.x = mesh->mVertices[i].x;
+			vertex.pos.y = mesh->mVertices[i].y;
+			vertex.pos.z = mesh->mVertices[i].z;
 
 			if (mesh->mNormals != nullptr)
-			{
-				vertex.normal.x = mesh->mNormals[i].x;
-				vertex.normal.y = mesh->mNormals[i].y;
-				vertex.normal.z = mesh->mNormals[i].z;
-				//vertex.normal = *reinterpret_cast<XMFLOAT3*>(&mesh->mNormals[i]);
-			}
+				vertex.normal = *reinterpret_cast<XMFLOAT3*>(&mesh->mNormals[i]);
 			else
-			{
 				vertex.normal = { 0,0,0 };
-			}
 
 			if (mesh->mTextureCoords[0])
 			{
@@ -42,32 +33,19 @@ Mesh::Mesh(ID3D11Device* device, ID3D11DeviceContext* deviceContext, float scale
 				vertex.tangent = *reinterpret_cast<XMFLOAT3*>(&mesh->mTangents[i]);
 			else
 				vertex.tangent = { 0.0f,0.0f,0.0f };
-			/*if (mesh->mBitangents != nullptr)
-				vertex.binormal = *reinterpret_cast<XMFLOAT3*>(&mesh->mBitangents[i]);
-			else
-				vertex.binormal = { 0.0f,0.0f,0.0f };*/
 			vertices.push_back(vertex);
+			XMStoreFloat3(&vertex.pos,XMVector3Transform(XMLoadFloat3(&vertex.pos),transformMatrix));
+			modelVertices->push_back(vertex);
 		}
 
-		this->boundingSphereRadius = 0.0f;
-		for (int i = 0; i < vertices.size(); ++i)
-		{
-			float r = sqrt(vertices[i].pos.x * vertices[i].pos.x + vertices[i].pos.y * vertices[i].pos.y + vertices[i].pos.z * vertices[i].pos.z);
-			if (r > boundingSphereRadius)
-				boundingSphereRadius = r;
-		}
-
-		std::vector<DWORD> indices;
 		for (UINT i = 0; i < mesh->mNumFaces; ++i)
 		{
-			Face* tempFace = new Face();
 			aiFace face = mesh->mFaces[i];
 			for (UINT j = 0; j < face.mNumIndices; ++j)
 			{
-				tempFace->vertices.push_back(*reinterpret_cast<XMFLOAT3*>(&mesh->mVertices[face.mIndices[j]]));
 				indices.push_back(face.mIndices[j]);
 			}
-			faces.push_back(tempFace);
+			faces.push_back(face);
 		}
 
 		HRESULT hr = this->vertexBuffer.Init(device, vertices.data(), static_cast<UINT>(vertices.size()));
@@ -91,13 +69,11 @@ Mesh::Mesh(const Mesh& mesh)
 	this->vertexBuffer = mesh.vertexBuffer;
 	this->textures = mesh.textures;
 	this->transformMatrix = mesh.transformMatrix;
-	this->worldMatrix = mesh.worldMatrix;
 	this->mesh = mesh.mesh;
 }
 
-void Mesh::Draw(const XMMATRIX& worldMatrix)
+void Mesh::Draw()
 {
-	this->worldMatrix = worldMatrix;
 	//Set Textures
 	for (size_t i = 0; i < textures.size(); ++i)
 	{
@@ -112,7 +88,6 @@ void Mesh::Draw(const XMMATRIX& worldMatrix)
 		{
 			this->deviceContext->PSSetShaderResources(2, 1, textures[i].GetTextureResourceViewAddress());
 		}
-
 	}
 
 	///Draw Stuff///
@@ -123,119 +98,56 @@ void Mesh::Draw(const XMMATRIX& worldMatrix)
 	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
 }
 
+bool Mesh::RayMeshIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance)
+{
+	bool intersect = false;
+	if (faces.size() > 0)
+	{
+		worldMatrix = this->transformMatrix * worldMatrix;
+		for (int i = 0; i < faces.size(); ++i)
+			if (RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, faces[i], intersectDistance))
+				intersect = true;
+	}
+	return intersect;
+}
+
+bool Mesh::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace face, float& intersectDistance)
+{
+	if (face.mNumIndices == 3)
+	{
+		XMVECTOR vertex0 = XMVectorSet(vertices[face.mIndices[0]].pos.x, vertices[face.mIndices[0]].pos.y, vertices[face.mIndices[0]].pos.z, 1.0f);
+		XMVECTOR vertex1 = XMVectorSet(vertices[face.mIndices[1]].pos.x, vertices[face.mIndices[1]].pos.y, vertices[face.mIndices[1]].pos.z, 1.0f);
+		XMVECTOR vertex2 = XMVectorSet(vertices[face.mIndices[2]].pos.x, vertices[face.mIndices[2]].pos.y, vertices[face.mIndices[2]].pos.z, 1.0f);
+
+		XMVECTOR normal = XMVector3Normalize(XMVector3Transform(XMVector3Cross(vertex1 - vertex0, vertex2 - vertex0), XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)))) * (XMVectorGetX(XMMatrixDeterminant(worldMatrix)) < 0 ? -1 : 1);
+		
+		vertex0 = XMVector3Transform(vertex0, worldMatrix);
+		vertex1 = XMVector3Transform(vertex1, worldMatrix);
+		vertex2 = XMVector3Transform(vertex2, worldMatrix);
+
+		float normalDotRayDir = XMVectorGetX(XMVector3Dot(normal, rayDir));
+		if (fabs(normalDotRayDir) < static_cast<float>(1e-8))
+			return false;
+
+		float t = -1 * (XMVectorGetX(XMVector3Dot(normal, rayOrigin)) - XMVectorGetX(XMVector3Dot(normal, vertex0))) / normalDotRayDir;
+		if (t < 0) return false;
+
+		XMVECTOR pointOfIntersect = rayOrigin + t * rayDir;
+
+		if (XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex1 - vertex0, pointOfIntersect - vertex0))) < 0 ||
+			XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex2 - vertex1, pointOfIntersect - vertex1))) < 0 ||
+			XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex0 - vertex2, pointOfIntersect - vertex2))) < 0) return false;
+
+		float distance = XMVectorGetX(XMVector3Length(pointOfIntersect - rayOrigin));
+		if (intersectDistance > distance)
+			intersectDistance = distance;
+	
+		return true;
+	}
+	return false;
+}
 
 const XMMATRIX& Mesh::GetTransformMatrix()
 {
 	return this->transformMatrix;
-}
-
-bool Mesh::RayMeshIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float* nearestIntersect)
-{
-	XMMATRIX invWorld = XMMatrixInverse(nullptr, worldMatrix);
-	rayOrigin = XMVector3Transform(rayOrigin, invWorld);
-	rayDir = XMVector3Transform(rayDir, invWorld);
-	XMMATRIX invTransform = XMMatrixInverse(nullptr, transformMatrix);
-	rayOrigin = XMVector3Transform(rayOrigin, invTransform);
-	rayDir = XMVector3Transform(rayDir, invTransform);
-	XMVectorSetW(rayOrigin, 1.0f);
-	XMVectorSetW(rayDir, 0.0f);
-
-	bool intersect = false;
-	*nearestIntersect = INT_MAX;
-
-	//if (RaySphereIntersect(rayOrigin, rayDir, nearestIntersect))
-	//	return true;
-
-	if (faces.size() > 0)
-	{
-		for (int i = 0; i < faces.size(); ++i)
-		{
-			float intersectDistance;
-			if (RayTriangleIntersect(rayOrigin, rayDir, &intersectDistance, i))
-			{
-				intersect = true;
-				if (*nearestIntersect > intersectDistance)
-				{
-					*nearestIntersect = intersectDistance;
-				}
-			}
-		}
-		if (intersect)
-			return true;
-	}
-	return false;
-}
-
-bool Mesh::RaySphereIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float* intersectDistance)
-{
-	//XMMATRIX invWorld = XMMatrixInverse(nullptr, worldMatrix);
-	//XMStoreFloat3(&rayOrigin, XMVector3Transform(XMLoadFloat3(&rayOrigin), invWorld));
-
-	float a = XMVectorGetX(XMVector3Dot(rayDir, rayDir));
-	float b = 2*XMVectorGetX(XMVector3Dot(rayDir, rayOrigin));
-	float c = XMVectorGetX(XMVector3Dot(rayOrigin, rayOrigin)) - (boundingSphereRadius * boundingSphereRadius);
-	//XMFLOAT3 bf; XMStoreFloat3(&bf, XMVector3Dot(rayDir, rayOrigin));
-	//float b = 2*bf.x;
-	//XMFLOAT3 cf; XMStoreFloat3(&cf, XMVector3Dot(rayOrigin, rayOrigin));
-	//float c = cf.x - (boundingSphereRadius*boundingSphereRadius);
-	float discriminant = (b * b) - (4 * a * c);
-	if (discriminant > 0)
-		*intersectDistance = (-b - sqrt(discriminant)) / (2.0 * a);
-	else
-		*intersectDistance = -1.0f;
-	return discriminant > 0;
-
-}
-bool Mesh::RayTriangleIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float* intersectDistance, int faceIndex)
-{
-	//XMMATRIX invWorld = XMMatrixInverse(nullptr, worldMatrix);
-	//XMStoreFloat3(&rayOrigin, XMVector3Transform(XMLoadFloat3(&rayOrigin), invWorld));
-	//XMMATRIX invTransform = XMMatrixInverse(nullptr, transformMatrix);
-	//XMStoreFloat3(&rayOrigin, XMVector3Transform(XMLoadFloat3(&rayOrigin), invTransform));
-	Face* triangle = faces[faceIndex];
-	if (triangle->vertices.size() == 3)
-	{
-		XMVECTOR vert1 = *reinterpret_cast<XMVECTOR*>(&triangle->vertices[0]);
-		XMVECTOR vert2 = *reinterpret_cast<XMVECTOR*>(&triangle->vertices[1]);
-		XMVECTOR vert3 = *reinterpret_cast<XMVECTOR*>(&triangle->vertices[2]);
-		XMFLOAT3 vert1f; XMStoreFloat3(&vert1f, vert1);
-		XMFLOAT3 vert2f; XMStoreFloat3(&vert2f, vert2);
-		XMFLOAT3 vert3f; XMStoreFloat3(&vert3f, vert3);
-
-		XMVECTOR U = vert2 - vert1;
-		XMVECTOR V = vert3 - vert1;
-
-		XMFLOAT3 faceNormal = XMFLOAT3();
-		XMStoreFloat3(&faceNormal, XMVector3Normalize(XMVector3Cross(U, V)));
-
-		float D = -1 * ((faceNormal.x * vert1f.x) + (faceNormal.y * vert1f.y) + (faceNormal.z * vert1f.z));
-		float ep1 = faceNormal.x * XMVectorGetX(rayDir) + faceNormal.y * XMVectorGetY(rayDir) + faceNormal.z * XMVectorGetZ(rayDir);
-		float ep2 = (faceNormal.x * (XMVectorGetX(rayOrigin) - XMVectorGetX(rayDir)) + faceNormal.y * (XMVectorGetY(rayOrigin) - XMVectorGetY(rayDir)) + faceNormal.z * (XMVectorGetZ(rayOrigin) - XMVectorGetZ(rayDir)));
-		if (ep2 == 0) return false;
-		float t = -(ep1 + D) / ep2;
-
-		XMFLOAT3 pif = XMFLOAT3(XMVectorGetX(rayOrigin) + XMVectorGetX(rayDir) * t, XMVectorGetY(rayOrigin) + XMVectorGetY(rayDir) * t, XMVectorGetZ(rayOrigin) + XMVectorGetZ(rayDir) * t);
-		XMVECTOR planeIntersect = XMLoadFloat3(&pif);
-		//// Research Barycentric Coordinates
-		XMVECTOR cp1 = XMVector3Cross((vert3 - vert2), (planeIntersect - vert2));
-		XMVECTOR cp2 = XMVector3Cross((vert3 - vert2), (vert1 - vert2));
-		if (XMVectorGetX(XMVector3Dot(cp1, cp2)) >= 0)
-		{
-			cp1 = XMVector3Cross((vert3 - vert1), (planeIntersect - vert1));
-			cp2 = XMVector3Cross((vert3 - vert1), (vert2 - vert1));
-			if (XMVectorGetX(XMVector3Dot(cp1, cp2)) >= 0)
-			{
-				cp1 = XMVector3Cross((vert3 - vert1), (planeIntersect - vert1));
-				cp2 = XMVector3Cross((vert3 - vert1), (vert3 - vert1));
-				if (XMVectorGetX(XMVector3Dot(cp1, cp2)) >= 0)
-				{
-					XMFLOAT3 intersectLength;
-					XMStoreFloat3(&intersectLength, XMVector3Length(planeIntersect - rayOrigin));
-					*intersectDistance = intersectLength.x;
-					return true;
-				}
-			}
-		}
-	}
-	return false;
 }
