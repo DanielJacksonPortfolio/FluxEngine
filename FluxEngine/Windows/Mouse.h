@@ -71,6 +71,13 @@ private:
 	void OnMouseEnter();
 	void OnMouseMoveRaw(int x, int y);
 
+
+	float GetMouseDiffX();
+	float GetMouseDiffY();
+	void AddMouseDiffX(float diffX);
+	void AddMouseDiffY(float diffY);
+	void ResetMouseDiff();
+
 	std::queue<Event> eventBuffer;
 	bool leftIsPressed = false;
 	bool rightIsPressed = false;
@@ -78,5 +85,6 @@ private:
 	bool isInWindow = false;
 	int wheelDeltaCarry = 0;
 	int x = 0, y = 0;
+	float xDiff = 0.0f, yDiff = 0.0f;
 };
 

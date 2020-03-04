@@ -98,20 +98,20 @@ void Mesh::Draw()
 	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
 }
 
-bool Mesh::RayMeshIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance)
+bool Mesh::RayMeshIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation)
 {
 	bool intersect = false;
 	if (faces.size() > 0)
 	{
 		worldMatrix = this->transformMatrix * worldMatrix;
 		for (int i = 0; i < faces.size(); ++i)
-			if (RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, faces[i], intersectDistance))
+			if (RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, faces[i], intersectDistance, intersectLocation))
 				intersect = true;
 	}
 	return intersect;
 }
 
-bool Mesh::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace face, float& intersectDistance)
+bool Mesh::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace face, float& intersectDistance, XMVECTOR& pointOfIntersect)
 {
 	if (face.mNumIndices == 3)
 	{
@@ -132,7 +132,7 @@ bool Mesh::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECT
 		float t = -1 * (XMVectorGetX(XMVector3Dot(normal, rayOrigin)) - XMVectorGetX(XMVector3Dot(normal, vertex0))) / normalDotRayDir;
 		if (t < 0) return false;
 
-		XMVECTOR pointOfIntersect = rayOrigin + t * rayDir;
+		pointOfIntersect = rayOrigin + t * rayDir;
 
 		if (XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex1 - vertex0, pointOfIntersect - vertex0))) < 0 ||
 			XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex2 - vertex1, pointOfIntersect - vertex1))) < 0 ||

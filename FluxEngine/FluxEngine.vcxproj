@@ -177,7 +177,7 @@
     <ClCompile Include="Application\Application.cpp" />
     <ClCompile Include="Engine\Buffers and Shaders\Shader.cpp" />
     <ClCompile Include="Engine\Buffers and Shaders\PixelShader.cpp" />
-    <ClCompile Include="Engine\Game Objects\RenderableGameObject.cpp" />
+    <ClCompile Include="Engine\Game Objects\PropObject.cpp" />
     <ClCompile Include="Engine\Game Objects\Model Data\Model.cpp" />
     <ClCompile Include="Engine\Game Objects\Model Data\Mesh.cpp" />
     <ClCompile Include="Engine\Game Objects\Lights\PointLight.cpp" />
@@ -209,7 +209,7 @@
     <ClInclude Include="Engine\Buffers and Shaders\Shader.h" />
     <ClInclude Include="Engine\Buffers and Shaders\PixelShader.h" />
     <ClInclude Include="Engine\Buffers and Shaders\IndexBuffer.h" />
-    <ClInclude Include="Engine\Game Objects\RenderableGameObject.h" />
+    <ClInclude Include="Engine\Game Objects\PropObject.h" />
     <ClInclude Include="Engine\Game Objects\Model Data\Model.h" />
     <ClInclude Include="Engine\Game Objects\Model Data\Mesh.h" />
     <ClInclude Include="Engine\Game Objects\Lights\PointLight.h" />

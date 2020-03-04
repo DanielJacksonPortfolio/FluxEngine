@@ -24,5 +24,7 @@ public:
 private:
 	Timer timer;
 	bool qPressed = false;
+	bool ePressed = false;
+	int toolMode = 1;
 };
 

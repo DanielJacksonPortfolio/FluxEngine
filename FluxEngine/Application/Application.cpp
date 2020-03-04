@@ -185,6 +185,9 @@ void Application::Update()
 		Keyboard::Event kbe = keyboard.ReadKey();
 		unsigned char keycode = kbe.GetKeyCode();
 	}
+
+	mouse.ResetMouseDiff();
+
 	while (!mouse.EventBufferIsEmpty())
 	{
 		Mouse::Event me = mouse.ReadEvent();
@@ -192,30 +195,54 @@ void Application::Update()
 		{
 			if (me.GetType() == Mouse::Event::Type::RAW_MOVE)
 			{
+				mouse.AddMouseDiffX(static_cast<float>(me.GetPosX()));
+				mouse.AddMouseDiffY(static_cast<float>(me.GetPosY()));
+
 				if (this->gfx.camera != nullptr)
 				{
-					if (!this->gfx.camera->GetLookAtMode())
-					{
-						if (this->gfx.camera->GetUpVectorFloat().y > 0)
-							this->gfx.camera->AdjustRotation(static_cast<float>(me.GetPosY()) * 0.01f, static_cast<float>(me.GetPosX()) * 0.01f, 0.0f);
-						else
-							this->gfx.camera->AdjustRotation(static_cast<float>(me.GetPosY()) * 0.01f, static_cast<float>(me.GetPosX()) * -0.01f, 0.0f);
-					}
+					float diffX = mouse.GetMouseDiffX();
+					float diffY = mouse.GetMouseDiffY();
+
+					this->gfx.camera->RotateByAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), diffX * 0.01f);
+					this->gfx.camera->RotateByAxis(this->gfx.camera->GetRightVector(), diffY * 0.01f);
 				}
 			}
 		}
 	}
 
-
-
 	if (this->gfx.camera != nullptr)
 	{
-		this->gfx.camera->SetLookAtPos();
-
 		if (keyboard.KeyIsPressed('E') && !this->gfx.showUI)
 		{
-			RenderableGameObject* object = gfx.SelectObject(mouse.GetPosX(), mouse.GetPosY());
-			gfx.SetObject(object);
+			if (ePressed == false)
+			{
+				XMVECTOR rayDirection = XMVECTOR();
+				XMVECTOR collisionLocation = XMVECTOR();
+				PropObject* object = gfx.PickObject(mouse.GetPosX(), mouse.GetPosY(), rayDirection, collisionLocation);
+				if(toolMode == 1)
+					gfx.SetObject(object);
+				if(toolMode == 2)
+					gfx.PushObject(object, rayDirection, collisionLocation);
+				if(toolMode == 3)
+					gfx.PushObject(object, -rayDirection, collisionLocation);
+			}
+			ePressed = true;
+		}
+		if (!keyboard.KeyIsPressed('E'))
+		{
+			ePressed = false;
+		}
+		if (keyboard.KeyIsPressed('1'))
+		{
+			toolMode = 1;
+		}
+		if (keyboard.KeyIsPressed('2'))
+		{
+			toolMode = 2;
+		}
+		if (keyboard.KeyIsPressed('3'))
+		{
+			toolMode = 3;
 		}
 		if (keyboard.KeyIsPressed('Q'))
 		{
@@ -231,29 +258,33 @@ void Application::Update()
 		}
 		if (keyboard.KeyIsPressed('W'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetForwardVector() * gfx.camera->GetVelocity().x * dt);
+			this->gfx.camera->AdjustPosition(this->gfx.camera->GetForwardVector() * XMVectorGetX(gfx.camera->GetLVelocity()) * dt);
 		}
 		if (keyboard.KeyIsPressed('A'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetLeftVector() * gfx.camera->GetVelocity().x * dt);
+			this->gfx.camera->AdjustPosition(this->gfx.camera->GetLeftVector() * XMVectorGetX(gfx.camera->GetLVelocity()) * dt);
 		}
 		if (keyboard.KeyIsPressed('S'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetBackwardVector() * gfx.camera->GetVelocity().x * dt);
+			this->gfx.camera->AdjustPosition(this->gfx.camera->GetBackwardVector() * XMVectorGetX(gfx.camera->GetLVelocity()) * dt);
 		}
 		if (keyboard.KeyIsPressed('D'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetRightVector() * gfx.camera->GetVelocity().x * dt);
+			this->gfx.camera->AdjustPosition(this->gfx.camera->GetRightVector() * XMVectorGetX(gfx.camera->GetLVelocity()) * dt);
 		}
 		if (keyboard.KeyIsPressed(VK_SPACE))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetUpVector() * gfx.camera->GetVelocity().x * dt);
+			this->gfx.camera->AdjustPosition(this->gfx.camera->GetUpVector() * XMVectorGetX(gfx.camera->GetLVelocity()) * dt);
 		}
 		if (keyboard.KeyIsPressed(VK_SHIFT))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetDownVector() * gfx.camera->GetVelocity().x * dt);
+			this->gfx.camera->AdjustPosition(this->gfx.camera->GetDownVector() * XMVectorGetX(gfx.camera->GetLVelocity()) * dt);
 		}
 	}
+
+	gfx.Update(dt);
+
+
 	timer.Restart();
 }
 

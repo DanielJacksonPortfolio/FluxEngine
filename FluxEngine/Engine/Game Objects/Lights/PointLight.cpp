@@ -5,8 +5,7 @@ bool PointLight::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	if (!model.Init("Data//Objects//light.fbx", device, deviceContext, cb_vertexShader, cb_pixelShader))
 		return false;
 
-	this->SetPosition(0.0f, 0.0f, 0.0f);
-	this->SetRotation(XM_PIDIV2, 0.0f, 0.0f);
+	GameObject::Init(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
 	this->UpdateMatrix();
 	return true;
 }
@@ -25,9 +24,9 @@ PointLight::PointLight(std::vector<std::string> data, ID3D11Device* device, ID3D
 std::string PointLight::Save()
 {
 	std::string output = "P,";
-	output += std::to_string(pos.x) + ",";
-	output += std::to_string(pos.y) + ",";
-	output += std::to_string(pos.z) + ",";	
+	output += std::to_string(XMVectorGetX(position)) + ",";
+	output += std::to_string(XMVectorGetY(position)) + ",";
+	output += std::to_string(XMVectorGetZ(position)) + ",";
 	output += std::to_string(lightColor.x) + ",";
 	output += std::to_string(lightColor.y) + ",";
 	output += std::to_string(lightColor.z) + ",";	

@@ -42,10 +42,10 @@ void Model::SetOrigin()
 	origin.y = origin.y / vertices.size();
 	origin.z = origin.z / vertices.size();
 	this->originVector = XMLoadFloat3(&origin);
-	SetBoundingRadius();
+	SetBoundingShape(XMMatrixIdentity());
 }
 
-void Model::SetBoundingRadius()
+void Model::SetBoundingShape(XMMATRIX rotation)
 {
 	this->modelBoundingSphereRadius = 0.0f;
 	float minDistance = INT_MAX;
@@ -60,6 +60,50 @@ void Model::SetBoundingRadius()
 		if (distanceFromOrigin > maxDistance) maxDistance = distanceFromOrigin;
 	}
 	modelBoundingSphereRadius = maxDistance;
+
+	float sphereVolume = (4.0f / 3.0f) * XM_PI * std::powf(modelBoundingSphereRadius, 3.0f);
+	
+	this->aabbw = 0.0f;
+	this->aabbh = 0.0f;
+	this->aabbd = 0.0f;
+	float minDistanceX = 0.0f;
+	float maxDistanceX = 0.0f;
+	float minDistanceY = 0.0f;
+	float maxDistanceY = 0.0f;
+	float minDistanceZ = 0.0f;
+	float maxDistanceZ = 0.0f;
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		
+		float x = vertices[i].pos.x - XMVectorGetX(this->originVector);
+		float y = vertices[i].pos.y - XMVectorGetY(this->originVector);
+		float z = vertices[i].pos.z - XMVectorGetZ(this->originVector);
+
+		XMVECTOR xyz = XMVector3Transform(XMVectorSet(x, y, z, 0), rotation);
+		x = XMVectorGetX(xyz);
+		y = XMVectorGetY(xyz);
+		z = XMVectorGetZ(xyz);
+
+		if (x > maxDistanceX) maxDistanceX = x;
+		if (x < minDistanceX) minDistanceX = x;
+		if (y > maxDistanceY) maxDistanceY = y;
+		if (y < minDistanceY) minDistanceY = y;
+		if (z > maxDistanceZ) maxDistanceZ = z;
+		if (z < minDistanceZ) minDistanceZ = z;
+	}
+	aabbw = maxDistanceX - minDistanceX;
+	aabbh = maxDistanceY - minDistanceY;
+	aabbd = maxDistanceZ - minDistanceZ;
+
+	this->minAABBCoord = XMVectorSet(minDistanceX, minDistanceY, minDistanceZ, 0);
+	this->maxAABBCoord = XMVectorSet(maxDistanceX, maxDistanceY, maxDistanceZ, 0);
+
+	float aabbVolume = aabbw * aabbh * aabbd;
+
+	if (aabbVolume < sphereVolume)
+		boundingShape = BoundingShape::AABB;
+	else
+		boundingShape = BoundingShape::SPHERE;
 }
 
 void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
@@ -78,23 +122,42 @@ void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatr
 	}
 }
 
-void Model::DrawDebug(XMVECTOR position, float scale, const XMMATRIX& viewProjectionMatrix, Model* sphere)
+void Model::DrawDebug(XMVECTOR position, float scale, const XMMATRIX& viewProjectionMatrix, Model* sphere, Model* box)
 {
-	objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
-	XMMATRIX newWorld = XMMatrixScaling(objectBoundingSphereRadius, objectBoundingSphereRadius, objectBoundingSphereRadius) * XMMatrixTranslationFromVector(position);
-	sphere->Draw(newWorld, viewProjectionMatrix);
+	if (boundingShape == BoundingShape::SPHERE)
+	{
+		objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
+		XMMATRIX newWorld = XMMatrixScaling(objectBoundingSphereRadius, objectBoundingSphereRadius, objectBoundingSphereRadius) * XMMatrixTranslationFromVector(position);
+		sphere->Draw(newWorld, viewProjectionMatrix);
+	}
+	else
+	{
+		XMMATRIX newWorld = XMMatrixScaling(aabbw*scale, aabbh*scale, aabbd * scale) * XMMatrixTranslationFromVector(position);
+		box->Draw(newWorld, viewProjectionMatrix);
+	}
 }
 
-bool Model::RayModelIntersect(XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect)
+bool Model::RayModelIntersect(XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
 {
-	objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
-	if (RaySphereIntersect(position, rayOrigin, rayDir))
+	bool initialCheck = false;
+	if (boundingShape == BoundingShape::SPHERE)
+	{
+		objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
+		if (RaySphereIntersect(position, rayOrigin, rayDir))
+			initialCheck = true;
+	}
+	else
+	{
+		if (RayAABBIntersect(scale,position, rayOrigin, rayDir))
+			initialCheck = true;
+	}
+	if(initialCheck)
 	{
 		bool intersect = false;
 		for (int i = 0; i < meshes.size(); ++i)
 		{
 			float intersectDistance = INT_MAX;
-			if (meshes[i]->RayMeshIntersect(XMMatrixTranslationFromVector(-originVector) * worldMatrix, rayOrigin, rayDir, intersectDistance))
+			if (meshes[i]->RayMeshIntersect(XMMatrixTranslationFromVector(-originVector) * worldMatrix, rayOrigin, rayDir, intersectDistance, intersectLocation))
 			{
 				intersect = true;
 				if (nearestIntersect > intersectDistance)
@@ -115,6 +178,25 @@ bool Model::RaySphereIntersect(XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR r
 	float c = XMVectorGetX(XMVector3Dot(oc, oc)) - (objectBoundingSphereRadius * objectBoundingSphereRadius);
 	return 0 < ((b * b) - (4 * a * c));
 
+}
+
+bool Model::RayAABBIntersect(float scale, XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR rayDir)
+{
+	XMVECTOR dirfrac = XMVectorSet(1 / XMVectorGetX(rayDir), 1 / XMVectorGetY(rayDir), 1 / XMVectorGetZ(rayDir), 0);
+
+	float t1 = (XMVectorGetX(scale*minAABBCoord+position) - XMVectorGetX(rayOrigin)) * XMVectorGetX(dirfrac);
+	float t2 = (XMVectorGetX(scale*maxAABBCoord+position) - XMVectorGetX(rayOrigin)) * XMVectorGetX(dirfrac);
+	float t3 = (XMVectorGetY(scale*minAABBCoord+position) - XMVectorGetY(rayOrigin)) * XMVectorGetY(dirfrac);
+	float t4 = (XMVectorGetY(scale*maxAABBCoord+position) - XMVectorGetY(rayOrigin)) * XMVectorGetY(dirfrac);
+	float t5 = (XMVectorGetZ(scale*minAABBCoord+position) - XMVectorGetZ(rayOrigin)) * XMVectorGetZ(dirfrac);
+	float t6 = (XMVectorGetZ(scale*maxAABBCoord+position) - XMVectorGetZ(rayOrigin)) * XMVectorGetZ(dirfrac);
+
+	float tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
+	float tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
+
+	if (tmax < 0 || tmin > tmax)
+		return false;
+	return true;
 }
 
 

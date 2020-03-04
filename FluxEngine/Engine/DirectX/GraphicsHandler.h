@@ -7,7 +7,7 @@
 #include "../../Resources/Config.h"
 
 #include "../Game Objects/Camera.h"
-#include "../Game Objects/RenderableGameObject.h"
+#include "../Game Objects/PropObject.h"
 #include "../Game Objects/Lights/PointLight.h"
 #include "../Game Objects/Lights/DirectionalLight.h"
 
@@ -28,17 +28,16 @@ public:
 
 	bool Init(HWND hWnd, int width, int height, Config* config);
 	void RenderFrame();
-	void SetObject(RenderableGameObject* obj);
-	RenderableGameObject* SelectObject(float x, float y);
+	void SetObject(PropObject* obj);
+	void PushObject(PropObject* obj, XMVECTOR rayDirection, XMVECTOR collisionLocation);
+	PropObject* PickObject(float x, float y, XMVECTOR& rayDirection, XMVECTOR& collisionLocation);
+	void Update(float dt);
 
 	Camera* camera;
-	RenderableGameObject* currentObject;
-	RenderableGameObject* skybox;
-	RenderableGameObject* debugSphere;
+	PropObject* currentObject;
 
 	PointLight* pointLight;
 	DirectionalLight* directionalLight;
-	std::unordered_map<std::string, Bindable*> bindables = {};
 
 	bool showUI = false;
 
@@ -46,6 +45,9 @@ private:
 	bool InitDirectX();
 	bool InitShaders();
 	bool InitScene();
+	void SphereSphereCollision(PropObject* obj1, PropObject* obj2);
+	void SpherePlaneCollision(PropObject* obj, PropObject* plane);
+	void ResolvePenetrations();
 	void InitImGUI();
 
 	void RenderGUI();
@@ -81,12 +83,18 @@ private:
 	std::vector<Camera*> cameras = {};
 	std::vector<PointLight*> pLights = {};
 	std::vector<DirectionalLight*> dLights = {};
-	std::vector<std::pair<std::string, RenderableGameObject*>> objects = {};
+	std::vector<std::pair<std::string, PropObject*>> objects = {};
 
 	int cameraID = 0;
 	int pLightID = 0;
 	int dLightID = 0;
 	int objectID = 0;
+
+	PropObject* skybox;
+	PropObject* floor;
+	PropObject* debugSphere;
+	PropObject* debugCube;
+	std::unordered_map<std::string, Bindable*> bindables = {};
 
 	bool showLights = true;
 	bool showPLControls = true;
@@ -95,10 +103,15 @@ private:
 	bool showObjectControls = true;
 	bool showGeneralControls = true;
 	bool showNewObjectWindow = false;
+	bool showDebugWindow = false;
 
+	bool gravityEnabled = false;
 	float shininess = 8.0f;
-	char sceneName[256] = "testing";
+	char sceneName[256] = "cube";
 	char newObjectPath[256] = "data//objects//";
+
+	XMFLOAT3 GRAVITY = { 0.0f, -0.00098f, 0.0f };
+	float pushStrength = 1.0f;
 
 	XMVECTOR pickRayOrigin = XMVECTOR();
 	XMVECTOR pickRayDirection = XMVECTOR();
@@ -135,7 +148,9 @@ private:
 	XMMATRIX viewMatrix = XMMatrixIdentity();
 	XMMATRIX projectionMatrix = XMMatrixIdentity();
 
+	Model* testModel;
 	ConstantBuffer<CB_vertexShader> cb_vertexShader;
 	ConstantBuffer<CB_pixelShader> cb_pixelShader;
+
 };
 

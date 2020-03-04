@@ -20,12 +20,12 @@ public:
 	void Draw();
 	const XMMATRIX& GetTransformMatrix();
 	size_t GetNumFaces() { return faces.size(); }
-	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace traingle , float& intersectDistance);
-	bool RayMeshIntersect( XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance);
+	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace traingle , float& intersectDistance, XMVECTOR& pointOfIntersect);
+	bool RayMeshIntersect( XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation);
 private:
-
-
+	std::vector<Vertex_PosTexNormTan> vertices;
 	VertexBuffer<Vertex_PosTexNormTan> vertexBuffer;
+	std::vector<DWORD> indices;
 	IndexBuffer indexBuffer;
 	ID3D11DeviceContext* deviceContext;
 	XMMATRIX transformMatrix;
@@ -34,7 +34,5 @@ private:
 	std::vector<aiFace> faces = {};
 	std::string directory;
 
-	std::vector<Vertex_PosTexNormTan> vertices;
-	std::vector<DWORD> indices;
 };
 

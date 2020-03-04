@@ -34,6 +34,32 @@ const int Mouse::Event::GetPosY()
 }
 
 
+float Mouse::GetMouseDiffX()
+{
+	return this->xDiff;
+}
+
+float Mouse::GetMouseDiffY()
+{
+	return this->yDiff;
+}
+
+void Mouse::AddMouseDiffX(float diffX)
+{
+	this->xDiff += diffX;
+}
+
+void Mouse::AddMouseDiffY(float diffY)
+{
+	this->yDiff += diffY;
+}
+
+void Mouse::ResetMouseDiff()
+{
+	this->xDiff = 0.0f;
+	this->yDiff = 0.0f;
+}
+
 void Mouse::OnLeftPressed(int x, int y)
 {
 	this->leftIsPressed = true;

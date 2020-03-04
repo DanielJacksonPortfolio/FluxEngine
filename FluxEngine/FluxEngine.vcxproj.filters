@@ -81,9 +81,6 @@
     <ClCompile Include="Engine\Game Objects\GameObject.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Game Objects\RenderableGameObject.cpp">
-      <Filter>Source\Engine\Game Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Game Objects\Model Data\Color.cpp">
       <Filter>Source\Engine\Game Objects\Model Data</Filter>
     </ClCompile>
@@ -101,6 +98,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Game Objects\Lights\PointLight.cpp">
       <Filter>Source\Engine\Game Objects\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Game Objects\PropObject.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -182,9 +182,6 @@
     <ClInclude Include="Engine\Game Objects\GameObject.h">
       <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Game Objects\RenderableGameObject.h">
-      <Filter>Headers\Engine\Game Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Game Objects\Model Data\Color.h">
       <Filter>Headers\Engine\Game Objects\Model Data</Filter>
     </ClInclude>
@@ -205,6 +202,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Game Objects\Lights\PointLight.h">
       <Filter>Headers\Engine\Game Objects\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\PropObject.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

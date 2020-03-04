@@ -1,7 +1,7 @@
 #pragma once
-#include "../RenderableGameObject.h"
+#include "../PropObject.h"
 #include "Light.h"
-class PointLight : public RenderableGameObject, public Light
+class PointLight : public PropObject, public Light
 {
 public:
 	PointLight() {}

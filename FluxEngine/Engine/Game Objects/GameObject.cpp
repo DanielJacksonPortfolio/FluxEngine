@@ -1,127 +1,64 @@
 #include "GameObject.h"
 
-const XMVECTOR& GameObject::GetPositionVector() const
+bool GameObject::Init(XMVECTOR position, XMVECTOR orientation, std::string name)
 {
-	return this->posVector;
+	if (name == "")
+	{
+		name = "Object " + std::to_string(++OBJECT_COUNT);
+	}
+	this->name = name;
+	this->position = position;
+	this->SetOrientation(orientation);
+
+	return true;
 }
 
-const XMFLOAT3& GameObject::GetPositionFloat3() const
+const XMVECTOR& GameObject::GetPosition() const
 {
-	return this->pos;
+	return this->position;
 }
 
-const XMVECTOR& GameObject::GetRotationVector() const
+const XMQUATERNION& GameObject::GetOrientation() const
 {
-	return this->rotVector;
+	return orientation;
 }
 
-const XMFLOAT3& GameObject::GetRotationFloat3() const
+const XMMATRIX& GameObject::GetOrientationMatrix() const
 {
-	return this->rot;
+	return XMMatrixRotationQuaternion(orientation);
 }
 
 const XMVECTOR& GameObject::GetForwardVector(bool omitY)
 {
-	if (omitY)
-		return this->forwardVector_noY;
-	else
-		return this->forwardVector;
+	return this->forwardVector;
 }
 
 const XMVECTOR& GameObject::GetLeftVector(bool omitY)
 {
-	if (omitY)
-		return this->leftVector_noY;
-	else
-		return this->leftVector;
+	return this->leftVector;
 }
 
 const XMVECTOR& GameObject::GetRightVector(bool omitY)
 {
-	if (omitY)
-		return this->rightVector_noY;
-	else
-		return this->rightVector;
+	return this->rightVector;
 }
 
 const XMVECTOR& GameObject::GetBackwardVector(bool omitY)
 {
-	if (omitY)
-		return this->backwardVector_noY;
-	else
-		return this->backwardVector;
+	return this->backwardVector;
 }
 const XMVECTOR& GameObject::GetUpVector(bool omitY)
 {
-	if (omitY)
-		return this->upVector_noY;
-	else
-		return this->upVector;
+	return this->upVector;
 }
 const XMVECTOR& GameObject::GetDownVector(bool omitY)
 {
-	if (omitY)
-		return this->downVector_noY;
-	else
-		return this->downVector;
+	return this->downVector;
 }
 
-const XMFLOAT3 GameObject::GetForwardVectorFloat(bool omitY)
+XMMATRIX GameObject::GetRotationMatrix() const
 {
-	XMFLOAT3 val;
-	if (omitY)
-		XMStoreFloat3(&val, this->forwardVector_noY);
-	else
-		XMStoreFloat3(&val, this->forwardVector);
-	return val;
-}
-;
-const XMFLOAT3 GameObject::GetLeftVectorFloat(bool omitY)
-{
-	XMFLOAT3 val;
-	if (omitY)
-		XMStoreFloat3(&val, this->leftVector_noY);
-	else
-		XMStoreFloat3(&val, this->leftVector);
-	return val;
-}
-
-const XMFLOAT3 GameObject::GetRightVectorFloat(bool omitY)
-{
-	XMFLOAT3 val;
-	if (omitY)
-		XMStoreFloat3(&val, this->rightVector_noY);
-	else
-		XMStoreFloat3(&val, this->rightVector);
-	return val;
-}
-
-const XMFLOAT3 GameObject::GetBackwardVectorFloat(bool omitY)
-{
-	XMFLOAT3 val;
-	if (omitY)
-		XMStoreFloat3(&val, this->backwardVector_noY);
-	else
-		XMStoreFloat3(&val, this->backwardVector);
-	return val;
-}
-const XMFLOAT3 GameObject::GetUpVectorFloat(bool omitY)
-{
-	XMFLOAT3 val;
-	if (omitY)
-		XMStoreFloat3(&val, this->upVector_noY);
-	else
-		XMStoreFloat3(&val, this->upVector);
-	return val;
-}
-const XMFLOAT3 GameObject::GetDownVectorFloat(bool omitY)
-{
-	XMFLOAT3 val;
-	if (omitY)
-		XMStoreFloat3(&val, this->downVector_noY);
-	else
-		XMStoreFloat3(&val, this->downVector);
-	return val;
+	return this->rotationMatrix;
 }
 
 bool& GameObject::GetLockedPos(int dimension) 
@@ -129,48 +66,9 @@ bool& GameObject::GetLockedPos(int dimension)
 	return this->lockedPos[dimension]; 
 }
 
-void GameObject::SetLockedPos(bool lockVal, int dimension) 
-{
-	this->lockedPos[dimension] = lockVal;
-}
-
-bool& GameObject::GetLockedRot(int dimension)
-{
-	return this->lockedRot[dimension];
-}
-
-void GameObject::SetLockedRot(bool lockVal, int dimension)
-{
-	this->lockedRot[dimension] = lockVal;
-}
-
 std::string& GameObject::GetName()
 {
-	return this->objectName;
-}
-
-void GameObject::SetName(std::string name)
-{
-	this->objectName = name;
-}
-
-XMFLOAT3& GameObject::GetVelocity()
-{
-	return this->velocity;
-}
-
-void GameObject::SetVelocity(XMFLOAT3 v) 
-{
-	this->velocity = v;
-}
-float& GameObject::GetAcceleration()
-{
-	return this->acceleration;
-}
-
-void GameObject::SetAcceleration(float a)
-{
-	this->acceleration = a;
+	return this->name;
 }
 
 void GameObject::UpdateMatrix()
@@ -180,35 +78,24 @@ void GameObject::UpdateMatrix()
 
 void GameObject::UpdateDirectionVectors()
 {
-	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, 0.0f);
-	this->forwardVector = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
-	this->backwardVector = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
-	this->leftVector = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotationMatrix);
-	this->rightVector = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotationMatrix);
-	this->upVector = XMVector3TransformCoord(this->DEFAULT_UP_VECTOR, vecRotationMatrix);
-	this->downVector = XMVector3TransformCoord(this->DEFAULT_DOWN_VECTOR, vecRotationMatrix);
+	this->forwardVector = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), this->rotationMatrix);
+	this->backwardVector = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), this->rotationMatrix);
+	this->rightVector = XMVector3TransformNormal(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), this->rotationMatrix);
+	this->leftVector = XMVector3TransformNormal(XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f), this->rotationMatrix);
+	this->upVector = XMVector3TransformNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), this->rotationMatrix);
+	this->downVector = XMVector3TransformNormal(XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f), this->rotationMatrix);
 
-	XMMATRIX vecRotationMatrixNoY = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
-	this->forwardVector_noY = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrixNoY);
-	this->backwardVector_noY = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrixNoY);
-	this->leftVector_noY = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotationMatrixNoY);
-	this->rightVector_noY = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotationMatrixNoY);
-	this->upVector_noY = XMVector3TransformCoord(this->DEFAULT_UP_VECTOR, vecRotationMatrixNoY);
-	this->downVector_noY = XMVector3TransformCoord(this->DEFAULT_DOWN_VECTOR, vecRotationMatrixNoY);
+	//this->forwardVector = XMVector3TransformNormal(DEFAULT_FORWARD_VECTOR, this->rotationMatrix);
+	//this->backwardVector = XMVector3TransformNormal(DEFAULT_BACKWARD_VECTOR, this->rotationMatrix);
+	//this->rightVector = XMVector3TransformNormal(DEFAULT_RIGHT_VECTOR, this->rotationMatrix);
+	//this->leftVector = XMVector3TransformNormal(DEFAULT_LEFT_VECTOR, this->rotationMatrix);
+	//this->upVector = XMVector3TransformNormal(DEFAULT_UP_VECTOR, this->rotationMatrix);
+	//this->downVector = XMVector3TransformNormal(DEFAULT_DOWN_VECTOR, this->rotationMatrix);
 }
 
 void GameObject::SetPosition(const XMVECTOR& pos)
 {
-	XMFLOAT3 newPos;
-	XMStoreFloat3(&newPos, pos);
-	if (lockedPos[0])
-		newPos.x = this->pos.x;
-	if (lockedPos[1])
-		newPos.y = this->pos.y;
-	if (lockedPos[2])
-		newPos.z = this->pos.z;
-	this->pos = newPos;
-	this->posVector = XMLoadFloat3(&this->pos);
+	this->position = pos;
 	this->UpdateMatrix();
 }
 
@@ -216,13 +103,12 @@ void GameObject::SetPosition(const XMFLOAT3& pos)
 {
 	XMFLOAT3 newPos = pos;
 	if (lockedPos[0])
-		newPos.x = this->pos.x;
+		newPos.x = XMVectorGetX(this->position);
 	if (lockedPos[1])
-		newPos.y = this->pos.y;
+		newPos.y = XMVectorGetY(this->position);
 	if (lockedPos[2])
-		newPos.z = this->pos.z;
-	this->pos = newPos;
-	this->posVector = XMLoadFloat3(&this->pos);
+		newPos.z = XMVectorGetZ(this->position);
+	this->position = XMLoadFloat3(&newPos);
 	this->UpdateMatrix();
 }
 
@@ -230,174 +116,120 @@ void GameObject::SetPosition(float x, float y, float z)
 {
 	XMFLOAT3 newPos = XMFLOAT3(x, y, z);
 	if (lockedPos[0])
-		newPos.x = this->pos.x;
+		newPos.x = XMVectorGetX(this->position);
 	if (lockedPos[1])
-		newPos.y = this->pos.y;
+		newPos.y = XMVectorGetY(this->position);
 	if (lockedPos[2])
-		newPos.z = this->pos.z;
-	this->pos = newPos;
-	this->posVector = XMLoadFloat3(&this->pos);
+		newPos.z = XMVectorGetZ(this->position);
+	this->position = XMLoadFloat3(&newPos);
 	this->UpdateMatrix();
 }
 
 void GameObject::AdjustPosition(const XMVECTOR& pos)
 {
-	XMFLOAT3 newPos;
-	XMStoreFloat3(&newPos,pos);
-	if (!lockedPos[0])
-		this->pos.x += newPos.x;
-	if (!lockedPos[1])
-		this->pos.y += newPos.y;
-	if (!lockedPos[2])
-		this->pos.z += newPos.z;
-	this->posVector = XMLoadFloat3(&this->pos);
+	this->position += pos;
 	this->UpdateMatrix();
 }
 
 void GameObject::AdjustPosition(const XMFLOAT3& pos)
 {
+	XMFLOAT3 newPos = pos;
 	if (!lockedPos[0])
-		this->pos.x += pos.x;
-	if (!lockedPos[1])
-		this->pos.y += pos.y;
-	if (!lockedPos[2])
-		this->pos.z += pos.z;
-	this->posVector = XMLoadFloat3(&this->pos);
+		newPos.x = XMVectorGetX(this->position);
+	if (lockedPos[1])
+		newPos.y = XMVectorGetY(this->position);
+	if (lockedPos[2])
+		newPos.z = XMVectorGetZ(this->position);
+	this->position += XMLoadFloat3(&newPos);
 	this->UpdateMatrix();
 }
 
 void GameObject::AdjustPosition(float x, float y, float z)
 {
+	XMFLOAT3 newPos = XMFLOAT3(x, y, z);
 	if (!lockedPos[0])
-		this->pos.x += x;
-	if (!lockedPos[1])
-		this->pos.y += y;
-	if (!lockedPos[2])
-		this->pos.z += z;
-	this->posVector = XMLoadFloat3(&this->pos);
-	this->UpdateMatrix();
-}
-
-void GameObject::SetRotation(const XMVECTOR& rot)
-{
-	XMFLOAT3 newRot;
-	XMStoreFloat3(&newRot, rot);
-	if (lockedRot[0])
-		newRot.x = this->rot.x;
-	if (lockedRot[1])
-		newRot.y = this->rot.y;
-	if (lockedRot[2])
-		newRot.z = this->rot.z;
-	this->rot = newRot;
-	this->rotVector = XMLoadFloat3(&this->rot);
-	this->UpdateMatrix();
-}
-
-void GameObject::SetRotation(const XMFLOAT3& rot)
-{
-	XMFLOAT3 newRot = rot;
-	if (lockedRot[0])
-		newRot.x = this->rot.x;
-	if (lockedRot[1])
-		newRot.y = this->rot.y;
-	if (lockedRot[2])
-		newRot.z = this->rot.z;
-	this->rot = newRot;
-	this->rotVector = XMLoadFloat3(&this->rot);
-	this->UpdateMatrix();
-}
-
-void GameObject::SetRotation(float x, float y, float z)
-{
-	XMFLOAT3 newRot = XMFLOAT3(x, y, z);
-	if (lockedPos[0])
-		newRot.x = this->rot.x;
+		newPos.x = XMVectorGetX(this->position);
 	if (lockedPos[1])
-		newRot.y = this->rot.y;
+		newPos.y = XMVectorGetY(this->position);
 	if (lockedPos[2])
-		newRot.z = this->rot.z;
-	this->rot = newRot;
-	this->rotVector = XMLoadFloat3(&this->rot);
+		newPos.z = XMVectorGetZ(this->position);
+	this->position += XMLoadFloat3(&newPos);
 	this->UpdateMatrix();
 }
 
-void GameObject::AdjustRotation(const XMVECTOR& rot)
+void GameObject::SetOrientation(const XMQUATERNION& orientation)
 {
-	XMFLOAT3 newRot;
-	XMStoreFloat3(&newRot, rot);
-	if (!lockedRot[0])
-		this->rot.x += newRot.x;
-	if (!lockedRot[1])
-		this->rot.y += newRot.y;
-	if (!lockedRot[2])
-		this->rot.z += newRot.z;
-	this->rotVector = XMLoadFloat3(&this->rot);
-	this->UpdateMatrix();
+	this->orientation = orientation;
+	this->rotationMatrix = XMMatrixRotationQuaternion(this->orientation);
+	this->UpdateDirectionVectors();
 }
 
-void GameObject::AdjustRotation(const XMFLOAT3& rot)
+void GameObject::SetOrientation(float roll, float pitch, float yaw)
 {
-	if (!lockedRot[0])
-		this->rot.x += rot.x;
-	if (!lockedRot[1])
-		this->rot.y += rot.y;
-	if (!lockedRot[2])
-		this->rot.z += rot.z;
-	this->rotVector = XMLoadFloat3(&this->rot);
-	this->UpdateMatrix();
+	this->rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+	this->orientation = XMQuaternionRotationMatrix(this->rotationMatrix);
+	this->UpdateDirectionVectors();
 }
 
-void GameObject::AdjustRotation(float x, float y, float z)
+void GameObject::SetOrientation(XMMATRIX rotationMatrix)
 {
-	if (!lockedRot[0])
-		this->rot.x += x;
-	if (!lockedRot[1])
-		this->rot.y += y;
-	if (!lockedRot[2])
-		this->rot.z += z;
-	this->rotVector = XMLoadFloat3(&this->rot);
-	this->UpdateMatrix();
+	this->rotationMatrix = rotationMatrix;
+	this->orientation = XMQuaternionRotationMatrix(this->rotationMatrix);
+	this->UpdateDirectionVectors();
 }
 
-void GameObject::SetOrientation(const XMQUATERNION& orient)
+void GameObject::RotateByAxis(XMVECTOR axis, float angle)
 {
-	this->orientation = orient;
+	this->rotationMatrix *= XMMatrixRotationAxis(axis, angle);
+	this->orientation = XMQuaternionRotationMatrix(this->rotationMatrix);
+	this->UpdateDirectionVectors();
 }
 
-void GameObject::AdjustOrientation(const XMQUATERNION& orient, float dt)
+void GameObject::SetLockedPos(bool lockVal, int dimension)
 {
-	this->orientation = XMQuaternionSlerp(this->orientation, orient, dt);
+	this->lockedPos[dimension] = lockVal;
 }
 
-void GameObject::SetLookAtPos(XMFLOAT3 lookAtPos)
+void GameObject::SetName(std::string name)
 {
-	if (lookAtPos.x == this->pos.x && lookAtPos.y == this->pos.y && lookAtPos.z == this->pos.z)
-		return;
-
-	lookAtPos.x = this->pos.x - lookAtPos.x;
-	lookAtPos.y = this->pos.y - lookAtPos.y;
-	lookAtPos.z = this->pos.z - lookAtPos.z;
-
-	float pitch = 0.0f;
-	if (lookAtPos.y != 0.0f)
-	{
-		const float distance = sqrt(pow(lookAtPos.x, 2) + pow(lookAtPos.z, 2));
-		pitch = atan(lookAtPos.y / distance);
-	}
-
-	float yaw = 0.0f;
-	if (lookAtPos.x != 0.0f)
-	{
-		yaw = atan(lookAtPos.x / lookAtPos.z);
-	}
-	if (lookAtPos.z > 0.0f)
-	{
-		yaw += XM_PI;
-	}
-	float roll = 0.0f;
-	this->SetRotation(pitch, yaw, roll);
+	this->name = name;
 }
-void GameObject::SetLookAtPos(float x, float y, float z)
-{
-	SetLookAtPos(XMFLOAT3(x, y, z));
-}
+
+//void GameObject::SlerpOrientation(const XMQUATERNION& orient, float dt)
+//{
+//	this->orientation = XMQuaternionNormalize(XMQuaternionSlerp(this->orientation, orient, dt));
+//}
+
+//void GameObject::SetLookAtPos(XMFLOAT3 lookAtPos)
+//{
+//	if (lookAtPos.x == XMVectorGetX(this->position) && lookAtPos.y == XMVectorGetY(this->position) && lookAtPos.z == XMVectorGetZ(this->position))
+//		return;
+//
+//	lookAtPos.x = XMVectorGetX(this->position) - lookAtPos.x;
+//	lookAtPos.y = XMVectorGetY(this->position) - lookAtPos.y;
+//	lookAtPos.z = XMVectorGetZ(this->position) - lookAtPos.z;
+//
+//	float pitch = 0.0f;
+//	if (lookAtPos.y != 0.0f)
+//	{
+//		const float distance = sqrt(pow(lookAtPos.x, 2) + pow(lookAtPos.z, 2));
+//		pitch = atan(lookAtPos.y / distance);
+//	}
+//
+//	float yaw = 0.0f;
+//	if (lookAtPos.x != 0.0f)
+//	{
+//		yaw = atan(lookAtPos.x / lookAtPos.z);
+//	}
+//	if (lookAtPos.z > 0.0f)
+//	{
+//		yaw += XM_PI;
+//	}
+//	float roll = 0.0f;
+//	this->SetRotation(pitch, yaw, roll);
+//}
+
+//void GameObject::SetLookAtPos(float x, float y, float z)
+//{
+//	SetLookAtPos(XMFLOAT3(x, y, z));
+//}

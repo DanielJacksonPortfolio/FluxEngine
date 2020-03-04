@@ -23,7 +23,7 @@ bool GraphicsHandler::Init(HWND hWnd, int width, int height, Config* config)
 	return true;
 }
 
-RenderableGameObject* GraphicsHandler::SelectObject(float mouseX, float mouseY)
+PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& rayDirection, XMVECTOR& collisionLocation)
 {
 	float normalizedCoordinateX = (2.0f * mouseX) / windowWidth - 1.0f;
 	float normalizedCoordinateY = 1.0f - (2.0f * mouseY) / windowHeight;
@@ -34,42 +34,91 @@ RenderableGameObject* GraphicsHandler::SelectObject(float mouseX, float mouseY)
 	XMMATRIX inverseProjection = XMMatrixInverse(&determinant, projectionMatrix);
 	XMMATRIX inverseView = XMMatrixInverse(&determinant, viewMatrix);
 
-	XMVECTOR eyePos = this->camera->GetPositionVector();
+	XMVECTOR eyePos = this->camera->GetPosition();
 	XMVECTOR rayOriginVector = XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, -1, 0), inverseProjection), inverseView); // World Space
-	XMVECTOR rayDirection = XMVector3Normalize(rayOriginVector - eyePos);
+	rayDirection = XMVector3Normalize(rayOriginVector - eyePos);
 
 	pickRayDirection = rayDirection;
 	pickRayOrigin = eyePos;
 
-	std::vector<std::pair<RenderableGameObject*, float>> selectedObjects = {};
+	struct Object
+	{
+		PropObject* object;
+		float intersectDistance;
+		XMVECTOR intersectLocation;
+		Object(PropObject* object, float intersectDistance, XMVECTOR intersectLocation) : object(object), intersectDistance(intersectDistance), intersectLocation(intersectLocation) {}
+	};
+
+	std::vector<Object> selectedObjects = {};
 
 	for(int i = 0; i < objects.size(); ++i)
 	{
-		RenderableGameObject* object = objects[i].second;
+		PropObject* object = objects[i].second;
 		float nearestIntersect = INT_MAX;
-		if (object->RayModelIntersect(eyePos, rayDirection, nearestIntersect))
-			selectedObjects.push_back({ object, nearestIntersect });
+		XMVECTOR intersectLocation = XMVECTOR();
+		if (object->RayModelIntersect(eyePos, rayDirection, nearestIntersect, intersectLocation))
+			selectedObjects.push_back(Object(object, nearestIntersect,intersectLocation));
 	}
 
 	numObjectsSelected = selectedObjects.size();
 
 	if (selectedObjects.size() > 0)
 	{
-		RenderableGameObject* closestObject = selectedObjects[0].first;
-		float closestObjectDistance = selectedObjects[0].second;
+		PropObject* closestObject = selectedObjects[0].object;
+		float closestObjectDistance = selectedObjects[0].intersectDistance;
+		int closestObjectID = 0;
+
 		for (size_t i = 1; i < selectedObjects.size(); ++i)
-		{
-			if (selectedObjects[i].second < closestObjectDistance)
+			if (selectedObjects[i].intersectDistance < closestObjectDistance)
 			{
-				closestObject = selectedObjects[i].first;
-				closestObjectDistance = selectedObjects[i].second;
+				closestObjectID = i;
+				closestObjectDistance = selectedObjects[closestObjectID].intersectDistance;
 			}
-		}
+
+		closestObject = selectedObjects[closestObjectID].object;
+		collisionLocation = selectedObjects[closestObjectID].intersectLocation;
+
 		objectSelectedID = "Object Selected: " + closestObject->GetName();
 		return closestObject;
 	}
 	objectSelectedID = "No Object Selected";
 	return nullptr;
+}
+
+void GraphicsHandler::Update(float dt)
+{
+	//ResolvePenetrations();
+
+	for (int i = 0; i < objects.size(); ++i)
+	{
+		if (gravityEnabled)
+		{
+			if (XMVectorGetY(objects[i].second->GetPosition() + objects[i].second->GetModel().minAABBCoord*objects[i].second->GetScale()) >= 0)
+				objects[i].second->AddLinearForce(GRAVITY); //Gravity
+			else
+				//objects[i].second->SetPosition(objects[i].second->GetPositionFloat3().x, objects[i].second->GetModel().aabbh*0.5*objects[i].second->GetScale(),objects[i].second->GetPositionFloat3().z);
+				objects[i].second->AdjustPosition(0, -XMVectorGetY(objects[i].second->GetPosition() + objects[i].second->GetModel().minAABBCoord * objects[i].second->GetScale()), 0);
+		}
+			
+		objects[i].second->Update(dt); 
+	}
+
+	this->camera->Update(dt);
+}
+
+
+void GraphicsHandler::SetObject(PropObject* obj)
+{
+	currentObject = obj;
+}
+
+void GraphicsHandler::PushObject(PropObject* obj, XMVECTOR rayDirection, XMVECTOR collisionLocation)
+{
+	if (obj != nullptr)
+	{
+		obj->AddLinearForce(rayDirection * pushStrength);
+		obj->AddTorque(rayDirection * pushStrength, collisionLocation);
+	}
 }
 
 void GraphicsHandler::RenderFrame()
@@ -88,12 +137,13 @@ void GraphicsHandler::RenderFrame()
 			dwTimeStart = dwTimeCur;
 
 		this->cb_vertexShader.data.elapsedTime = (dwTimeCur - dwTimeStart) / 1000.0f;
+		this->cb_vertexShader.ApplyChanges();
 
 		for(int i = 0; i < dLights.size(); ++i)
 		{
 			this->cb_pixelShader.data.directionalLightColor[i] = XMFLOAT4(dLights[i]->GetColor().x, dLights[i]->GetColor().y, dLights[i]->GetColor().z,1.0f);
 			this->cb_pixelShader.data.directionalLightStrength[i] = XMFLOAT4(dLights[i]->GetStrength(),1.0f,1.0f,1.0f);
-			this->cb_pixelShader.data.directionalLightDirection[i] = XMFLOAT4(dLights[i]->GetDirection().x, dLights[i]->GetDirection().y, dLights[i]->GetDirection().z,1.0f);
+			this->cb_pixelShader.data.directionalLightDirection[i] = XMFLOAT4(XMVectorGetX(dLights[i]->GetDirection()), XMVectorGetY(dLights[i]->GetDirection()), XMVectorGetZ(dLights[i]->GetDirection()),1.0f);
 		}
 		this->cb_pixelShader.data.numDLights = static_cast<int>(dLights.size());
 
@@ -101,7 +151,7 @@ void GraphicsHandler::RenderFrame()
 		{
 			this->cb_pixelShader.data.pointLightColor[i] = XMFLOAT4(pLights[i]->GetColor().x, pLights[i]->GetColor().y, pLights[i]->GetColor().z, 1.0f);
 			this->cb_pixelShader.data.pointLightFactors[i].x = pLights[i]->GetStrength();
-			this->cb_pixelShader.data.pointLightPosition[i] = XMFLOAT4(pLights[i]->GetPositionFloat3().x, pLights[i]->GetPositionFloat3().y, pLights[i]->GetPositionFloat3().z,1.0f);
+			this->cb_pixelShader.data.pointLightPosition[i] = XMFLOAT4(XMVectorGetX(pLights[i]->GetPosition()), XMVectorGetY(pLights[i]->GetPosition()), XMVectorGetZ(pLights[i]->GetPosition()),1.0f);
 			this->cb_pixelShader.data.pointLightFactors[i].y = pLights[i]->GetCAttenuation();
 			this->cb_pixelShader.data.pointLightFactors[i].z = pLights[i]->GetLAttenuation();
 			this->cb_pixelShader.data.pointLightFactors[i].w = pLights[i]->GetEAttenuation();
@@ -109,15 +159,15 @@ void GraphicsHandler::RenderFrame()
 		this->cb_pixelShader.data.numPLights = static_cast<int>(pLights.size());
 
 		this->cb_pixelShader.data.shininess = this->shininess;
-		this->cb_pixelShader.data.cameraPosition = this->camera->GetPositionFloat3();
+		XMStoreFloat3(&this->cb_pixelShader.data.cameraPosition, this->camera->GetPosition());
 		this->cb_pixelShader.ApplyChanges();
 
 		this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
 		this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
 		this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
 
-		///Shader Stuff///
-		camera->SetProjectionValues(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight), 0.5f, 5000.0f);
+
+		camera->UpdateViewMatrix();
 
 		//Matrices
 		this->viewMatrix = this->camera->GetViewMatrix();
@@ -130,7 +180,7 @@ void GraphicsHandler::RenderFrame()
 		//Set Shaders
 
 		if (camera != nullptr)
-			skybox->SetPosition(camera->GetPositionFloat3());
+			skybox->SetPosition(camera->GetPosition());
 
 		this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
 		this->deviceContext->PSSetShader(this->pixelShader_skybox.GetShader(), NULL, 0);
@@ -138,10 +188,11 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->PSSetShader(this->pixelShader.GetShader(), NULL, 0);
 		this->deviceContext->ClearDepthStencilView(this->depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+
 		//// SetUp Shader Bindable
 		for(int i = 0; i < objects.size(); ++i)
 		{
-			RenderableGameObject* object = objects[i].second;
+			PropObject* object = objects[i].second;
 			if (object != nullptr)
 			{
 				//Rasterizer States
@@ -155,16 +206,19 @@ void GraphicsHandler::RenderFrame()
 				this->cb_pixelShader.ApplyChanges();
 				if (object->GetName() == "Water")
 				{
+					bindables["RSNone"]->Bind();
 					this->deviceContext->VSSetShader(this->vertexShaderMovable.GetShader(), NULL, 0);
 					object->Draw(viewProjectionMatrix);
 					this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
 				}
 				else
 					object->Draw(viewProjectionMatrix);
-				if(debugMode || object->GetMovable())
-					object->DrawDebug(viewProjectionMatrix, &debugSphere->GetModel());
+				if(debugMode)
+					object->DrawDebug(viewProjectionMatrix,&debugSphere->GetModel(), &debugCube->GetModel());
 			}
 		}
+
+		this->floor->Draw(viewProjectionMatrix);
 
 		if (showLights)
 		{
@@ -200,11 +254,6 @@ void GraphicsHandler::RenderFrame()
 	RenderGUI();
 
 	this->swapChain->Present(config->vSync, NULL);
-}
-
-void GraphicsHandler::SetObject(RenderableGameObject* obj)
-{
-	currentObject = obj;
 }
 
 void GraphicsHandler::SaveScene(std::string sceneName)
@@ -268,13 +317,13 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	DeleteObjects();
 	std::ifstream objectsFile(sceneName + "_objects.txt");
 	std::string line = "";
-	//std::unordered_map<std::string, RenderableGameObject*> newObjects = {};
-	std::vector<std::pair<std::string, RenderableGameObject*>> newObjects = {};
+	//std::unordered_map<std::string, PropObject*> newObjects = {};
+	std::vector<std::pair<std::string, PropObject*>> newObjects = {};
 	while (std::getline(objectsFile, line))
 	{
 		std::vector<std::string> data = {};
 		StringTools::SplitString(line, data, ',');
-		RenderableGameObject* newObject = new RenderableGameObject();
+		PropObject* newObject = new PropObject();
 		if (newObject->Init(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader))
 			newObjects.push_back(std::make_pair(data[0], newObject));
 			//newObjects[data[0]] = newObject;
@@ -293,7 +342,9 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	{
 		std::vector<std::string> data = {};
 		StringTools::SplitString(line, data, ',');
-		newCameras.push_back(new Camera(data));
+		Camera* cam = new Camera();
+		cam->Init(data);
+		newCameras.push_back(cam);
 	}
 	camerasFile.close();
 	cameras = newCameras;
@@ -347,17 +398,19 @@ void GraphicsHandler::RenderGUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-
-	ImGui::Begin("Debug Data");
-	std::string originString = "3D Pick Ray Origin: " + std::to_string(XMVectorGetX(pickRayOrigin)) + ", " +	std::to_string(XMVectorGetY(pickRayOrigin)) + ", " +	std::to_string(XMVectorGetZ(pickRayOrigin));
-	std::string dirString = "3D Pick Ray Direction: " + std::to_string(XMVectorGetX(pickRayDirection)) + ", " + std::to_string(XMVectorGetY(pickRayDirection)) + ", " + std::to_string(XMVectorGetZ(pickRayDirection));
-	std::string numSelectedString = "Number of Objects Selected: " + std::to_string(numObjectsSelected);
-	ImGui::Checkbox("Debug Mode", &debugMode);
-	ImGui::Text(originString.c_str());
-	ImGui::Text(dirString.c_str());
-	ImGui::Text(objectSelectedID.c_str());
-	ImGui::Text(numSelectedString.c_str());
-	ImGui::End();
+	if (showDebugWindow)
+	{
+		ImGui::Begin("Debug Data");
+		std::string originString = "3D Pick Ray Origin: " + std::to_string(XMVectorGetX(pickRayOrigin)) + ", " + std::to_string(XMVectorGetY(pickRayOrigin)) + ", " + std::to_string(XMVectorGetZ(pickRayOrigin));
+		std::string dirString = "3D Pick Ray Direction: " + std::to_string(XMVectorGetX(pickRayDirection)) + ", " + std::to_string(XMVectorGetY(pickRayDirection)) + ", " + std::to_string(XMVectorGetZ(pickRayDirection));
+		std::string numSelectedString = "Number of Objects Selected: " + std::to_string(numObjectsSelected);
+		ImGui::Checkbox("Debug Mode", &debugMode);
+		ImGui::Text(originString.c_str());
+		ImGui::Text(dirString.c_str());
+		ImGui::Text(objectSelectedID.c_str());
+		ImGui::Text(numSelectedString.c_str());
+		ImGui::End();
+	}
 
 	if (showUI)
 	{
@@ -368,7 +421,8 @@ void GraphicsHandler::RenderGUI()
 			{
 				ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
 				ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
-				XMFLOAT3 lightPos = this->pointLight->GetPositionFloat3();
+				XMFLOAT3 lightPos;
+				XMStoreFloat3(&lightPos, this->pointLight->GetPosition());
 				ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
 				this->pointLight->SetPosition(lightPos);
 
@@ -397,7 +451,7 @@ void GraphicsHandler::RenderGUI()
 					DeletePointLight();
 				ImGui::SameLine();
 				if (ImGui::Button("Move To Camera"))
-					pointLight->SetPosition(camera->GetPositionVector() + camera->GetForwardVector());
+					pointLight->SetPosition(camera->GetPosition() + camera->GetForwardVector());
 			}
 			ImGui::End();
 		}
@@ -409,7 +463,11 @@ void GraphicsHandler::RenderGUI()
 			{
 				ImGui::ColorEdit3("Color", &this->directionalLight->GetColor().x);
 				ImGui::DragFloat("Strength", &this->directionalLight->GetStrength(), 0.01f, 0.0f, 10.0f);
-				ImGui::DragFloat3("Direction", &directionalLight->GetDirection().x, 0.01f, -1.0f, 1.0f);
+				XMFLOAT3 lightDir;
+				XMStoreFloat3(&lightDir, this->directionalLight->GetDirection());
+				ImGui::DragFloat3("Direction", &lightDir.x, 0.01f, -1.0f, 1.0f);
+				this->directionalLight->SetPosition(lightDir);
+
 				if (dLights.size() > 1)
 				{
 					if (ImGui::Button("Previous Light"))
@@ -438,24 +496,13 @@ void GraphicsHandler::RenderGUI()
 			if (camera != nullptr)
 			{
 				ImGui::Text(camera->GetName().c_str());
-				ImGui::DragFloat("Move Speed", &camera->GetVelocity().x, 0.005f, 0.0f, 5.0f);
-				ImGui::DragFloat("FOV", &camera->GetFOV(), 0.1f, 0.01f, 179.99f);
+				ImGui::DragFloat("Move Speed", &camera->GetLVelocity().m128_f32[0], 0.005f, 0.0f, 5.0f);
 				ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0));
-				if (!camera->GetLookAtMode())
-				{
-					ImGui::SameLine();
-					ImGui::Checkbox("Pitch Lock?", &camera->GetLockedRot(0));
-				}
 				ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
-				if (!camera->GetLookAtMode())
-				{
-					ImGui::SameLine();
-					ImGui::Checkbox("Yaw Lock?", &camera->GetLockedRot(1));
-				}
 				ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
 				if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
 				{
-					XMFLOAT3 camPos = this->camera->GetPositionFloat3();
+					XMFLOAT3 camPos; XMStoreFloat3(&camPos, this->camera->GetPosition());
 					if (!camera->GetLockedPos(0))
 					{
 						if (!camera->GetLockedPos(1))
@@ -485,24 +532,6 @@ void GraphicsHandler::RenderGUI()
 							ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
 					}
 					this->camera->SetPosition(camPos);
-				}
-				ImGui::Checkbox("Look At Fixed Position?", &camera->GetLookAtMode());
-				if (!camera->GetLookAtMode())
-				{
-					if (!camera->GetLockedRot(0) || !camera->GetLockedRot(1))
-					{
-						XMFLOAT3 camRot = this->camera->GetRotationFloat3();
-						if (!camera->GetLockedRot(0))
-							ImGui::DragFloat("Pitch", &camRot.x, 0.01f, -XM_PI, XM_PI);
-						if (!camera->GetLockedRot(1))
-							ImGui::DragFloat("Yaw", &camRot.y, 0.01f, -XM_PI, XM_PI);
-						this->camera->SetRotation(camRot);
-					}
-				}
-				else
-				{
-					ImGui::DragFloat3("Look At", &camera->GetLookAtPos().x, 0.1f, -50.0f, 50.0f);
-					this->camera->SetLookAtPos();
 				}
 				if (cameras.size() > 1)
 				{
@@ -535,64 +564,17 @@ void GraphicsHandler::RenderGUI()
 				ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
 				if (currentObject->GetRenderMode())
 				{
-					ImGui::SameLine();
-					ImGui::Checkbox("Movable?", &currentObject->GetMovable());
-					if (currentObject->GetMovable())
-						ImGui::DragFloat("Move Speed", &currentObject->GetVelocity().x, 0.005f, 0.0f, 5.0f);
-					ImGui::Checkbox("Move Lock X?", &currentObject->GetLockedPos(0)); ImGui::SameLine();
-					ImGui::Checkbox("Pitch Lock?", &currentObject->GetLockedRot(0));
-					ImGui::Checkbox("Move Lock Y?", &currentObject->GetLockedPos(1)); ImGui::SameLine();
-					ImGui::Checkbox("Yaw Lock?", &currentObject->GetLockedRot(1));
-					ImGui::Checkbox("Move Lock Z?", &currentObject->GetLockedPos(2)); ImGui::SameLine();
-					ImGui::Checkbox("Roll Lock?", &currentObject->GetLockedRot(2));
-
-					if (!currentObject->GetLockedPos(0) || !currentObject->GetLockedPos(1) || !currentObject->GetLockedPos(2))
-					{
-						XMFLOAT3 objPos = this->currentObject->GetPositionFloat3();
-						if (!currentObject->GetLockedPos(0))
-						{
-							if (!currentObject->GetLockedPos(1))
-							{
-								if (!currentObject->GetLockedPos(2))
-									ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -80.0f, 80.0f);
-								else
-									ImGui::DragFloat2("Position XY", &objPos.x, 0.1f, -80.0f, 80.0f);
-							}
-							else
-							{
-								ImGui::DragFloat("Position X", &objPos.x, 0.1f, -80.0f, 80.0f);
-								if (!currentObject->GetLockedPos(2))
-									ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
-							}
-						}
-						else
-						{
-							if (!currentObject->GetLockedPos(1))
-							{
-								if (!currentObject->GetLockedPos(2))
-									ImGui::DragFloat2("Position YZ", &objPos.y, 0.1f, -80.0f, 80.0f);
-								else
-									ImGui::DragFloat("Position Y", &objPos.y, 0.1f, -80.0f, 80.0f);
-							}
-							else
-								ImGui::DragFloat("Position Z", &objPos.z, 0.1f, -80.0f, 80.0f);
-						}
-						this->currentObject->SetPosition(objPos);
-					}
-					if (!currentObject->GetLockedRot(0) || !currentObject->GetLockedRot(1) || !currentObject->GetLockedRot(2))
-					{
-						XMFLOAT3 objRot = this->currentObject->GetRotationFloat3();
-						if (!currentObject->GetLockedRot(0))
-							ImGui::DragFloat("Pitch", &objRot.x, 0.01f, -XM_PI, XM_PI);
-						if (!currentObject->GetLockedRot(1))
-							ImGui::DragFloat("Yaw", &objRot.y, 0.01f, -XM_PI, XM_PI);
-						if (!currentObject->GetLockedRot(2))
-							ImGui::DragFloat("Roll", &objRot.z, 0.01f, -XM_PI, XM_PI);
-						this->currentObject->SetRotation(objRot);
-					}
+					XMFLOAT3 objPos; XMStoreFloat3(&objPos,this->currentObject->GetPosition());
+					ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -500.0f, 500.0f);
+					this->currentObject->SetPosition(objPos);
+					XMFLOAT4 objQ; XMStoreFloat4(&objQ, this->currentObject->GetOrientation());
+					ImGui::DragFloat3("Rotational Axis", &objQ.x, 0.01f -0.5f, 0.5f);
+					ImGui::DragFloat("Rotational Angle", &objQ.w, 0.01f, -XM_PI, XM_PI);
+					this->currentObject->SetOrientation(XMLoadFloat4(&objQ));
 					ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
+					ImGui::DragFloat("Damping", &currentObject->rotationDamping, 0.001f, 0.0f, 1.0f);
 					ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
-					ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode()); ImGui::SameLine();
+					ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode());
 					ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
 					ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
 				}
@@ -615,14 +597,9 @@ void GraphicsHandler::RenderGUI()
 					DuplicateObject();
 				if (ImGui::Button("Delete Object"))
 					DeleteObject();
-				if (ImGui::Button("Lock Camera To This"))
-				{
-					camera->SetLookAtPos(currentObject->GetPositionFloat3());
-					camera->SetLookAtMode(true);
-				}
 				ImGui::SameLine();
 				if (ImGui::Button("Move To Camera"))
-					currentObject->SetPosition(camera->GetPositionVector() + camera->GetForwardVector() * 10);
+					currentObject->SetPosition(camera->GetPosition() + camera->GetForwardVector() * 10);
 			}
 			ImGui::End();
 		}
@@ -640,7 +617,11 @@ void GraphicsHandler::RenderGUI()
 		{
 			ImGui::Begin("General Controls");
 			ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
-			ImGui::Checkbox("Show Lights?", &showLights);
+			ImGui::Checkbox("Show Lights?", &showLights); ImGui::SameLine();
+			ImGui::Checkbox("Gravity Enabled", &gravityEnabled);
+			if (gravityEnabled)
+				ImGui::DragFloat3("Gravity Direction", &GRAVITY.x, 0.00001f, -1.0f, 1.0f);
+			ImGui::DragFloat("Push Strength", &pushStrength, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
 			ImGui::ColorEdit3("Ambient Color", &this->cb_pixelShader.data.ambientLightColor.x);
 			ImGui::DragFloat("Ambient Strength", &this->cb_pixelShader.data.ambientLightStrength, 0.01f, 0.0f, 1.0f);
@@ -656,6 +637,7 @@ void GraphicsHandler::RenderGUI()
 
 		ImGui::Begin("Show/Hide Windows");
 		ImGui::Checkbox("Show Error Log?", &ErrorLogger::showErrorLog);
+		ImGui::Checkbox("Show 3D Picking Debug?", &showDebugWindow);
 		ImGui::Checkbox("Show Point Light Controls?", &showPLControls);
 		ImGui::Checkbox("Show Directional Light Controls?", &showDLControls);
 		ImGui::Checkbox("Show Camera Controls?", &showCamControls);
@@ -708,7 +690,8 @@ void GraphicsHandler::NextObject(int direction)
 
 void GraphicsHandler::NewCamera()
 {
-	Camera* camera = new Camera();
+	Camera* camera = new Camera();		
+	camera->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), 70.0f, 1.77777779, 0.1f, 1000.0f);
 	cameras.insert(cameras.begin() + cameraID, camera);
 	this->camera = cameras[cameraID];
 }
@@ -778,13 +761,13 @@ void GraphicsHandler::DeleteObject()
 void GraphicsHandler::NewObject()
 {
 	showNewObjectWindow = false;
-	RenderableGameObject* newObject = new RenderableGameObject();
+	PropObject* newObject = new PropObject();
 	std::string directory = StringTools::GetDirectoryFromPath(newObjectPath);
 	std::string fileExtension = StringTools::GetFileExtension(newObjectPath);
 	try
 	{
 		std::string name = std::string(newObjectPath).substr(directory.length() + 1, std::string(newObjectPath).length() - directory.length() - fileExtension.length() - 2);
-		if (newObject->Init(newObjectPath, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader, name))
+		if (newObject->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), newObjectPath, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader, name))
 		{
 			objects.insert(objects.begin() + objectID, { newObject->GetName(), newObject });
 			this->currentObject = newObject;
@@ -799,7 +782,7 @@ void GraphicsHandler::NewObject()
 
 void GraphicsHandler::DuplicateObject()
 {
-	RenderableGameObject* object = new RenderableGameObject(*currentObject);
+	PropObject* object = new PropObject(*currentObject);
 	object->GetName() += " - Copy";
 	objects.insert(objects.begin() + objectID, { object->GetName(), object });
 	this->currentObject = object;
@@ -1055,13 +1038,21 @@ bool GraphicsHandler::InitScene()
 		hr = cb_pixelShader.Init(this->device.Get(), this->deviceContext.Get());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_pixelShader");
 
+		testModel = new Model();
+		testModel->Init("data//objects//cube.fbx", device.Get(), deviceContext.Get(), cb_vertexShader, cb_pixelShader);
+
 		//Model Load
 		LoadScene("data//scenes//" + std::string(sceneName));
-		skybox = new RenderableGameObject();
-		debugSphere = new RenderableGameObject();
-		skybox->Init("data//skies//desert.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"SKYBOX");
+		skybox = new PropObject();
+		floor = new PropObject();
+		debugSphere = new PropObject();
+		debugCube = new PropObject();
+		skybox->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), "data//skies//desert.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"SKYBOX");
 		skybox->SetScale(10.0f);
-		debugSphere->Init("data//objects//sphere.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"DEBUG SPHERE");
+		debugSphere->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), "data//objects//sphere.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"DEBUG SPHERE");
+		debugCube->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), "data//objects//cube.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"DEBUG CUBE");
+		floor->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), "data//objects//plane.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"FLOOR");
+		floor->SetScale(1000.0f);
 
 		currentObject = objects[0].second;
 	}
@@ -1071,4 +1062,52 @@ bool GraphicsHandler::InitScene()
 		return false;
 	}
 	return true;
+}
+
+void GraphicsHandler::SphereSphereCollision(PropObject* obj1, PropObject* obj2)
+{
+	float distanceBetween = fabs(XMVectorGetX(XMVector3Length(obj1->GetPosition() - obj2->GetPosition())));
+	float collisionDistance = obj1->GetModel().objectBoundingSphereRadius + obj2->GetModel().objectBoundingSphereRadius;
+
+	if (distanceBetween < collisionDistance) // Collision
+	{
+		float penetrationDepth = (collisionDistance - distanceBetween) * 0.5f;
+		XMVECTOR toObj = XMVector3Normalize(obj1->GetPosition() - obj2->GetPosition());
+		obj1->AdjustPosition(toObj * penetrationDepth);
+		obj2->AdjustPosition(-toObj * penetrationDepth);
+		//obj1->AddLinearForce(toObj*penetrationDepth);
+		//obj2->AddLinearForce(-toObj*penetrationDepth);
+	}
+}
+
+void GraphicsHandler::SpherePlaneCollision(PropObject* obj, PropObject* plane)
+{
+	float A = XMVectorGetX(plane->GetUpVector());
+	float B = XMVectorGetY(plane->GetUpVector());
+	float C = XMVectorGetZ(plane->GetUpVector());
+	float D = -XMVectorGetX(plane->GetPosition()) - XMVectorGetY(plane->GetPosition()) - XMVectorGetZ(plane->GetPosition());
+	float numerator = fabs(A * XMVectorGetX(obj->GetPosition()) + B * XMVectorGetY(obj->GetPosition()) + C * XMVectorGetX(obj->GetPosition()) + D);
+	float denominator = sqrtf(A*A + B*B + C*C);
+
+	float d = numerator / denominator;
+
+	if (d > obj->GetModel().objectBoundingSphereRadius)
+	{
+	}
+}
+
+void GraphicsHandler::ResolvePenetrations()
+{
+	//NEEDS OPTIMIZING
+	for (size_t i = 0; i < objects.size(); ++i)
+	{
+		//SpherePlaneCollision(objects[i].second, floor);
+		for (size_t j = 0; j < objects.size(); ++j)
+		{
+			if (j != i)
+			{
+				SphereSphereCollision(objects[i].second, objects[j].second);
+			}
+		}
+	}
 }

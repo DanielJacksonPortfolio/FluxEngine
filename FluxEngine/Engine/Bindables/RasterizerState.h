@@ -10,10 +10,10 @@ public:
 		this->device = device;
 		this->deviceContext = deviceContext;
 
-		CD3D11_RASTERIZER_DESC rasterizerDesc_CullFront_WireFrame(D3D11_DEFAULT);
-		rasterizerDesc_CullFront_WireFrame.CullMode = cullMode;
-		rasterizerDesc_CullFront_WireFrame.FillMode = fillMode;
-		HRESULT hr = this->device->CreateRasterizerState(&rasterizerDesc_CullFront_WireFrame, this->rasterizerState.GetAddressOf());
+		CD3D11_RASTERIZER_DESC rasterizerDesc(D3D11_DEFAULT);
+		rasterizerDesc.CullMode = cullMode;
+		rasterizerDesc.FillMode = fillMode;
+		HRESULT hr = this->device->CreateRasterizerState(&rasterizerDesc, this->rasterizerState.GetAddressOf());
 		EXCEPT_IF_FAILED(hr, "CreateRasterizerState Failed");
 	}
 	void Bind() override
