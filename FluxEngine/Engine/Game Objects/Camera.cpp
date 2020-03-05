@@ -7,12 +7,6 @@ void Camera::Init(std::vector<std::string> data)
 	SetLockedPos(std::stoi(data[12]), 0);
 	SetLockedPos(std::stoi(data[13]), 1);
 	SetLockedPos(std::stoi(data[14]), 2);
-	//SetLookAtPos(XMFLOAT3(std::stof(data[15]), std::stof(data[16]), std::stof(data[17])));
-}
-
-void Camera::Update(float deltaTime)
-{
-	smoothedOrientation = XMQuaternionSlerp(smoothedOrientation, orientation, 15.0f * deltaTime);
 }
 
 void Camera::UpdateProjectionMatrix()
@@ -121,9 +115,4 @@ const XMMATRIX& Camera::GetViewMatrix() const
 const XMMATRIX& Camera::GetProjectionMatrix() const
 {
 	return this->projectionMatrix;
-}
-
-XMVECTOR Camera::GetSmoothedOrientation()
-{
-	return this->smoothedOrientation;
 }

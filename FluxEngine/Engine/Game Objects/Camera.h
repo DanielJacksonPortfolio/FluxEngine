@@ -9,14 +9,6 @@ public:
 
 	const XMMATRIX& GetViewMatrix() const;
 	const XMMATRIX& GetProjectionMatrix() const;
-
-	float& GetFOV() { return this->fov; }
-	void SetFOV(float fov) { this->fov = fov; }
-
-	//XMFLOAT3& GetLookAtPos() { return lookAtPos; }
-	//void SetLookAtPos() { if (lookAtMode) GameObject::SetLookAtPos(lookAtPos); }
-	//void SetLookAtPos(XMFLOAT3 lookAtPos) { this->lookAtPos = lookAtPos;  if(lookAtMode) GameObject::SetLookAtPos(lookAtPos); }
-
 	float GetFov() const;
 	float GetAspectRatio() const;
 	float GetNearPlane() const;
@@ -27,12 +19,10 @@ public:
 	void SetNearPlane(float nearPlane, bool updateProjection = true);
 	void SetFarPlane(float farPlane, bool updateProjection = true);
 
-	void Update(float deltaTime) override;
-
 	void UpdateProjectionMatrix();
 	void UpdateViewMatrix();
+	float& GetSpeed() { return moveSpeed; }
 
-	XMVECTOR GetSmoothedOrientation();
 	std::string Save();
 private:
 	XMMATRIX viewMatrix = {};
@@ -42,6 +32,6 @@ private:
 	float nearPlane = 0.0f;
 	float farPlane = 0.0f;
 
-	XMVECTOR smoothedOrientation = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	float moveSpeed = 0.01f;
 };
 

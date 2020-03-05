@@ -143,12 +143,12 @@ bool Model::RayModelIntersect(XMMATRIX worldMatrix, XMVECTOR position, float sca
 	if (boundingShape == BoundingShape::SPHERE)
 	{
 		objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
-		if (RaySphereIntersect(position, rayOrigin, rayDir))
+		if (CollisionHandler::Instance()->RaySphereIntersect(position, objectBoundingSphereRadius, rayOrigin, rayDir))
 			initialCheck = true;
 	}
 	else
 	{
-		if (RayAABBIntersect(scale,position, rayOrigin, rayDir))
+		if (CollisionHandler::Instance()->RayAABBIntersect(scale*minAABBCoord, scale * maxAABBCoord, position, rayOrigin, rayDir))
 			initialCheck = true;
 	}
 	if(initialCheck)
@@ -168,35 +168,6 @@ bool Model::RayModelIntersect(XMMATRIX worldMatrix, XMVECTOR position, float sca
 			return true;
 	}
 	return false;
-}
-
-bool Model::RaySphereIntersect(XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR rayDir)
-{
-	XMVECTOR oc = rayOrigin - position;
-	float a = XMVectorGetX(XMVector3Dot(rayDir, rayDir));
-	float b = 2 * XMVectorGetX(XMVector3Dot(oc, rayDir));
-	float c = XMVectorGetX(XMVector3Dot(oc, oc)) - (objectBoundingSphereRadius * objectBoundingSphereRadius);
-	return 0 < ((b * b) - (4 * a * c));
-
-}
-
-bool Model::RayAABBIntersect(float scale, XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR rayDir)
-{
-	XMVECTOR dirfrac = XMVectorSet(1 / XMVectorGetX(rayDir), 1 / XMVectorGetY(rayDir), 1 / XMVectorGetZ(rayDir), 0);
-
-	float t1 = (XMVectorGetX(scale*minAABBCoord+position) - XMVectorGetX(rayOrigin)) * XMVectorGetX(dirfrac);
-	float t2 = (XMVectorGetX(scale*maxAABBCoord+position) - XMVectorGetX(rayOrigin)) * XMVectorGetX(dirfrac);
-	float t3 = (XMVectorGetY(scale*minAABBCoord+position) - XMVectorGetY(rayOrigin)) * XMVectorGetY(dirfrac);
-	float t4 = (XMVectorGetY(scale*maxAABBCoord+position) - XMVectorGetY(rayOrigin)) * XMVectorGetY(dirfrac);
-	float t5 = (XMVectorGetZ(scale*minAABBCoord+position) - XMVectorGetZ(rayOrigin)) * XMVectorGetZ(dirfrac);
-	float t6 = (XMVectorGetZ(scale*maxAABBCoord+position) - XMVectorGetZ(rayOrigin)) * XMVectorGetZ(dirfrac);
-
-	float tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
-	float tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
-
-	if (tmax < 0 || tmin > tmax)
-		return false;
-	return true;
 }
 
 

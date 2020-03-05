@@ -27,8 +27,6 @@ public:
 	float aabbd = 1.0f;
 private:
 	void SetOrigin();
-	bool RaySphereIntersect(XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR rayDir);
-	bool RayAABBIntersect(float scale, XMVECTOR position, XMVECTOR rayOrigin, XMVECTOR rayDir);
 	bool LoadModel(const std::string& filepath);
 	void ProcessNode(aiNode* node, const aiScene* scene, const XMMATRIX& parentTransformMatrix);
 	Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const XMMATRIX& transformMatrix);

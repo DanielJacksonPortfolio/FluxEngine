@@ -164,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Physics\CollisionHandler.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui_draw.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui_impl_dx11.cpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="Tools\ExceptionHandler.cpp" />
     <ClCompile Include="Engine\DirectX\GraphicsHandler.cpp" />
     <ClCompile Include="Engine\Buffers and Shaders\VertexShader.cpp" />
+    <ClCompile Include="Engine\Game Objects\Transform.cpp" />
     <ClCompile Include="Windows\Keyboard.cpp" />
     <ClCompile Include="Windows\Mouse.cpp" />
     <ClCompile Include="Tools\StringTools.cpp" />
@@ -194,6 +196,7 @@
     <ClCompile Include="Application\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Physics\CollisionHandler.h" />
     <ClInclude Include="Engine\Bindables\Bindable.h" />
     <ClInclude Include="Engine\Game Objects\Model Data\Color.h" />
     <ClInclude Include="Engine\Game Objects\Lights\DirectionalLight.h" />
@@ -221,6 +224,7 @@
     <ClInclude Include="Engine\Buffers and Shaders\VertexShader.h" />
     <ClInclude Include="Engine\Buffers and Shaders\VertexTypes.h" />
     <ClInclude Include="Engine\Buffers and Shaders\VertexBuffer.h" />
+    <ClInclude Include="Engine\Game Objects\Transform.h" />
     <ClInclude Include="Windows\Keyboard.h" />
     <ClInclude Include="Windows\Mouse.h" />
     <ClInclude Include="Resources\resource.h" />

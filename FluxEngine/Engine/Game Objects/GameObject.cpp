@@ -78,19 +78,12 @@ void GameObject::UpdateMatrix()
 
 void GameObject::UpdateDirectionVectors()
 {
-	this->forwardVector = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), this->rotationMatrix);
-	this->backwardVector = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), this->rotationMatrix);
-	this->rightVector = XMVector3TransformNormal(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), this->rotationMatrix);
-	this->leftVector = XMVector3TransformNormal(XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f), this->rotationMatrix);
-	this->upVector = XMVector3TransformNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), this->rotationMatrix);
-	this->downVector = XMVector3TransformNormal(XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f), this->rotationMatrix);
-
-	//this->forwardVector = XMVector3TransformNormal(DEFAULT_FORWARD_VECTOR, this->rotationMatrix);
-	//this->backwardVector = XMVector3TransformNormal(DEFAULT_BACKWARD_VECTOR, this->rotationMatrix);
-	//this->rightVector = XMVector3TransformNormal(DEFAULT_RIGHT_VECTOR, this->rotationMatrix);
-	//this->leftVector = XMVector3TransformNormal(DEFAULT_LEFT_VECTOR, this->rotationMatrix);
-	//this->upVector = XMVector3TransformNormal(DEFAULT_UP_VECTOR, this->rotationMatrix);
-	//this->downVector = XMVector3TransformNormal(DEFAULT_DOWN_VECTOR, this->rotationMatrix);
+	this->forwardVector = XMVector3TransformNormal(DEFAULT_FORWARD_VECTOR, this->rotationMatrix);
+	this->backwardVector = XMVector3TransformNormal(DEFAULT_BACKWARD_VECTOR, this->rotationMatrix);
+	this->rightVector = XMVector3TransformNormal(DEFAULT_RIGHT_VECTOR, this->rotationMatrix);
+	this->leftVector = XMVector3TransformNormal(DEFAULT_LEFT_VECTOR, this->rotationMatrix);
+	this->upVector = XMVector3TransformNormal(DEFAULT_UP_VECTOR, this->rotationMatrix);
+	this->downVector = XMVector3TransformNormal(DEFAULT_DOWN_VECTOR, this->rotationMatrix);
 }
 
 void GameObject::SetPosition(const XMVECTOR& pos)
@@ -134,7 +127,7 @@ void GameObject::AdjustPosition(const XMVECTOR& pos)
 void GameObject::AdjustPosition(const XMFLOAT3& pos)
 {
 	XMFLOAT3 newPos = pos;
-	if (!lockedPos[0])
+	if (lockedPos[0])
 		newPos.x = XMVectorGetX(this->position);
 	if (lockedPos[1])
 		newPos.y = XMVectorGetY(this->position);
@@ -147,7 +140,7 @@ void GameObject::AdjustPosition(const XMFLOAT3& pos)
 void GameObject::AdjustPosition(float x, float y, float z)
 {
 	XMFLOAT3 newPos = XMFLOAT3(x, y, z);
-	if (!lockedPos[0])
+	if (lockedPos[0])
 		newPos.x = XMVectorGetX(this->position);
 	if (lockedPos[1])
 		newPos.y = XMVectorGetY(this->position);

@@ -105,46 +105,18 @@ bool Mesh::RayMeshIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR r
 	{
 		worldMatrix = this->transformMatrix * worldMatrix;
 		for (int i = 0; i < faces.size(); ++i)
-			if (RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, faces[i], intersectDistance, intersectLocation))
+		{
+			XMVECTOR vertex0 = XMVectorSet(vertices[faces[i].mIndices[0]].pos.x, vertices[faces[i].mIndices[0]].pos.y, vertices[faces[i].mIndices[0]].pos.z, 1.0f);
+			XMVECTOR vertex1 = XMVectorSet(vertices[faces[i].mIndices[1]].pos.x, vertices[faces[i].mIndices[1]].pos.y, vertices[faces[i].mIndices[1]].pos.z, 1.0f);
+			XMVECTOR vertex2 = XMVectorSet(vertices[faces[i].mIndices[2]].pos.x, vertices[faces[i].mIndices[2]].pos.y, vertices[faces[i].mIndices[2]].pos.z, 1.0f);
+
+			if (CollisionHandler::Instance()->RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, vertex0, vertex1, vertex2, intersectDistance, intersectLocation))
+			{
 				intersect = true;
+			}
+		}
 	}
 	return intersect;
-}
-
-bool Mesh::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace face, float& intersectDistance, XMVECTOR& pointOfIntersect)
-{
-	if (face.mNumIndices == 3)
-	{
-		XMVECTOR vertex0 = XMVectorSet(vertices[face.mIndices[0]].pos.x, vertices[face.mIndices[0]].pos.y, vertices[face.mIndices[0]].pos.z, 1.0f);
-		XMVECTOR vertex1 = XMVectorSet(vertices[face.mIndices[1]].pos.x, vertices[face.mIndices[1]].pos.y, vertices[face.mIndices[1]].pos.z, 1.0f);
-		XMVECTOR vertex2 = XMVectorSet(vertices[face.mIndices[2]].pos.x, vertices[face.mIndices[2]].pos.y, vertices[face.mIndices[2]].pos.z, 1.0f);
-
-		XMVECTOR normal = XMVector3Normalize(XMVector3Transform(XMVector3Cross(vertex1 - vertex0, vertex2 - vertex0), XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)))) * (XMVectorGetX(XMMatrixDeterminant(worldMatrix)) < 0 ? -1 : 1);
-		
-		vertex0 = XMVector3Transform(vertex0, worldMatrix);
-		vertex1 = XMVector3Transform(vertex1, worldMatrix);
-		vertex2 = XMVector3Transform(vertex2, worldMatrix);
-
-		float normalDotRayDir = XMVectorGetX(XMVector3Dot(normal, rayDir));
-		if (fabs(normalDotRayDir) < static_cast<float>(1e-8))
-			return false;
-
-		float t = -1 * (XMVectorGetX(XMVector3Dot(normal, rayOrigin)) - XMVectorGetX(XMVector3Dot(normal, vertex0))) / normalDotRayDir;
-		if (t < 0) return false;
-
-		pointOfIntersect = rayOrigin + t * rayDir;
-
-		if (XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex1 - vertex0, pointOfIntersect - vertex0))) < 0 ||
-			XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex2 - vertex1, pointOfIntersect - vertex1))) < 0 ||
-			XMVectorGetX(XMVector3Dot(normal, XMVector3Cross(vertex0 - vertex2, pointOfIntersect - vertex2))) < 0) return false;
-
-		float distance = XMVectorGetX(XMVector3Length(pointOfIntersect - rayOrigin));
-		if (intersectDistance > distance)
-			intersectDistance = distance;
-	
-		return true;
-	}
-	return false;
 }
 
 const XMMATRIX& Mesh::GetTransformMatrix()

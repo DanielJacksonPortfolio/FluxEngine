@@ -7,7 +7,6 @@
 #include "../../Resources/Config.h"
 
 #include "../Game Objects/Camera.h"
-#include "../Game Objects/PropObject.h"
 #include "../Game Objects/Lights/PointLight.h"
 #include "../Game Objects/Lights/DirectionalLight.h"
 
@@ -45,8 +44,6 @@ private:
 	bool InitDirectX();
 	bool InitShaders();
 	bool InitScene();
-	void SphereSphereCollision(PropObject* obj1, PropObject* obj2);
-	void SpherePlaneCollision(PropObject* obj, PropObject* plane);
 	void ResolvePenetrations();
 	void InitImGUI();
 
@@ -105,12 +102,12 @@ private:
 	bool showNewObjectWindow = false;
 	bool showDebugWindow = false;
 
-	bool gravityEnabled = false;
+	bool gravityEnabled = true;
 	float shininess = 8.0f;
-	char sceneName[256] = "cube";
+	char sceneName[256] = "initial";
 	char newObjectPath[256] = "data//objects//";
-
-	XMFLOAT3 GRAVITY = { 0.0f, -0.00098f, 0.0f };
+	float floorHeight = 0.0f;
+	XMVECTOR GRAVITY = { 0.0f, -0.00098f, 0.0f, 0.0f };
 	float pushStrength = 1.0f;
 
 	XMVECTOR pickRayOrigin = XMVECTOR();

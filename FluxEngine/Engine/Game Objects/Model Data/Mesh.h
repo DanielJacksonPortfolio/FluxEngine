@@ -4,6 +4,7 @@
 #include "../../Buffers and Shaders/VertexBuffer.h"
 #include "../../Buffers and Shaders/IndexBuffer.h"	
 #include "../../Buffers and Shaders/ConstantBuffer.h"
+#include "../../Physics/CollisionHandler.h"
 #include <vector>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -20,7 +21,6 @@ public:
 	void Draw();
 	const XMMATRIX& GetTransformMatrix();
 	size_t GetNumFaces() { return faces.size(); }
-	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, aiFace traingle , float& intersectDistance, XMVECTOR& pointOfIntersect);
 	bool RayMeshIntersect( XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation);
 private:
 	std::vector<Vertex_PosTexNormTan> vertices;

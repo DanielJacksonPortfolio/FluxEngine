@@ -5,6 +5,7 @@ bool PropObject::Init(std::vector<std::string> data, ID3D11Device* device, ID3D1
 	if(!Init(XMVectorSet(std::stof(data[2]), std::stof(data[3]), std::stof(data[4]), 1.0f), XMVectorSet(std::stof(data[5]), std::stof(data[6]), std::stof(data[7]), std::stof(data[8])),data[1], device, deviceContext, cb_vertexShader, cb_pixelShader, data[0]))
 		return false;
 	SetScale(std::stof(data[9]));
+	SetMass(std::stof(data[10]));
 	this->model.SetBoundingShape(XMMatrixRotationQuaternion(this->orientation));
 	return true;
 }
@@ -89,6 +90,7 @@ PropObject::PropObject(const PropObject& obj)
 	this->specularMap = obj.specularMap;
 	this->renderMode = obj.renderMode;
 	this->scale = obj.scale;
+	this->mass = obj.mass;
 	this->filepath = obj.filepath;
 }
 
@@ -104,7 +106,8 @@ std::string PropObject::Save()
 	output += std::to_string(XMVectorGetY(orientation)) + ",";
 	output += std::to_string(XMVectorGetZ(orientation)) + ",";
 	output += std::to_string(XMVectorGetW(orientation)) + ",";
-	output += std::to_string(scale);
+	output += std::to_string(scale) + ",";
+	output += std::to_string(mass);
 	return output;
 }
 

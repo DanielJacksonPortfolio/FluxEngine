@@ -102,6 +102,12 @@
     <ClCompile Include="Engine\Game Objects\PropObject.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Physics\CollisionHandler.cpp">
+      <Filter>Source\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Game Objects\Transform.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\Window.h">
@@ -206,6 +212,12 @@
     <ClInclude Include="Engine\Game Objects\PropObject.h">
       <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Physics\CollisionHandler.h">
+      <Filter>Headers\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\Transform.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
@@ -285,6 +297,12 @@
     </Filter>
     <Filter Include="Resources\Shaders">
       <UniqueIdentifier>{d6607cdb-a31e-4850-9376-3edf13298f48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Physics">
+      <UniqueIdentifier>{06112ff3-6df9-4610-b482-84a775f4b481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Physics">
+      <UniqueIdentifier>{f3b56af5-d281-4bea-a5d0-465417ff2e8e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
