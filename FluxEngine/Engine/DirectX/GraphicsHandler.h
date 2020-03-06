@@ -51,7 +51,7 @@ private:
 	void InitImGUI();
 
 	void RenderGUI();
-	void ResolvePenetrations();
+	void ResolveCollisions();
 
 	void NextCamera(int direction = 1);
 	void NextPLight(int direction = 1);
@@ -113,7 +113,7 @@ private:
 	char newObjectPath[256] = "data//objects//";
 	float floorHeight = 0.0f;
 	XMVECTOR GRAVITY = { 0.0f, -0.00098f, 0.0f, 0.0f };
-	float pushStrength = 1.0f;
+	float pushStrength = 10.0f;
 
 	XMVECTOR pickRayOrigin = XMVECTOR();
 	XMVECTOR pickRayDirection = XMVECTOR();

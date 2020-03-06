@@ -87,7 +87,7 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 
 void GraphicsHandler::Update(float dt)
 {
-	ResolvePenetrations();
+	ResolveCollisions();
 
 	for (size_t i = 0; i < objects.size(); ++i)
 	{
@@ -135,8 +135,8 @@ void GraphicsHandler::PushObject(PropObject* obj, XMVECTOR rayDirection, XMVECTO
 {
 	if (obj != nullptr)
 	{
-		obj->GetPhysics()->AddLinearForce(rayDirection * pushStrength*obj->GetPhysics()->GetMass());
-		obj->GetPhysics()->AddTorque(rayDirection * pushStrength, collisionLocation);
+		obj->GetPhysics()->AddLinearForce(rayDirection * pushStrength * obj->GetPhysics()->GetMass());
+		obj->GetPhysics()->AddTorque(rayDirection * pushStrength * obj->GetPhysics()->GetMass(), collisionLocation);
 	}
 }
 
@@ -771,9 +771,14 @@ void GraphicsHandler::DeleteObject()
 	currentObject = nullptr;
 	objects.erase(objects.begin() + deleteObjectID);
 	if (objects.size() > 0)
+	{
+		--objectID;
 		NextObject();
+	}
 	else
+	{
 		objectID = 0;
+	}
 }
 
 void GraphicsHandler::NewObject()
@@ -1076,19 +1081,20 @@ bool GraphicsHandler::InitScene()
 }
 
 
-void GraphicsHandler::ResolvePenetrations()
+void GraphicsHandler::ResolveCollisions()
 {
 	////NEEDS OPTIMIZING
-	for (size_t i = 0; i < objects.size(); ++i)
+	for (size_t i = 0; i < objects.size()-1; ++i)
 	{
-		for (size_t j = 0; j < objects.size(); ++j)
+		for (size_t j = i+1; j < objects.size(); ++j)
 		{
 			if (j != i)
 			{
 				bool collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel()->objectBoundingSphereRadius, objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel()->objectBoundingSphereRadius);
 				if (collision)
 				{
-					std::string output = "Collision Detected between: " + objects[i].first + " & " + objects[j].first + ".\n";
+					CollisionHandler::Instance()->ResolveCollision(objects[i].second->GetPhysics(), objects[j].second->GetPhysics());
+					//std::string output = "Collision Detected between: " + objects[i].first + " & " + objects[j].first + ".\n";
 					//OutputDebugString(output.c_str());
 				}
 			}

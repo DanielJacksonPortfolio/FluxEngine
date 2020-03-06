@@ -15,7 +15,7 @@ CollisionHandler* CollisionHandler::Instance()
 
 bool CollisionHandler::SphereSphereCollision(XMVECTOR sphere1Pos, float sphere1Radius, XMVECTOR sphere2Pos, float sphere2Radius)
 {
-	return fabs(XMVectorGetX(XMVector3Length(sphere1Pos - sphere2Pos))) < (sphere1Radius + sphere2Radius);
+	return XMVectorGetX(XMVector3Length(sphere1Pos - sphere2Pos)) < (sphere1Radius + sphere2Radius);
 }
 
 bool CollisionHandler::SpherePlaneCollision(XMVECTOR spherePos, float sphereRadius, XMVECTOR planeNormal, XMVECTOR pointOnPlane)
@@ -121,6 +121,13 @@ bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOr
 XMVECTOR CollisionHandler::VectorReflection(XMVECTOR vector, XMVECTOR planeNormal)
 {
 	return vector + 2 * XMVector3Dot(-vector, planeNormal) * planeNormal;
+}
+
+void CollisionHandler::ResolveCollision(Physics* obj1, Physics* obj2)
+{
+	obj1->GetTransform()->SetPosition(obj1->GetTransform()->GetLastPosition());
+	obj2->GetTransform()->SetPosition(obj2->GetTransform()->GetLastPosition());
+
 }
 
 bool CollisionHandler::RayPropIntersect(PropObject* object, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)

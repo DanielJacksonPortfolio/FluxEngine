@@ -13,9 +13,10 @@ bool PropObject::Init(std::vector<std::string> data, ID3D11Device* device, ID3D1
 
 void PropObject::Update(float dt)
 {
+	transform->Update(dt);
 	physics->UpdateLinearPhysics(dt);
 	physics->UpdateAngularPhysics(dt);
-	UpdateMatrix();
+	UpdateMatrix(); 
 }
 
 PropObject::PropObject(const PropObject& obj)

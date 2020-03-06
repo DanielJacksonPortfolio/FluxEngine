@@ -16,9 +16,9 @@ public:
 	Transform() {}
 	Transform(const Transform& transform);
 
+	void Update(float dt);
 	const XMVECTOR& GetPosition() const;
 	const XMVECTOR& GetLastPosition() const;
-	XMVECTOR& EditPosition();
 	const XMQUATERNION& GetOrientation() const;
 	XMMATRIX GetRotationMatrix() const;
 

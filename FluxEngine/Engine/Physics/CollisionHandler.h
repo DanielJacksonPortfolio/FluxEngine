@@ -23,6 +23,8 @@ public:
 
 	XMVECTOR VectorReflection(XMVECTOR vector, XMVECTOR planeNormal);
 
+	void ResolveCollision(Physics* obj1, Physics* obj12);
+
 	bool RayPropIntersect(PropObject* object, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);
 
 	bool RayModelIntersect(Model* model, XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);

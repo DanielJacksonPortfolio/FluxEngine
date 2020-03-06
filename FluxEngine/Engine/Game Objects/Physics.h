@@ -30,6 +30,8 @@ public:
 	float& GetRotationDamping() { return rotationDamping; }
 	void UpdateLinearPhysics(float dt);
 	void UpdateAngularPhysics(float dt);
+	Appearance* GetAppearance() { return this->appearance; }
+	Transform* GetTransform() { return this->transform; }
 private:
 	std::vector<XMVECTOR> LForces = {};
 	std::vector<XMVECTOR> torques = {};

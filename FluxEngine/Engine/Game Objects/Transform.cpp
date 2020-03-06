@@ -22,6 +22,11 @@ Transform::Transform(const Transform& transform)
 	this->worldMatrix = transform.worldMatrix;
 }
 
+void Transform::Update(float dt)
+{
+	UpdateLastPosition();
+}
+
 const XMVECTOR& Transform::GetPosition() const
 {
 	return this->position;
@@ -29,11 +34,6 @@ const XMVECTOR& Transform::GetPosition() const
 const XMVECTOR& Transform::GetLastPosition() const
 {
 	return this->lastPosition;
-}
-
-XMVECTOR& Transform::EditPosition()
-{
-	return this->position;
 }
 
 const XMQUATERNION& Transform::GetOrientation() const
@@ -99,12 +99,6 @@ void Transform::UpdateDirectionVectors()
 	this->downVector = XMVector3TransformNormal(DEFAULT_DOWN_VECTOR, this->rotationMatrix);
 }
 
-void Transform::SetPosition(const XMVECTOR& pos)
-{
-	UpdateLastPosition();
-	this->position = pos;
-}
-
 void Transform::SetLastPosition(const XMVECTOR& pos)
 {
 	this->lastPosition = pos;
@@ -115,9 +109,13 @@ void Transform::UpdateLastPosition()
 	this->lastPosition = this->position;
 }
 
+void Transform::SetPosition(const XMVECTOR& pos)
+{
+	this->position = pos;
+}
+
 void Transform::SetPosition(const XMFLOAT3& pos)
 {
-	UpdateLastPosition();
 	XMFLOAT3 newPos = pos;
 	if (lockedPos[0])
 		newPos.x = XMVectorGetX(this->position);
@@ -125,25 +123,16 @@ void Transform::SetPosition(const XMFLOAT3& pos)
 		newPos.y = XMVectorGetY(this->position);
 	if (lockedPos[2])
 		newPos.z = XMVectorGetZ(this->position);
-	this->position = XMLoadFloat3(&newPos);
+	SetPosition(XMLoadFloat3(&newPos));
 }
 
 void Transform::SetPosition(float x, float y, float z)
 {
-	UpdateLastPosition();
-	XMFLOAT3 newPos = XMFLOAT3(x, y, z);
-	if (lockedPos[0])
-		newPos.x = XMVectorGetX(this->position);
-	if (lockedPos[1])
-		newPos.y = XMVectorGetY(this->position);
-	if (lockedPos[2])
-		newPos.z = XMVectorGetZ(this->position);
-	this->position = XMLoadFloat3(&newPos);
+	SetPosition(XMFLOAT3(x, y, z));
 }
 
 void Transform::AdjustPosition(const XMVECTOR& pos)
 {
-	UpdateLastPosition();
 	this->position += pos;
 }
 
