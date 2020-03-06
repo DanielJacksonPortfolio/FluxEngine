@@ -9,6 +9,7 @@
 #include "../Game Objects/Camera.h"
 #include "../Game Objects/Lights/PointLight.h"
 #include "../Game Objects/Lights/DirectionalLight.h"
+#include "../Physics/CollisionHandler.h"
 
 #include "../Bindables/RasterizerState.h"
 

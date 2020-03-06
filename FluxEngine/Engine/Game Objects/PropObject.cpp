@@ -6,7 +6,7 @@ bool PropObject::Init(std::vector<std::string> data, ID3D11Device* device, ID3D1
 		return false;
 	this->transform->SetScale(std::stof(data[9]));
 	this->physics->SetMass(std::stof(data[10]));
-	this->appearance->GetModel().SetBoundingShape(XMMatrixRotationQuaternion(this->transform->GetOrientation()));
+	this->appearance->GetModel()->SetBoundingShape(XMMatrixRotationQuaternion(this->transform->GetOrientation()));
 	return true;
 }
 
@@ -48,7 +48,7 @@ bool PropObject::Init(XMVECTOR pos, XMVECTOR orientation, const std::string& fil
 	this->appearance = new Appearance();
 	this->physics = new Physics(transform, appearance);
 	this->appearance->SetFilepath(filepath);
-	if (!this->appearance->GetModel().Init(filepath, device, deviceContext, cb_vertexShader, cb_pixelShader))
+	if (!this->appearance->GetModel()->Init(filepath, device, deviceContext, cb_vertexShader, cb_pixelShader))
 	{
 		ErrorLogger::Log("Failed to load model @ " + filepath);
 		return false;
@@ -59,23 +59,16 @@ bool PropObject::Init(XMVECTOR pos, XMVECTOR orientation, const std::string& fil
 void PropObject::Draw(const XMMATRIX& viewProjectionMatrix)
 {
 	if(this->appearance->GetRenderMode())
-		this->appearance->GetModel().Draw(this->transform->GetWorldMatrix(), viewProjectionMatrix);
+		this->appearance->GetModel()->Draw(this->transform->GetWorldMatrix(), viewProjectionMatrix);
 }
 void PropObject::DrawDebug(const XMMATRIX& viewProjectionMatrix, Model* sphere, Model* box)
 {
 	if(this->appearance->GetRenderMode())
-		this->appearance->GetModel().DrawDebug(this->transform->GetPosition(), this->transform->GetScale(), viewProjectionMatrix, sphere, box);
+		this->appearance->GetModel()->DrawDebug(this->transform->GetPosition(), this->transform->GetScale(), viewProjectionMatrix, sphere, box);
 }
 
 void PropObject::UpdateMatrix()
 {
 	this->transform->SetWorldMatrix(XMMatrixScaling(this->transform->GetScale(), this->transform->GetScale(), this->transform->GetScale()) * XMMatrixRotationQuaternion(this->transform->GetOrientation()) * XMMatrixTranslationFromVector(this->transform->GetPosition()));
 	this->transform->UpdateDirectionVectors();
-}
-
-bool PropObject::RayModelIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
-{
-	UpdateMatrix();
-	this->appearance->GetModel().SetBoundingShape(XMMatrixRotationQuaternion(this->transform->GetOrientation()));
-	return this->appearance->GetModel().RayModelIntersect(this->transform->GetWorldMatrix(), this->transform->GetPosition(), this->transform->GetScale(), rayOrigin, rayDir, nearestIntersect, intersectLocation);
 }

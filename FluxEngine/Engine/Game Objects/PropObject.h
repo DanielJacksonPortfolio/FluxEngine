@@ -1,6 +1,5 @@
 #pragma once
 #include "GameObject.h"
-#include "Appearance.h"
 #include "Physics.h"
 
 class PropObject : public GameObject
@@ -15,14 +14,12 @@ public:
 
 	Appearance* GetAppearance() { return this->appearance; }
 	Physics* GetPhysics() { return this->physics; }
-	bool RayModelIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);
-
 	std::string Save() override;
 	void Update(float dt) override;
+	void UpdateMatrix() override;
 
 protected:
 	Appearance* appearance = nullptr;
-	void UpdateMatrix() override;
 
 private:
 	Physics* physics = nullptr;

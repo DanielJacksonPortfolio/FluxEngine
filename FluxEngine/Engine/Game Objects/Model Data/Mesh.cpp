@@ -98,27 +98,6 @@ void Mesh::Draw()
 	this->deviceContext->DrawIndexed(this->indexBuffer.GetCount(), 0, 0);
 }
 
-bool Mesh::RayMeshIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation)
-{
-	bool intersect = false;
-	if (faces.size() > 0)
-	{
-		worldMatrix = this->transformMatrix * worldMatrix;
-		for (int i = 0; i < faces.size(); ++i)
-		{
-			XMVECTOR vertex0 = XMVectorSet(vertices[faces[i].mIndices[0]].pos.x, vertices[faces[i].mIndices[0]].pos.y, vertices[faces[i].mIndices[0]].pos.z, 1.0f);
-			XMVECTOR vertex1 = XMVectorSet(vertices[faces[i].mIndices[1]].pos.x, vertices[faces[i].mIndices[1]].pos.y, vertices[faces[i].mIndices[1]].pos.z, 1.0f);
-			XMVECTOR vertex2 = XMVectorSet(vertices[faces[i].mIndices[2]].pos.x, vertices[faces[i].mIndices[2]].pos.y, vertices[faces[i].mIndices[2]].pos.z, 1.0f);
-
-			if (CollisionHandler::Instance()->RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, vertex0, vertex1, vertex2, intersectDistance, intersectLocation))
-			{
-				intersect = true;
-			}
-		}
-	}
-	return intersect;
-}
-
 const XMMATRIX& Mesh::GetTransformMatrix()
 {
 	return this->transformMatrix;

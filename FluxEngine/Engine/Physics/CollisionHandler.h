@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 using namespace DirectX;
 
+#include "../Game Objects/PropObject.h"
+
 class CollisionHandler
 {
 public:
@@ -20,6 +22,12 @@ public:
 	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, XMVECTOR vertex0, XMVECTOR vertex1, XMVECTOR vertex2, float& intersectDistance, XMVECTOR& pointOfIntersect);
 
 	XMVECTOR VectorReflection(XMVECTOR vector, XMVECTOR planeNormal);
+
+	bool RayPropIntersect(PropObject* object, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);
+
+	bool RayModelIntersect(Model* model, XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);
+
+	bool RayMeshIntersect(Mesh* mesh, XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation);
 
 private:
 	static CollisionHandler* instance;

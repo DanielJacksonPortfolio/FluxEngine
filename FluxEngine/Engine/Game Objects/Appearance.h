@@ -7,9 +7,12 @@ using namespace DirectX;
 class Appearance
 {
 public:
-	Appearance() {}
+	Appearance() 
+	{
+		model = new Model();
+	}
 	Appearance(const Appearance& app);
-	Model& GetModel() { return this->model; }
+	Model* GetModel() { return this->model; }
 	int& GetGrayscale() { return this->grayscale; }
 	void SetGrayscale(int grayscale) { this->grayscale = grayscale; }
 	bool& GetNormalMapMode() { return this->normalMap; }
@@ -23,7 +26,7 @@ public:
 	std::string GetFilepath() { return this->filepath; }
 	void SetFilepath(std::string filepath) { this->filepath = filepath; }
 private:
-	Model model = Model();
+	Model* model = nullptr;
 
 	std::string filepath = "";
 	bool wireframe = false;

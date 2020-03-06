@@ -137,39 +137,6 @@ void Model::DrawDebug(XMVECTOR position, float scale, const XMMATRIX& viewProjec
 	}
 }
 
-bool Model::RayModelIntersect(XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
-{
-	bool initialCheck = false;
-	if (boundingShape == BoundingShape::SPHERE)
-	{
-		objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
-		if (CollisionHandler::Instance()->RaySphereIntersect(position, objectBoundingSphereRadius, rayOrigin, rayDir))
-			initialCheck = true;
-	}
-	else
-	{
-		if (CollisionHandler::Instance()->RayAABBIntersect(scale*minAABBCoord, scale * maxAABBCoord, position, rayOrigin, rayDir))
-			initialCheck = true;
-	}
-	if(initialCheck)
-	{
-		bool intersect = false;
-		for (int i = 0; i < meshes.size(); ++i)
-		{
-			float intersectDistance = INT_MAX;
-			if (meshes[i]->RayMeshIntersect(XMMatrixTranslationFromVector(-originVector) * worldMatrix, rayOrigin, rayDir, intersectDistance, intersectLocation))
-			{
-				intersect = true;
-				if (nearestIntersect > intersectDistance)
-					nearestIntersect = intersectDistance;
-			}
-		}
-		if (intersect)
-			return true;
-	}
-	return false;
-}
-
 
 bool Model::LoadModel(const std::string& filepath)
 {

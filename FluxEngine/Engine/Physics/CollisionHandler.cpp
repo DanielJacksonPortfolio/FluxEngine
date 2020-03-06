@@ -1,6 +1,6 @@
 #include "../../Tools/StrippedWindows.h"
 #include <algorithm>
-#include "CollisionHandler.h"
+#include "../Physics/CollisionHandler.h"
 
 CollisionHandler* CollisionHandler::instance = nullptr;
 
@@ -120,4 +120,65 @@ bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOr
 XMVECTOR CollisionHandler::VectorReflection(XMVECTOR vector, XMVECTOR planeNormal)
 {
 	return vector + 2 * XMVector3Dot(-vector, planeNormal) * planeNormal;
+}
+
+bool CollisionHandler::RayPropIntersect(PropObject* object, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
+{
+	object->UpdateMatrix();
+	object->GetAppearance()->GetModel()->SetBoundingShape(XMMatrixRotationQuaternion(object->GetTransform()->GetOrientation()));
+	return Instance()->RayModelIntersect(object->GetAppearance()->GetModel(),object->GetTransform()->GetWorldMatrix(), object->GetTransform()->GetPosition(), object->GetTransform()->GetScale(), rayOrigin, rayDir, nearestIntersect, intersectLocation);
+}
+
+bool CollisionHandler::RayModelIntersect(Model* model, XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
+{
+	bool initialCheck = false;
+	if (model->boundingShape == Model::BoundingShape::SPHERE)
+	{
+		model->objectBoundingSphereRadius = model->modelBoundingSphereRadius * scale;
+		if (CollisionHandler::Instance()->RaySphereIntersect(position, model->objectBoundingSphereRadius, rayOrigin, rayDir))
+			initialCheck = true;
+	}
+	else
+	{
+		if (CollisionHandler::Instance()->RayAABBIntersect(scale * model->minAABBCoord, scale * model->maxAABBCoord, position, rayOrigin, rayDir))
+			initialCheck = true;
+	}
+	if (initialCheck)
+	{
+		bool intersect = false;
+		for (int i = 0; i < model->meshes.size(); ++i)
+		{
+			float intersectDistance = INT_MAX;
+			if (CollisionHandler::Instance()->RayMeshIntersect(model->meshes[i],XMMatrixTranslationFromVector(-model->originVector) * worldMatrix, rayOrigin, rayDir, intersectDistance, intersectLocation))
+			{
+				intersect = true;
+				if (nearestIntersect > intersectDistance)
+					nearestIntersect = intersectDistance;
+			}
+		}
+		if (intersect)
+			return true;
+	}
+	return false;
+}
+
+bool CollisionHandler::RayMeshIntersect(Mesh* mesh, XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation)
+{
+	bool intersect = false;
+	if (mesh->faces.size() > 0)
+	{
+		worldMatrix = mesh->transformMatrix * worldMatrix;
+		for (int i = 0; i < mesh->faces.size(); ++i)
+		{
+			XMVECTOR vertex0 = XMVectorSet(mesh->vertices[mesh->faces[i].mIndices[0]].pos.x, mesh->vertices[mesh->faces[i].mIndices[0]].pos.y, mesh->vertices[mesh->faces[i].mIndices[0]].pos.z, 1.0f);
+			XMVECTOR vertex1 = XMVectorSet(mesh->vertices[mesh->faces[i].mIndices[1]].pos.x, mesh->vertices[mesh->faces[i].mIndices[1]].pos.y, mesh->vertices[mesh->faces[i].mIndices[1]].pos.z, 1.0f);
+			XMVECTOR vertex2 = XMVectorSet(mesh->vertices[mesh->faces[i].mIndices[2]].pos.x, mesh->vertices[mesh->faces[i].mIndices[2]].pos.y, mesh->vertices[mesh->faces[i].mIndices[2]].pos.z, 1.0f);
+
+			if (CollisionHandler::Instance()->RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, vertex0, vertex1, vertex2, intersectDistance, intersectLocation))
+			{
+				intersect = true;
+			}
+		}
+	}
+	return intersect;
 }
