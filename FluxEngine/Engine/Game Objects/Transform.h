@@ -17,16 +17,21 @@ public:
 	Transform(const Transform& transform);
 
 	const XMVECTOR& GetPosition() const;
+	const XMVECTOR& GetLastPosition() const;
 	XMVECTOR& EditPosition();
 	const XMQUATERNION& GetOrientation() const;
 	XMMATRIX GetRotationMatrix() const;
+
+	void SetLastPosition(const XMVECTOR& pos);
+
+	void UpdateLastPosition();
 
 	void SetPosition(const XMVECTOR& pos);
 	void SetPosition(const XMFLOAT3& pos);
 	void SetPosition(float x, float y, float z);
 
 	void AdjustPosition(const XMVECTOR& pos);
-	void AdjustPosition(const XMFLOAT3& pos);
+	void AdjustPosition(XMFLOAT3 pos);
 	void AdjustPosition(float x, float y, float z);
 
 	void SetOrientation(const XMQUATERNION& orient);
@@ -64,6 +69,9 @@ private:
 	XMVECTOR leftVector = XMVECTOR();
 	XMVECTOR rightVector = XMVECTOR();
 	XMVECTOR backwardVector = XMVECTOR();
+
+
+	XMVECTOR lastPosition = XMVECTOR();
 
 	float scale = 1.0f;
 

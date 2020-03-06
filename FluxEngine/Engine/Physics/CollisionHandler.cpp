@@ -24,7 +24,7 @@ bool CollisionHandler::SpherePlaneCollision(XMVECTOR spherePos, float sphereRadi
 	float B = XMVectorGetY(planeNormal);
 	float C = XMVectorGetZ(planeNormal);
 	float D = -XMVectorGetX(pointOnPlane) - XMVectorGetY(pointOnPlane) - XMVectorGetZ(pointOnPlane);
-	float numerator = fabs(A * XMVectorGetX(spherePos) + B * XMVectorGetY(spherePos) + C * XMVectorGetX(spherePos) + D);
+	float numerator = static_cast<float>(fabs(A * XMVectorGetX(spherePos) + B * XMVectorGetY(spherePos) + C * XMVectorGetX(spherePos) + D));
 	float denominator = sqrtf(A * A + B * B + C * C);
 
 	return (numerator / denominator) < sphereRadius; //Distance < radius
@@ -91,7 +91,7 @@ bool CollisionHandler::RayOBBIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir)
 
 bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, XMVECTOR vertex0, XMVECTOR vertex1, XMVECTOR vertex2, float& intersectDistance, XMVECTOR& pointOfIntersect)
 {
-	XMVECTOR normal = XMVector3Normalize(XMVector3Transform(XMVector3Cross(vertex1 - vertex0, vertex2 - vertex0), XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)))) * (XMVectorGetX(XMMatrixDeterminant(worldMatrix)) < 0 ? -1 : 1);
+	XMVECTOR normal = XMVector3Normalize(XMVector3Transform(XMVector3Cross(vertex1 - vertex0, vertex2 - vertex0), XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)))) * (XMVectorGetX(XMMatrixDeterminant(worldMatrix)) < 0.0f ? -1.0f : 1.0f);
 
 	vertex0 = XMVector3Transform(vertex0, worldMatrix);
 	vertex1 = XMVector3Transform(vertex1, worldMatrix);
@@ -116,6 +116,7 @@ bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOr
 
 	return true;
 }
+
 
 XMVECTOR CollisionHandler::VectorReflection(XMVECTOR vector, XMVECTOR planeNormal)
 {

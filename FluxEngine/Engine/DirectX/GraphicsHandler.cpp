@@ -60,7 +60,7 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 			selectedObjects.push_back(Object(object, nearestIntersect,intersectLocation));
 	}
 
-	numObjectsSelected = selectedObjects.size();
+	numObjectsSelected = static_cast<int>(selectedObjects.size());
 
 	if (selectedObjects.size() > 0)
 	{
@@ -71,7 +71,7 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 		for (size_t i = 1; i < selectedObjects.size(); ++i)
 			if (selectedObjects[i].intersectDistance < closestObjectDistance)
 			{
-				closestObjectID = i;
+				closestObjectID = static_cast<int>(i);
 				closestObjectDistance = selectedObjects[closestObjectID].intersectDistance;
 			}
 

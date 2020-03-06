@@ -11,6 +11,8 @@
 #include "../Game Objects/Lights/DirectionalLight.h"
 #include "../Physics/CollisionHandler.h"
 
+#include "../Physics/CollisionHandler.h"
+
 #include "../Bindables/RasterizerState.h"
 
 #include <ImGUI/imgui.h>

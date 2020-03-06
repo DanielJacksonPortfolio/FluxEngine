@@ -19,14 +19,15 @@ public:
 
 	XMVECTOR originVector = XMVECTOR();
 	float objectBoundingSphereRadius = 1.0f;
+	float modelBoundingSphereRadius = 1.0f;
 	XMVECTOR minAABBCoord = XMVECTOR();
 	XMVECTOR maxAABBCoord = XMVECTOR();
 	float aabbw = 1.0f;
 	float aabbh = 1.0f;
 	float aabbd = 1.0f;
-	float modelBoundingSphereRadius = 1.0f;
 	BoundingShape boundingShape = BoundingShape::SPHERE;
 	std::vector<Mesh*> meshes;
+
 private:
 	void SetOrigin();
 	bool LoadModel(const std::string& filepath);

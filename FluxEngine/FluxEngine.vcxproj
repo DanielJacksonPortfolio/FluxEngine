@@ -164,8 +164,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Game Objects\Appearance.cpp" />
     <ClCompile Include="Engine\Physics\CollisionHandler.cpp" />
+    <ClCompile Include="Engine\Game Objects\Appearance.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui_draw.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui_impl_dx11.cpp" />
