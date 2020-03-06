@@ -56,11 +56,11 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 		PropObject* object = objects[i].second;
 		float nearestIntersect = INT_MAX;
 		XMVECTOR intersectLocation = XMVECTOR();
-		if (object->RayModelIntersect(eyePos, rayDirection, nearestIntersect, intersectLocation))
+		if (CollisionHandler::Instance()->RayPropIntersect(object, eyePos, rayDirection, nearestIntersect, intersectLocation))
 			selectedObjects.push_back(Object(object, nearestIntersect,intersectLocation));
 	}
 
-	numObjectsSelected = selectedObjects.size();
+	numObjectsSelected = static_cast<int>(selectedObjects.size());
 
 	if (selectedObjects.size() > 0)
 	{
@@ -71,7 +71,7 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 		for (size_t i = 1; i < selectedObjects.size(); ++i)
 			if (selectedObjects[i].intersectDistance < closestObjectDistance)
 			{
-				closestObjectID = i;
+				closestObjectID = static_cast<int>(i);
 				closestObjectDistance = selectedObjects[closestObjectID].intersectDistance;
 			}
 
@@ -94,10 +94,10 @@ void GraphicsHandler::Update(float dt)
 		if (gravityEnabled)
 		{
 			objects[i].second->GetPhysics()->AddLinearForce(GRAVITY * objects[i].second->GetPhysics()->GetMass()); //Gravity
-			if (XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel().minAABBCoord * objects[i].second->GetTransform()->GetScale()) < floorHeight)
+			if (XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel()->minAABBCoord * objects[i].second->GetTransform()->GetScale()) < floorHeight)
 			{
 				objects[i].second->GetPhysics()->AddLinearForce(-GRAVITY * objects[i].second->GetPhysics()->GetMass());
-				objects[i].second->GetTransform()->AdjustPosition(0, floorHeight-XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel().minAABBCoord * objects[i].second->GetTransform()->GetScale()), 0);
+				objects[i].second->GetTransform()->AdjustPosition(0, floorHeight-XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel()->minAABBCoord * objects[i].second->GetTransform()->GetScale()), 0);
 				objects[i].second->GetPhysics()->SetLVelocity(CollisionHandler::Instance()->VectorReflection(objects[i].second->GetPhysics()->GetLVelocity(),XMVectorSet(0.0f,1.0f,0.0f,1.0f)) * 0.5);
 			}
 		}
@@ -1085,7 +1085,7 @@ void GraphicsHandler::ResolvePenetrations()
 		{
 			if (j != i)
 			{
-				bool collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel().objectBoundingSphereRadius, objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel().objectBoundingSphereRadius);
+				bool collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel()->objectBoundingSphereRadius, objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel()->objectBoundingSphereRadius);
 				if (collision)
 				{
 					std::string output = "Collision Detected between: " + objects[i].first + " & " + objects[j].first + ".\n";

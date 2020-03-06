@@ -40,7 +40,7 @@ void Physics::UpdateLinearPhysics(float dt)
 void Physics::UpdateAngularPhysics(float dt)
 {
 	XMVECTOR torque = GetAngularResultantForce();
-	XMMATRIX inertiaTensor = XMMatrixIdentity() * (0.4f * mass * this->appearance->GetModel().objectBoundingSphereRadius * this->appearance->GetModel().objectBoundingSphereRadius, 0.4f * mass * this->appearance->GetModel().objectBoundingSphereRadius * this->appearance->GetModel().objectBoundingSphereRadius, 0.4f * mass * this->appearance->GetModel().objectBoundingSphereRadius * this->appearance->GetModel().objectBoundingSphereRadius); //Sphere
+	XMMATRIX inertiaTensor = XMMatrixIdentity() * (0.4f * mass * this->appearance->GetModel()->objectBoundingSphereRadius * this->appearance->GetModel()->objectBoundingSphereRadius, 0.4f * mass * this->appearance->GetModel()->objectBoundingSphereRadius * this->appearance->GetModel()->objectBoundingSphereRadius, 0.4f * mass * this->appearance->GetModel()->objectBoundingSphereRadius * this->appearance->GetModel()->objectBoundingSphereRadius); //Sphere
 	this->angularAcceleration = XMVector3Transform(torque, XMMatrixInverse(nullptr, inertiaTensor));
 	this->angularAcceleration = XMVectorSetW(this->angularAcceleration, 0.0f);
 	this->angularVelocity = this->angularVelocity + (angularAcceleration * dt * 0.001f);

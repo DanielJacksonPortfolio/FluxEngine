@@ -102,9 +102,6 @@
     <ClCompile Include="Engine\Game Objects\PropObject.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Physics\CollisionHandler.cpp">
-      <Filter>Source\Engine\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Game Objects\Transform.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
@@ -113,6 +110,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Game Objects\Physics.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\CollisionHandler.cpp">
+      <Filter>Source\Engine\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

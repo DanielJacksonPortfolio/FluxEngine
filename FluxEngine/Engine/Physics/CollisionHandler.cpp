@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "CollisionHandler.h"
 
+
 CollisionHandler* CollisionHandler::instance = nullptr;
 
 CollisionHandler* CollisionHandler::Instance()
@@ -24,7 +25,7 @@ bool CollisionHandler::SpherePlaneCollision(XMVECTOR spherePos, float sphereRadi
 	float B = XMVectorGetY(planeNormal);
 	float C = XMVectorGetZ(planeNormal);
 	float D = -XMVectorGetX(pointOnPlane) - XMVectorGetY(pointOnPlane) - XMVectorGetZ(pointOnPlane);
-	float numerator = fabs(A * XMVectorGetX(spherePos) + B * XMVectorGetY(spherePos) + C * XMVectorGetX(spherePos) + D);
+	float numerator = static_cast<float>(fabs(A * XMVectorGetX(spherePos) + B * XMVectorGetY(spherePos) + C * XMVectorGetX(spherePos) + D));
 	float denominator = sqrtf(A * A + B * B + C * C);
 
 	return (numerator / denominator) < sphereRadius; //Distance < radius
@@ -91,7 +92,7 @@ bool CollisionHandler::RayOBBIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir)
 
 bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, XMVECTOR vertex0, XMVECTOR vertex1, XMVECTOR vertex2, float& intersectDistance, XMVECTOR& pointOfIntersect)
 {
-	XMVECTOR normal = XMVector3Normalize(XMVector3Transform(XMVector3Cross(vertex1 - vertex0, vertex2 - vertex0), XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)))) * (XMVectorGetX(XMMatrixDeterminant(worldMatrix)) < 0 ? -1 : 1);
+	XMVECTOR normal = XMVector3Normalize(XMVector3Transform(XMVector3Cross(vertex1 - vertex0, vertex2 - vertex0), XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)))) * (XMVectorGetX(XMMatrixDeterminant(worldMatrix)) < 0.0f ? -1.0f : 1.0f);
 
 	vertex0 = XMVector3Transform(vertex0, worldMatrix);
 	vertex1 = XMVector3Transform(vertex1, worldMatrix);
@@ -117,7 +118,76 @@ bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOr
 	return true;
 }
 
+
+bool CollisionHandler::RayMeshIntersect(Mesh* mesh, XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation)
+{
+	bool intersect = false;
+	if (mesh->faces.size() > 0)
+	{
+		worldMatrix = mesh->transformMatrix * worldMatrix;
+		for (int i = 0; i < mesh->faces.size(); ++i)
+		{
+			XMVECTOR vertex0 = XMVectorSet(mesh->vertices[mesh->faces[i].mIndices[0]].pos.x, mesh->vertices[mesh->faces[i].mIndices[0]].pos.y, mesh->vertices[mesh->faces[i].mIndices[0]].pos.z, 1.0f);
+			XMVECTOR vertex1 = XMVectorSet(mesh->vertices[mesh->faces[i].mIndices[1]].pos.x, mesh->vertices[mesh->faces[i].mIndices[1]].pos.y, mesh->vertices[mesh->faces[i].mIndices[1]].pos.z, 1.0f);
+			XMVECTOR vertex2 = XMVectorSet(mesh->vertices[mesh->faces[i].mIndices[2]].pos.x, mesh->vertices[mesh->faces[i].mIndices[2]].pos.y, mesh->vertices[mesh->faces[i].mIndices[2]].pos.z, 1.0f);
+
+			if (this->Instance()->RayTriangleIntersect(worldMatrix, rayOrigin, rayDir, vertex0, vertex1, vertex2, intersectDistance, intersectLocation))
+			{
+				intersect = true;
+			}
+		}
+	}
+	return intersect;
+}
+
+
+bool CollisionHandler::RayModelIntersect(Model* model, XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
+{
+	bool initialCheck = false;
+	model->objectBoundingSphereRadius = model->modelBoundingSphereRadius * scale;
+	if (model->boundingShape == Model::BoundingShape::SPHERE)
+	{
+		if (this->Instance()->RaySphereIntersect(position, model->objectBoundingSphereRadius, rayOrigin, rayDir))
+			initialCheck = true;
+	}
+	else
+	{
+		if (this->Instance()->RayAABBIntersect(scale * model->minAABBCoord, scale * model->maxAABBCoord, position, rayOrigin, rayDir))
+			initialCheck = true;
+	}
+	if (initialCheck)
+	{
+		bool intersect = false;
+		for (int i = 0; i < model->meshes.size(); ++i)
+		{
+			float intersectDistance = INT_MAX;
+			if (this->Instance()->RayMeshIntersect(model->meshes[i],XMMatrixTranslationFromVector(-model->originVector) * worldMatrix, rayOrigin, rayDir, intersectDistance, intersectLocation))
+			{
+				intersect = true;
+				if (nearestIntersect > intersectDistance)
+					nearestIntersect = intersectDistance;
+			}
+		}
+		if (intersect)
+			return true;
+	}
+	return false;
+}
+
+
 XMVECTOR CollisionHandler::VectorReflection(XMVECTOR vector, XMVECTOR planeNormal)
 {
 	return vector + 2 * XMVector3Dot(-vector, planeNormal) * planeNormal;
+}
+
+bool CollisionHandler::RayPropIntersect(PropObject* prop, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation)
+{
+	prop->UpdateMatrix();
+	prop->GetAppearance()->GetModel()->SetBoundingShape(XMMatrixRotationQuaternion(prop->GetTransform()->GetOrientation()));
+	return this->Instance()->RayModelIntersect(prop->GetAppearance()->GetModel(), prop->GetTransform()->GetWorldMatrix(), prop->GetTransform()->GetPosition(), prop->GetTransform()->GetScale(), rayOrigin, rayDir, nearestIntersect, intersectLocation);
+}
+
+void CollisionHandler::ResolveCollision(Physics* obj1, Physics* obj2)
+{
+
 }

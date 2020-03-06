@@ -1,6 +1,8 @@
 #pragma once
 #include <DirectXMath.h>
 using namespace DirectX;
+#include "../Game Objects/PropObject.h"
+
 
 class CollisionHandler
 {
@@ -18,8 +20,13 @@ public:
 	bool RayAABBIntersect(XMVECTOR aabbMin, XMVECTOR aabbMax, XMVECTOR aabbPos, XMVECTOR rayOrigin, XMVECTOR rayDir);
 	bool RayOBBIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir);
 	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, XMVECTOR vertex0, XMVECTOR vertex1, XMVECTOR vertex2, float& intersectDistance, XMVECTOR& pointOfIntersect);
+	bool RayMeshIntersect(Mesh* mesh, XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, float& intersectDistance, XMVECTOR& intersectLocation);
+	bool RayModelIntersect(Model* model, XMMATRIX worldMatrix, XMVECTOR position, float scale, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);
+	bool RayPropIntersect(PropObject* prop, XMVECTOR rayOrigin, XMVECTOR rayDir, float& nearestIntersect, XMVECTOR& intersectLocation);
 
 	XMVECTOR VectorReflection(XMVECTOR vector, XMVECTOR planeNormal);
+
+	void ResolveCollision(Physics* obj1, Physics* obj2);
 
 private:
 	static CollisionHandler* instance;

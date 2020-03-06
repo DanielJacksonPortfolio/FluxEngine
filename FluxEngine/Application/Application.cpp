@@ -218,7 +218,7 @@ void Application::Update()
 			{
 				XMVECTOR rayDirection = XMVECTOR();
 				XMVECTOR collisionLocation = XMVECTOR();
-				PropObject* object = gfx.PickObject(mouse.GetPosX(), mouse.GetPosY(), rayDirection, collisionLocation);
+				PropObject* object = gfx.PickObject(static_cast<float>(mouse.GetPosX()), static_cast<float>(mouse.GetPosY()), rayDirection, collisionLocation);
 				if(toolMode == 1)
 					gfx.SetObject(object);
 				if(toolMode == 2)
