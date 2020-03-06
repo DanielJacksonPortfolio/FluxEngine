@@ -2,11 +2,10 @@
 
 void Camera::Init(std::vector<std::string> data)
 {
-	linearVelocity = { 0.01f ,0.0f ,0.0f ,0.0f };
 	Init(XMVectorSet(std::stof(data[1]), std::stof(data[2]), std::stof(data[3]), 1.0f), XMVectorSet(std::stof(data[4]), std::stof(data[5]), std::stof(data[6]), std::stof(data[7])), std::stof(data[8]), std::stof(data[9]), std::stof(data[10]), std::stof(data[11]), data[0]);
-	SetLockedPos(std::stoi(data[12]), 0);
-	SetLockedPos(std::stoi(data[13]), 1);
-	SetLockedPos(std::stoi(data[14]), 2);
+	this->transform->SetLockedPos(std::stoi(data[12]), 0);
+	this->transform->SetLockedPos(std::stoi(data[13]), 1);
+	this->transform->SetLockedPos(std::stoi(data[14]), 2);
 }
 
 void Camera::UpdateProjectionMatrix()
@@ -16,7 +15,7 @@ void Camera::UpdateProjectionMatrix()
 
 void Camera::UpdateViewMatrix()
 {
-	this->viewMatrix = XMMatrixLookToLH(this->position, this->forwardVector, this->upVector);
+	this->viewMatrix = XMMatrixLookToLH(this->transform->GetPosition(), this->transform->GetForwardVector(), this->transform->GetUpVector());
 }
 
 void Camera::Init(XMVECTOR pos, XMVECTOR orientation, float fov, float aspectRatio, float nearPlane, float farPlane, std::string name)
@@ -30,24 +29,30 @@ void Camera::Init(XMVECTOR pos, XMVECTOR orientation, float fov, float aspectRat
 	this->UpdateProjectionMatrix();
 }
 
+void Camera::Update(float dt)
+{
+	this->UpdateViewMatrix();
+	this->UpdateProjectionMatrix();
+}
+
 std::string Camera::Save()
 {
 	std::string output = "";
 	output += name + ",";
-	output += std::to_string(XMVectorGetX(position)) + ",";
-	output += std::to_string(XMVectorGetY(position)) + ",";
-	output += std::to_string(XMVectorGetZ(position)) + ",";
-	output += std::to_string(XMVectorGetX(orientation)) + ",";
-	output += std::to_string(XMVectorGetY(orientation)) + ",";
-	output += std::to_string(XMVectorGetZ(orientation)) + ",";
-	output += std::to_string(XMVectorGetW(orientation)) + ",";
+	output += std::to_string(XMVectorGetX(this->transform->GetPosition())) + ",";
+	output += std::to_string(XMVectorGetY(this->transform->GetPosition())) + ",";
+	output += std::to_string(XMVectorGetZ(this->transform->GetPosition())) + ",";
+	output += std::to_string(XMVectorGetX(this->transform->GetOrientation())) + ",";
+	output += std::to_string(XMVectorGetY(this->transform->GetOrientation())) + ",";
+	output += std::to_string(XMVectorGetZ(this->transform->GetOrientation())) + ",";
+	output += std::to_string(XMVectorGetW(this->transform->GetOrientation())) + ",";
 	output += std::to_string(fov) + ",";
 	output += std::to_string(aspectRatio) + ",";
 	output += std::to_string(nearPlane) + ",";
 	output += std::to_string(farPlane) + ",";
-	output += std::to_string(lockedPos[0]) + ",";
-	output += std::to_string(lockedPos[1]) + ",";
-	output += std::to_string(lockedPos[2]) + ",";
+	output += std::to_string(this->transform->GetLockedPos(0)) + ",";
+	output += std::to_string(this->transform->GetLockedPos(1)) + ",";
+	output += std::to_string(this->transform->GetLockedPos(2)) + ",";
 	return output;
 }
 

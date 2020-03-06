@@ -203,8 +203,8 @@ void Application::Update()
 					float diffX = mouse.GetMouseDiffX();
 					float diffY = mouse.GetMouseDiffY();
 
-					this->gfx.camera->RotateByAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), diffX * 0.01f);
-					this->gfx.camera->RotateByAxis(this->gfx.camera->GetRightVector(), diffY * 0.01f);
+					this->gfx.camera->GetTransform()->RotateByAxis(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), diffX * 0.01f);
+					this->gfx.camera->GetTransform()->RotateByAxis(this->gfx.camera->GetTransform()->GetRightVector(), diffY * 0.01f);
 				}
 			}
 		}
@@ -258,34 +258,35 @@ void Application::Update()
 		}
 		if (keyboard.KeyIsPressed('W'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetForwardVector() * gfx.camera->GetSpeed() * dt);
+			this->gfx.camera->GetTransform()->AdjustPosition(this->gfx.camera->GetTransform()->GetForwardVector() * gfx.camera->GetSpeed() * dt);
 		}
 		if (keyboard.KeyIsPressed('A'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetLeftVector() * gfx.camera->GetSpeed() * dt);
+			this->gfx.camera->GetTransform()->AdjustPosition(this->gfx.camera->GetTransform()->GetLeftVector() * gfx.camera->GetSpeed() * dt);
 		}
 		if (keyboard.KeyIsPressed('S'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetBackwardVector() * gfx.camera->GetSpeed() * dt);
+			this->gfx.camera->GetTransform()->AdjustPosition(this->gfx.camera->GetTransform()->GetBackwardVector() * gfx.camera->GetSpeed() * dt);
 		}
 		if (keyboard.KeyIsPressed('D'))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetRightVector() * gfx.camera->GetSpeed() * dt);
+			this->gfx.camera->GetTransform()->AdjustPosition(this->gfx.camera->GetTransform()->GetRightVector() * gfx.camera->GetSpeed() * dt);
 		}
 		if (keyboard.KeyIsPressed(VK_SPACE))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetUpVector() * gfx.camera->GetSpeed() * dt);
+			this->gfx.camera->GetTransform()->AdjustPosition(this->gfx.camera->GetTransform()->GetUpVector() * gfx.camera->GetSpeed() * dt);
 		}
 		if (keyboard.KeyIsPressed(VK_SHIFT))
 		{
-			this->gfx.camera->AdjustPosition(this->gfx.camera->GetDownVector() * gfx.camera->GetSpeed() * dt);
+			this->gfx.camera->GetTransform()->AdjustPosition(this->gfx.camera->GetTransform()->GetDownVector() * gfx.camera->GetSpeed() * dt);
 		}
 	}
 
 	gfx.Update(dt);
 
-
 	timer.Restart();
+
+	this->RenderFrame();
 }
 
 void Application::RenderFrame()

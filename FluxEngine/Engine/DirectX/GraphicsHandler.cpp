@@ -34,7 +34,7 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 	XMMATRIX inverseProjection = XMMatrixInverse(&determinant, projectionMatrix);
 	XMMATRIX inverseView = XMMatrixInverse(&determinant, viewMatrix);
 
-	XMVECTOR eyePos = this->camera->GetPosition();
+	XMVECTOR eyePos = this->camera->GetTransform()->GetPosition();
 	XMVECTOR rayOriginVector = XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, -1, 0), inverseProjection), inverseView); // World Space
 	rayDirection = XMVector3Normalize(rayOriginVector - eyePos);
 
@@ -89,21 +89,40 @@ void GraphicsHandler::Update(float dt)
 {
 	ResolvePenetrations();
 
-	for (int i = 0; i < objects.size(); ++i)
+	for (size_t i = 0; i < objects.size(); ++i)
 	{
 		if (gravityEnabled)
 		{
-			objects[i].second->AddLinearForce(GRAVITY * objects[i].second->GetMass()); //Gravity
-			if (XMVectorGetY(objects[i].second->GetPosition() + objects[i].second->GetModel().minAABBCoord * objects[i].second->GetScale()) < floorHeight)
+			objects[i].second->GetPhysics()->AddLinearForce(GRAVITY * objects[i].second->GetPhysics()->GetMass()); //Gravity
+			if (XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel().minAABBCoord * objects[i].second->GetTransform()->GetScale()) < floorHeight)
 			{
-				objects[i].second->AddLinearForce(-GRAVITY * objects[i].second->GetMass());
-				objects[i].second->AdjustPosition(0, floorHeight-XMVectorGetY(objects[i].second->GetPosition() + objects[i].second->GetModel().minAABBCoord * objects[i].second->GetScale()), 0);
-				objects[i].second->SetLVelocity(XMVectorSet(XMVectorGetX(objects[i].second->GetLVelocity()), -XMVectorGetY(objects[i].second->GetLVelocity()), XMVectorGetZ(objects[i].second->GetLVelocity()), 1.0f)*0.5);
+				objects[i].second->GetPhysics()->AddLinearForce(-GRAVITY * objects[i].second->GetPhysics()->GetMass());
+				objects[i].second->GetTransform()->AdjustPosition(0, floorHeight-XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel().minAABBCoord * objects[i].second->GetTransform()->GetScale()), 0);
+				objects[i].second->GetPhysics()->SetLVelocity(CollisionHandler::Instance()->VectorReflection(objects[i].second->GetPhysics()->GetLVelocity(),XMVectorSet(0.0f,1.0f,0.0f,1.0f)) * 0.5);
 			}
 		}
 			
-		objects[i].second->Update(dt); 
+		objects[i].second->Update(dt);
 	}
+
+	for (size_t i = 0; i < cameras.size(); ++i)
+	{
+		cameras[i]->Update(dt);
+	}
+	for (size_t i = 0; i < pLights.size(); ++i)
+	{
+		pLights[i]->Update(dt);
+	}
+	for (size_t i = 0; i < dLights.size(); ++i)
+	{
+		dLights[i]->Update(dt);
+	}
+
+	floor->GetTransform()->SetPosition(XMVectorGetX(floor->GetTransform()->GetPosition()), floorHeight, XMVectorGetZ(floor->GetTransform()->GetPosition()));
+	floor->Update(dt);
+
+	skybox->GetTransform()->SetPosition(camera->GetTransform()->GetPosition());
+	this->skybox->Update(dt);
 }
 
 
@@ -116,8 +135,8 @@ void GraphicsHandler::PushObject(PropObject* obj, XMVECTOR rayDirection, XMVECTO
 {
 	if (obj != nullptr)
 	{
-		obj->AddLinearForce(rayDirection * pushStrength*obj->GetMass());
-		obj->AddTorque(rayDirection * pushStrength, collisionLocation);
+		obj->GetPhysics()->AddLinearForce(rayDirection * pushStrength*obj->GetPhysics()->GetMass());
+		obj->GetPhysics()->AddTorque(rayDirection * pushStrength, collisionLocation);
 	}
 }
 
@@ -151,7 +170,7 @@ void GraphicsHandler::RenderFrame()
 		{
 			this->cb_pixelShader.data.pointLightColor[i] = XMFLOAT4(pLights[i]->GetColor().x, pLights[i]->GetColor().y, pLights[i]->GetColor().z, 1.0f);
 			this->cb_pixelShader.data.pointLightFactors[i].x = pLights[i]->GetStrength();
-			this->cb_pixelShader.data.pointLightPosition[i] = XMFLOAT4(XMVectorGetX(pLights[i]->GetPosition()), XMVectorGetY(pLights[i]->GetPosition()), XMVectorGetZ(pLights[i]->GetPosition()),1.0f);
+			this->cb_pixelShader.data.pointLightPosition[i] = XMFLOAT4(XMVectorGetX(pLights[i]->GetTransform()->GetPosition()), XMVectorGetY(pLights[i]->GetTransform()->GetPosition()), XMVectorGetZ(pLights[i]->GetTransform()->GetPosition()),1.0f);
 			this->cb_pixelShader.data.pointLightFactors[i].y = pLights[i]->GetCAttenuation();
 			this->cb_pixelShader.data.pointLightFactors[i].z = pLights[i]->GetLAttenuation();
 			this->cb_pixelShader.data.pointLightFactors[i].w = pLights[i]->GetEAttenuation();
@@ -159,15 +178,12 @@ void GraphicsHandler::RenderFrame()
 		this->cb_pixelShader.data.numPLights = static_cast<int>(pLights.size());
 
 		this->cb_pixelShader.data.shininess = this->shininess;
-		XMStoreFloat3(&this->cb_pixelShader.data.cameraPosition, this->camera->GetPosition());
+		XMStoreFloat3(&this->cb_pixelShader.data.cameraPosition, this->camera->GetTransform()->GetPosition());
 		this->cb_pixelShader.ApplyChanges();
 
 		this->deviceContext->OMSetDepthStencilState(this->depthStencilState.Get(), 0);
 		this->deviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF); //this->blendState.Get()
 		this->deviceContext->PSSetSamplers(0, 1, this->samplerState.GetAddressOf());
-
-
-		camera->UpdateViewMatrix();
 
 		//Matrices
 		this->viewMatrix = this->camera->GetViewMatrix();
@@ -178,9 +194,6 @@ void GraphicsHandler::RenderFrame()
 		this->deviceContext->IASetInputLayout(this->vertexShader.GetInputLayout());
 
 		//Set Shaders
-
-		if (camera != nullptr)
-			skybox->SetPosition(camera->GetPosition());
 
 		this->deviceContext->VSSetShader(this->vertexShader.GetShader(), NULL, 0);
 		this->deviceContext->PSSetShader(this->pixelShader_skybox.GetShader(), NULL, 0);
@@ -196,13 +209,13 @@ void GraphicsHandler::RenderFrame()
 			if (object != nullptr)
 			{
 				//Rasterizer States
-				if (object->GetWireframeMode() == false)
+				if (object->GetAppearance()->GetWireframeMode() == false)
 					bindables["RSDefault"]->Bind();
 				else
 					bindables["RSNoneWireframe"]->Bind();
-				this->cb_pixelShader.data.normalMap = object->GetNormalMapMode();
-				this->cb_pixelShader.data.specularMap = object->GetSpecularMapMode();
-				this->cb_pixelShader.data.grayscale = object->GetGrayscale();
+				this->cb_pixelShader.data.normalMap = object->GetAppearance()->GetNormalMapMode();
+				this->cb_pixelShader.data.specularMap = object->GetAppearance()->GetSpecularMapMode();
+				this->cb_pixelShader.data.grayscale = object->GetAppearance()->GetGrayscale();
 				this->cb_pixelShader.ApplyChanges();
 				if (object->GetName() == "Water")
 				{
@@ -214,11 +227,10 @@ void GraphicsHandler::RenderFrame()
 				else
 					object->Draw(viewProjectionMatrix);
 				if(debugMode)
-					object->DrawDebug(viewProjectionMatrix,&debugSphere->GetModel(), &debugCube->GetModel());
+					object->DrawDebug(viewProjectionMatrix, debugSphere, debugCube);
 			}
 		}
 
-		floor->SetPosition(XMVectorGetX(floor->GetPosition()),floorHeight, XMVectorGetZ(floor->GetPosition()));
 		this->floor->Draw(viewProjectionMatrix);
 
 		if (showLights)
@@ -309,7 +321,7 @@ void GraphicsHandler::SaveScene(std::string sceneName)
 	generalFile.close();
 }
 
-void GraphicsHandler::LoadScene(std::string sceneName)
+void GraphicsHandler::LoadScene(std::string sceneName) 
 {
 	objectID = 0;
 	cameraID = 0;
@@ -319,7 +331,6 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 	DeleteObjects();
 	std::ifstream objectsFile(sceneName + "_objects.txt");
 	std::string line = "";
-	//std::unordered_map<std::string, PropObject*> newObjects = {};
 	std::vector<std::pair<std::string, PropObject*>> newObjects = {};
 	while (std::getline(objectsFile, line))
 	{
@@ -328,14 +339,13 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 		PropObject* newObject = new PropObject();
 		if (newObject->Init(data, this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader))
 			newObjects.push_back(std::make_pair(data[0], newObject));
-			//newObjects[data[0]] = newObject;
 	}
 	objectsFile.close();
 	objects = newObjects;
-	//if (objects.size() > 0)
-	//	currentObject = objects[0].second; // NextObject();
-	//else
-	currentObject = nullptr;
+	if (objects.size() > 0)
+		currentObject = objects[0].second; // NextObject();
+	else
+		currentObject = nullptr;
 
 	DeleteCameras();
 	std::ifstream camerasFile(sceneName + "_cameras.txt");
@@ -425,10 +435,9 @@ void GraphicsHandler::RenderGUI()
 				ImGui::ColorEdit3("Color", &this->pointLight->GetColor().x);
 				ImGui::DragFloat("Strength", &this->pointLight->GetStrength(), 0.01f, 0.0f, 10.0f);
 				XMFLOAT3 lightPos;
-				XMStoreFloat3(&lightPos, this->pointLight->GetPosition());
+				XMStoreFloat3(&lightPos, this->pointLight->GetTransform()->GetPosition());
 				ImGui::DragFloat3("Position", &lightPos.x, 0.1f, -50.0f, 50.0f);
-				this->pointLight->SetPosition(lightPos);
-
+				this->pointLight->GetTransform()->SetPosition(lightPos);
 				ImGui::Text("Attenuation:");
 				ImGui::DragFloat("Constant", &this->pointLight->GetCAttenuation(), 0.01f, 0.01f, 10.0f);
 				ImGui::DragFloat("Linear", &this->pointLight->GetLAttenuation(), 0.01f, 0.0f, 10.0f);
@@ -454,7 +463,9 @@ void GraphicsHandler::RenderGUI()
 					DeletePointLight();
 				ImGui::SameLine();
 				if (ImGui::Button("Move To Camera"))
-					pointLight->SetPosition(camera->GetPosition() + camera->GetForwardVector());
+				{
+					pointLight->GetTransform()->SetPosition(camera->GetTransform()->GetPosition() + camera->GetTransform()->GetForwardVector());
+				}
 			}
 			ImGui::End();
 		}
@@ -469,7 +480,7 @@ void GraphicsHandler::RenderGUI()
 				XMFLOAT3 lightDir;
 				XMStoreFloat3(&lightDir, this->directionalLight->GetDirection());
 				ImGui::DragFloat3("Direction", &lightDir.x, 0.01f, -1.0f, 1.0f);
-				this->directionalLight->SetPosition(lightDir);
+				this->directionalLight->GetTransform()->SetPosition(lightDir);
 
 				if (dLights.size() > 1)
 				{
@@ -489,7 +500,9 @@ void GraphicsHandler::RenderGUI()
 				if (ImGui::Button("Delete Light"))
 					DeleteDirectionalLight();
 				if (ImGui::Button("Set to Camera Direction"))
-					directionalLight->SetPosition(camera->GetForwardVector() * -1);
+				{
+					directionalLight->GetTransform()->SetPosition(camera->GetTransform()->GetForwardVector() * -1);
+				}
 			}
 			ImGui::End();
 		}
@@ -500,17 +513,17 @@ void GraphicsHandler::RenderGUI()
 			{
 				ImGui::Text(camera->GetName().c_str());
 				ImGui::DragFloat("Move Speed", &camera->GetSpeed(), 0.005f, 0.0f, 5.0f);
-				ImGui::Checkbox("Move Lock X?", &camera->GetLockedPos(0));
-				ImGui::Checkbox("Move Lock Y?", &camera->GetLockedPos(1));
-				ImGui::Checkbox("Move Lock Z?", &camera->GetLockedPos(2));
-				if (!camera->GetLockedPos(0) || !camera->GetLockedPos(1) || !camera->GetLockedPos(2))
+				ImGui::Checkbox("Move Lock X?", &camera->GetTransform()->GetLockedPos(0));
+				ImGui::Checkbox("Move Lock Y?", &camera->GetTransform()->GetLockedPos(1));
+				ImGui::Checkbox("Move Lock Z?", &camera->GetTransform()->GetLockedPos(2));
+				if (!camera->GetTransform()->GetLockedPos(0) || !camera->GetTransform()->GetLockedPos(1) || !camera->GetTransform()->GetLockedPos(2))
 				{
-					XMFLOAT3 camPos; XMStoreFloat3(&camPos, this->camera->GetPosition());
-					if (!camera->GetLockedPos(0))
+					XMFLOAT3 camPos; XMStoreFloat3(&camPos, this->camera->GetTransform()->GetPosition());
+					if (!camera->GetTransform()->GetLockedPos(0))
 					{
-						if (!camera->GetLockedPos(1))
+						if (!camera->GetTransform()->GetLockedPos(1))
 						{
-							if (!camera->GetLockedPos(2))
+							if (!camera->GetTransform()->GetLockedPos(2))
 								ImGui::DragFloat3("Position XYZ", &camPos.x, 0.1f, -80.0f, 80.0f);
 							else
 								ImGui::DragFloat2("Position XY", &camPos.x, 0.1f, -80.0f, 80.0f);
@@ -518,15 +531,15 @@ void GraphicsHandler::RenderGUI()
 						else
 						{
 							ImGui::DragFloat("Position X", &camPos.x, 0.1f, -80.0f, 80.0f);
-							if (!camera->GetLockedPos(2))
+							if (!camera->GetTransform()->GetLockedPos(2))
 								ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
 						}
 					}
 					else
 					{
-						if (!camera->GetLockedPos(1))
+						if (!camera->GetTransform()->GetLockedPos(1))
 						{
-							if (!camera->GetLockedPos(2))
+							if (!camera->GetTransform()->GetLockedPos(2))
 								ImGui::DragFloat2("Position YZ", &camPos.y, 0.1f, -80.0f, 80.0f);
 							else
 								ImGui::DragFloat("Position Y", &camPos.y, 0.1f, -80.0f, 80.0f);
@@ -534,7 +547,7 @@ void GraphicsHandler::RenderGUI()
 						else
 							ImGui::DragFloat("Position Z", &camPos.z, 0.1f, -80.0f, 80.0f);
 					}
-					this->camera->SetPosition(camPos);
+					this->camera->GetTransform()->SetPosition(camPos);
 				}
 				if (cameras.size() > 1)
 				{
@@ -564,22 +577,22 @@ void GraphicsHandler::RenderGUI()
 			if (currentObject != nullptr)
 			{
 				ImGui::Text(currentObject->GetName().c_str());
-				ImGui::Checkbox("Draw?", &currentObject->GetRenderMode());
-				if (currentObject->GetRenderMode())
+				ImGui::Checkbox("Draw?", &currentObject->GetAppearance()->GetRenderMode());
+				if (currentObject->GetAppearance()->GetRenderMode())
 				{
-					XMFLOAT3 objPos; XMStoreFloat3(&objPos,this->currentObject->GetPosition());
+					XMFLOAT3 objPos; XMStoreFloat3(&objPos,this->currentObject->GetTransform()->GetPosition());
 					ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -500.0f, 500.0f);
-					this->currentObject->SetPosition(objPos);
-					XMFLOAT4 objQ; XMStoreFloat4(&objQ, this->currentObject->GetOrientation());
+					this->currentObject->GetTransform()->SetPosition(objPos);
+					XMFLOAT4 objQ; XMStoreFloat4(&objQ, this->currentObject->GetTransform()->GetOrientation());
 					ImGui::DragFloat3("Rotational Axis", &objQ.x, 0.01f -0.5f, 0.5f);
 					ImGui::DragFloat("Rotational Angle", &objQ.w, 0.01f, -XM_PI, XM_PI);
-					this->currentObject->SetOrientation(XMLoadFloat4(&objQ));
-					ImGui::DragFloat("Scale", &currentObject->GetScale(), 0.01f, 0.01f, 10.0f);
-					ImGui::DragFloat("Damping", &currentObject->rotationDamping, 0.001f, 0.0f, 1.0f);
-					ImGui::SliderInt("Grayscale Mode", &currentObject->GetGrayscale(), 0, 2);
-					ImGui::Checkbox("Wireframe?", &currentObject->GetWireframeMode());
-					ImGui::Checkbox("Use Normal Map?", &currentObject->GetNormalMapMode()); ImGui::SameLine();
-					ImGui::Checkbox("Use Specular Map?", &currentObject->GetSpecularMapMode());
+					this->currentObject->GetTransform()->SetOrientation(XMLoadFloat4(&objQ));
+					ImGui::DragFloat("Scale", &currentObject->GetTransform()->GetScale(), 0.01f, 0.01f, 10.0f);
+					ImGui::DragFloat("Damping", &currentObject->GetPhysics()->GetRotationDamping(), 0.001f, 0.0f, 1.0f);
+					ImGui::SliderInt("Grayscale Mode", &currentObject->GetAppearance()->GetGrayscale(), 0, 2);
+					ImGui::Checkbox("Wireframe?", &currentObject->GetAppearance()->GetWireframeMode());
+					ImGui::Checkbox("Use Normal Map?", &currentObject->GetAppearance()->GetNormalMapMode()); ImGui::SameLine();
+					ImGui::Checkbox("Use Specular Map?", &currentObject->GetAppearance()->GetSpecularMapMode());
 				}
 				if (objects.size() > 1)
 				{
@@ -602,7 +615,9 @@ void GraphicsHandler::RenderGUI()
 					DeleteObject();
 				ImGui::SameLine();
 				if (ImGui::Button("Move To Camera"))
-					currentObject->SetPosition(camera->GetPosition() + camera->GetForwardVector() * 10);
+				{
+					currentObject->GetTransform()->SetPosition(camera->GetTransform()->GetPosition() + camera->GetTransform()->GetForwardVector() * 10);
+				}
 			}
 			ImGui::End();
 		}
@@ -637,7 +652,6 @@ void GraphicsHandler::RenderGUI()
 				LoadScene("data//scenes//" + std::string(sceneName));
 			ImGui::End();
 		}
-
 
 		ImGui::Begin("Show/Hide Windows");
 		ImGui::Checkbox("Show Error Log?", &ErrorLogger::showErrorLog);
@@ -1008,7 +1022,6 @@ bool GraphicsHandler::InitShaders()
 		#endif
 	}
 
-
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION",	0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,								D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
@@ -1038,25 +1051,19 @@ bool GraphicsHandler::InitScene()
 		//Constant Buffers
 		HRESULT hr = cb_vertexShader.Init(this->device.Get(), this->deviceContext.Get());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_vertexShader"); 
-		
 		hr = cb_pixelShader.Init(this->device.Get(), this->deviceContext.Get());
 		EXCEPT_IF_FAILED(hr, "Failed to initialize cb_pixelShader");
 
-		testModel = new Model();
-		testModel->Init("data//objects//cube.fbx", device.Get(), deviceContext.Get(), cb_vertexShader, cb_pixelShader);
-
-		//Model Load
 		LoadScene("data//scenes//" + std::string(sceneName));
 		skybox = new PropObject();
 		floor = new PropObject();
-		debugSphere = new PropObject();
-		debugCube = new PropObject();
+		debugSphere = new Model();
+		debugCube = new Model();
 		skybox->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), "data//skies//desert.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"SKYBOX");
-		skybox->SetScale(10.0f);
-		debugSphere->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), "data//objects//sphere.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"DEBUG SPHERE");
-		debugCube->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), "data//objects//cube.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"DEBUG CUBE");
+		debugSphere->Init("data//objects//sphere.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader);
+		debugCube->Init("data//objects//cube.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader);
 		floor->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), "data//objects//plane.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"FLOOR");
-		floor->SetScale(1000.0f);
+		floor->GetTransform()->SetScale(1000.0f);
 
 		currentObject = objects[0].second;
 	}
@@ -1071,19 +1078,18 @@ bool GraphicsHandler::InitScene()
 
 void GraphicsHandler::ResolvePenetrations()
 {
-	//NEEDS OPTIMIZING
+	////NEEDS OPTIMIZING
 	for (size_t i = 0; i < objects.size(); ++i)
 	{
-		
 		for (size_t j = 0; j < objects.size(); ++j)
 		{
 			if (j != i)
 			{
-				bool collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetPosition(), objects[i].second->GetModel().objectBoundingSphereRadius, objects[j].second->GetPosition(), objects[j].second->GetModel().objectBoundingSphereRadius);
+				bool collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel().objectBoundingSphereRadius, objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel().objectBoundingSphereRadius);
 				if (collision)
 				{
 					std::string output = "Collision Detected between: " + objects[i].first + " & " + objects[j].first + ".\n";
-					OutputDebugString(output.c_str());
+					//OutputDebugString(output.c_str());
 				}
 			}
 		}

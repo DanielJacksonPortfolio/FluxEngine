@@ -164,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Game Objects\Appearance.cpp" />
     <ClCompile Include="Engine\Physics\CollisionHandler.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui_draw.cpp" />
@@ -183,6 +184,7 @@
     <ClCompile Include="Engine\Game Objects\Model Data\Mesh.cpp" />
     <ClCompile Include="Engine\Game Objects\Lights\PointLight.cpp" />
     <ClCompile Include="Engine\Game Objects\Model Data\Texture.cpp" />
+    <ClCompile Include="Engine\Game Objects\Physics.cpp" />
     <ClCompile Include="Tools\ErrorLogger.cpp" />
     <ClCompile Include="Tools\ExceptionHandler.cpp" />
     <ClCompile Include="Engine\DirectX\GraphicsHandler.cpp" />
@@ -196,6 +198,7 @@
     <ClCompile Include="Application\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Game Objects\Appearance.h" />
     <ClInclude Include="Engine\Physics\CollisionHandler.h" />
     <ClInclude Include="Engine\Bindables\Bindable.h" />
     <ClInclude Include="Engine\Game Objects\Model Data\Color.h" />
@@ -208,6 +211,7 @@
     <ClInclude Include="Engine\Buffers and Shaders\Buffer.h" />
     <ClInclude Include="Engine\DirectX\AdapterHandler.h" />
     <ClInclude Include="Application\Application.h" />
+    <ClInclude Include="Engine\Game Objects\Physics.h" />
     <ClInclude Include="Resources\Config.h" />
     <ClInclude Include="Engine\Buffers and Shaders\Shader.h" />
     <ClInclude Include="Engine\Buffers and Shaders\PixelShader.h" />

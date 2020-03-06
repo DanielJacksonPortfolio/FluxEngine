@@ -20,7 +20,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			while (app.ProcessMessages())
 			{
 				app.Update();
-				app.RenderFrame();
 			}
 		}
 		return 0;

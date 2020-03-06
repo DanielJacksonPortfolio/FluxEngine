@@ -34,7 +34,6 @@ public:
 
 	Camera* camera;
 	PropObject* currentObject;
-
 	PointLight* pointLight;
 	DirectionalLight* directionalLight;
 
@@ -44,10 +43,10 @@ private:
 	bool InitDirectX();
 	bool InitShaders();
 	bool InitScene();
-	void ResolvePenetrations();
 	void InitImGUI();
 
 	void RenderGUI();
+	void ResolvePenetrations();
 
 	void NextCamera(int direction = 1);
 	void NextPLight(int direction = 1);
@@ -89,8 +88,8 @@ private:
 
 	PropObject* skybox;
 	PropObject* floor;
-	PropObject* debugSphere;
-	PropObject* debugCube;
+	Model* debugSphere;
+	Model* debugCube;
 	std::unordered_map<std::string, Bindable*> bindables = {};
 
 	bool showLights = true;
@@ -101,6 +100,7 @@ private:
 	bool showGeneralControls = true;
 	bool showNewObjectWindow = false;
 	bool showDebugWindow = false;
+	bool debugMode = false;
 
 	bool gravityEnabled = true;
 	float shininess = 8.0f;
@@ -116,7 +116,6 @@ private:
 	int numObjectsSelected = 0;
 
 	int windowWidth, windowHeight = 0;
-	bool debugMode = false;
 	Timer fpsTimer;
 	HWND hWnd = NULL;
 	std::unique_ptr<Config> config = nullptr;
@@ -145,7 +144,6 @@ private:
 	XMMATRIX viewMatrix = XMMatrixIdentity();
 	XMMATRIX projectionMatrix = XMMatrixIdentity();
 
-	Model* testModel;
 	ConstantBuffer<CB_vertexShader> cb_vertexShader;
 	ConstantBuffer<CB_pixelShader> cb_pixelShader;
 

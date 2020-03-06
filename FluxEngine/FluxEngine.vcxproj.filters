@@ -108,6 +108,12 @@
     <ClCompile Include="Engine\Game Objects\Transform.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Game Objects\Appearance.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Game Objects\Physics.cpp">
+      <Filter>Source\Engine\Game Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\Window.h">
@@ -216,6 +222,12 @@
       <Filter>Headers\Engine\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Game Objects\Transform.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\Appearance.h">
+      <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\Physics.h">
       <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
   </ItemGroup>

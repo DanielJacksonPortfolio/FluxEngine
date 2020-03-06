@@ -19,6 +19,8 @@ public:
 	bool RayOBBIntersect(XMVECTOR rayOrigin, XMVECTOR rayDir);
 	bool RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOrigin, XMVECTOR rayDir, XMVECTOR vertex0, XMVECTOR vertex1, XMVECTOR vertex2, float& intersectDistance, XMVECTOR& pointOfIntersect);
 
+	XMVECTOR VectorReflection(XMVECTOR vector, XMVECTOR planeNormal);
+
 private:
 	static CollisionHandler* instance;
 	CollisionHandler() {}

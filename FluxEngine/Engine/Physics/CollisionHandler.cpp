@@ -116,3 +116,8 @@ bool CollisionHandler::RayTriangleIntersect(XMMATRIX worldMatrix, XMVECTOR rayOr
 
 	return true;
 }
+
+XMVECTOR CollisionHandler::VectorReflection(XMVECTOR vector, XMVECTOR planeNormal)
+{
+	return vector + 2 * XMVector3Dot(-vector, planeNormal) * planeNormal;
+}
