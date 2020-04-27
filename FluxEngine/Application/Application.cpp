@@ -212,7 +212,7 @@ void Application::Update()
 
 	if (this->gfx.camera != nullptr)
 	{
-		if (keyboard.KeyIsPressed('E') && !this->gfx.showUI)
+		if (keyboard.KeyIsPressed('E'))
 		{
 			if (ePressed == false)
 			{
@@ -255,6 +255,18 @@ void Application::Update()
 		if (!keyboard.KeyIsPressed('Q'))
 		{
 			qPressed = false;
+		}
+		if (keyboard.KeyIsPressed('G'))
+		{
+			if (gPressed == false)
+			{
+				this->gfx.ToggleGravity();
+			}
+			gPressed = true;
+		}
+		if (!keyboard.KeyIsPressed('G'))
+		{
+			gPressed = false;
 		}
 		if (keyboard.KeyIsPressed('W'))
 		{

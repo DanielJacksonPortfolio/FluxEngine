@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Game Objects/Scene.h"
+
 #include "AdapterHandler.h"
 #include "../Buffers and Shaders/VertexShader.h"
 #include "../Buffers and Shaders/PixelShader.h"
@@ -9,11 +11,7 @@
 #include "../Game Objects/Camera.h"
 #include "../Game Objects/Lights/PointLight.h"
 #include "../Game Objects/Lights/DirectionalLight.h"
-#include "../Physics/CollisionHandler.h"
-
-#include "../Physics/CollisionHandler.h"
-
-#include "../Physics/CollisionHandler.h"
+#include "../Physics/Collisions/CollisionHandler.h"
 
 #include "../Bindables/RasterizerState.h"
 
@@ -25,6 +23,15 @@
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
 #include <unordered_map>
+
+#include "../Physics/Forces/ForceRegistry.h"
+#include "../Physics/Forces/Gravity.h"
+#include "../Physics/Forces/Drag.h"
+#include "../Physics/Forces/Spring.h"
+#include "../Physics/Forces/AnchoredSpring.h"
+#include "../Physics/Forces/Bungee.h"
+#include "../Physics/Forces/AnchoredBungee.h"
+#include "../Physics/Forces/Buoyancy.h"
 
 class GraphicsHandler
 {
@@ -43,6 +50,7 @@ public:
 	DirectionalLight* directionalLight;
 
 	bool showUI = false;
+	void ToggleGravity();
 
 private:
 	bool InitDirectX();
@@ -77,7 +85,6 @@ private:
 	void DeletePointLights();
 	void DeleteDirectionalLights();
 	void DeleteObjects();
-
 	void LoadScene(std::string sceneName);
 	void SaveScene(std::string sceneName);
 
@@ -112,8 +119,7 @@ private:
 	char sceneName[256] = "initial";
 	char newObjectPath[256] = "data//objects//";
 	float floorHeight = 0.0f;
-	XMVECTOR GRAVITY = { 0.0f, -0.00098f, 0.0f, 0.0f };
-	float pushStrength = 10.0f;
+	float pushStrength = 20.0f;
 
 	XMVECTOR pickRayOrigin = XMVECTOR();
 	XMVECTOR pickRayDirection = XMVECTOR();
@@ -152,5 +158,12 @@ private:
 	ConstantBuffer<CB_vertexShader> cb_vertexShader;
 	ConstantBuffer<CB_pixelShader> cb_pixelShader;
 
+	Scene* scene = nullptr;
+
+	Gravity* gravity = nullptr;
+	Drag* drag = nullptr;
+	AnchoredSpring* springA = nullptr;
+
+	ForceRegistry forceRegistry = ForceRegistry();
 };
 

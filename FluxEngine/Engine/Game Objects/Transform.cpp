@@ -4,6 +4,7 @@ Transform::Transform(const Transform& transform)
 {
 	this->worldMatrix = transform.worldMatrix;
 	this->position = transform.position;
+	this->lastPosition = transform.lastPosition;
 	this->orientation = transform.orientation;
 	this->rotationMatrix = transform.rotationMatrix;
 

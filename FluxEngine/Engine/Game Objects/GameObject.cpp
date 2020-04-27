@@ -9,6 +9,7 @@ bool GameObject::Init(XMVECTOR position, XMVECTOR orientation, std::string name)
 	this->name = name;
 	this->transform = new Transform();
 	this->transform->SetPosition(position);
+	this->transform->SetLastPosition(position);
 	this->transform->SetOrientation(orientation);
 	this->UpdateMatrix();
 	return true;

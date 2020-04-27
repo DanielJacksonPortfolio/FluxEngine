@@ -1,6 +1,6 @@
 #pragma once
 #include "GameObject.h"
-#include "Physics.h"
+#include "../Physics/RigidBody.h"
 
 class PropObject : public GameObject
 {
@@ -13,7 +13,7 @@ public:
 	void DrawDebug(const XMMATRIX& viewProjectionMatrix, Model* sphere, Model* box);
 
 	Appearance* GetAppearance() { return this->appearance; }
-	Physics* GetPhysics() { return this->physics; }
+	RigidBody* GetRigidBody() { return this->rigidBody; }
 	std::string Save() override;
 	void Update(float dt) override;
 	void UpdateMatrix() override;
@@ -22,6 +22,6 @@ protected:
 	Appearance* appearance = nullptr;
 
 private:
-	Physics* physics = nullptr;
+	RigidBody* rigidBody = nullptr;
 };
 

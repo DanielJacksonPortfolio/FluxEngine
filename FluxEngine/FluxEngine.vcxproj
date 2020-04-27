@@ -164,7 +164,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Physics\CollisionHandler.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\AABBPrimitive.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\Cable.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\Buoyancy.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\AnchoredBungee.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\Bungee.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\AnchoredSpring.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\ContactGenerator.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\ContactResolver.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Contact.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\Drag.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\CollisionHandler.cpp" />
     <ClCompile Include="Engine\Game Objects\Appearance.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Externals\ImGUI\imgui_draw.cpp" />
@@ -184,7 +194,17 @@
     <ClCompile Include="Engine\Game Objects\Model Data\Mesh.cpp" />
     <ClCompile Include="Engine\Game Objects\Lights\PointLight.cpp" />
     <ClCompile Include="Engine\Game Objects\Model Data\Texture.cpp" />
-    <ClCompile Include="Engine\Game Objects\Physics.cpp" />
+    <ClCompile Include="Engine\Physics\RigidBody.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\Gravity.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\ForceRegistry.cpp" />
+    <ClCompile Include="Engine\Game Objects\Scene.cpp" />
+    <ClCompile Include="Engine\Physics\Forces\Spring.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\Rod.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\Link.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\Primitive.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\PlanePrimitive.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\SpherePrimitive.cpp" />
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\OBBPrimitive.cpp" />
     <ClCompile Include="Tools\ErrorLogger.cpp" />
     <ClCompile Include="Tools\ExceptionHandler.cpp" />
     <ClCompile Include="Engine\DirectX\GraphicsHandler.cpp" />
@@ -198,8 +218,18 @@
     <ClCompile Include="Application\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\AABBPrimitive.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\Cable.h" />
+    <ClInclude Include="Engine\Physics\Forces\Buoyancy.h" />
+    <ClInclude Include="Engine\Physics\Forces\AnchoredBungee.h" />
+    <ClInclude Include="Engine\Physics\Forces\Bungee.h" />
+    <ClInclude Include="Engine\Physics\Forces\AnchoredSpring.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\ContactGenerator.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\ContactResolver.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Contact.h" />
+    <ClInclude Include="Engine\Physics\Forces\Drag.h" />
     <ClInclude Include="Engine\Game Objects\Appearance.h" />
-    <ClInclude Include="Engine\Physics\CollisionHandler.h" />
+    <ClInclude Include="Engine\Physics\Collisions\CollisionHandler.h" />
     <ClInclude Include="Engine\Bindables\Bindable.h" />
     <ClInclude Include="Engine\Game Objects\Model Data\Color.h" />
     <ClInclude Include="Engine\Game Objects\Lights\DirectionalLight.h" />
@@ -211,7 +241,13 @@
     <ClInclude Include="Engine\Buffers and Shaders\Buffer.h" />
     <ClInclude Include="Engine\DirectX\AdapterHandler.h" />
     <ClInclude Include="Application\Application.h" />
-    <ClInclude Include="Engine\Game Objects\Physics.h" />
+    <ClInclude Include="Engine\Physics\RigidBody.h" />
+    <ClInclude Include="Engine\Physics\Forces\ForceGenerator.h" />
+    <ClInclude Include="Engine\Physics\Forces\Gravity.h" />
+    <ClInclude Include="Engine\Physics\Forces\ForceRegistry.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\Primitive.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\PlanePrimitive.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\OBBPrimitive.h" />
     <ClInclude Include="Resources\Config.h" />
     <ClInclude Include="Engine\Buffers and Shaders\Shader.h" />
     <ClInclude Include="Engine\Buffers and Shaders\PixelShader.h" />
@@ -222,6 +258,11 @@
     <ClInclude Include="Engine\Game Objects\Lights\PointLight.h" />
     <ClInclude Include="Engine\Game Objects\Model Data\Texture.h" />
     <ClInclude Include="Engine\Bindables\RasterizerState.h" />
+    <ClInclude Include="Engine\Game Objects\Scene.h" />
+    <ClInclude Include="Engine\Physics\Forces\Spring.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\Rod.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\Link.h" />
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\SpherePrimitive.h" />
     <ClInclude Include="Tools\ErrorLogger.h" />
     <ClInclude Include="Tools\ExceptionHandler.h" />
     <ClInclude Include="Engine\DirectX\GraphicsHandler.h" />

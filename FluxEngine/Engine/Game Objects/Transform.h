@@ -70,9 +70,7 @@ private:
 	XMVECTOR rightVector = XMVECTOR();
 	XMVECTOR backwardVector = XMVECTOR();
 
-
 	XMVECTOR lastPosition = XMVECTOR();
-
 	float scale = 1.0f;
 
 	bool lockedPos[3] = { false,false,false };

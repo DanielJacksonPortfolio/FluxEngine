@@ -108,11 +108,71 @@
     <ClCompile Include="Engine\Game Objects\Appearance.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Game Objects\Physics.cpp">
+    <ClCompile Include="Engine\Physics\Collisions\CollisionHandler.cpp">
+      <Filter>Source\Engine\Physics\Collisions</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Game Objects\Scene.cpp">
       <Filter>Source\Engine\Game Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Physics\CollisionHandler.cpp">
+    <ClCompile Include="Engine\Physics\Forces\Drag.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\ForceRegistry.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\Gravity.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\Spring.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\Buoyancy.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\AnchoredBungee.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\AnchoredSpring.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Forces\Bungee.cpp">
+      <Filter>Source\Engine\Physics\Forces</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\Primitive.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Contact.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Contacts</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\ContactResolver.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Contacts</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\Cable.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\ContactGenerator.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\Link.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Contacts\Generators\Rod.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\RigidBody.cpp">
       <Filter>Source\Engine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\SpherePrimitive.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\PlanePrimitive.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\AABBPrimitive.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Physics\Collisions\Primitves\OBBPrimitive.cpp">
+      <Filter>Source\Engine\Physics\Collisions\Primitives</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,17 +278,80 @@
     <ClInclude Include="Engine\Game Objects\PropObject.h">
       <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Physics\CollisionHandler.h">
-      <Filter>Headers\Engine\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Game Objects\Transform.h">
       <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Game Objects\Appearance.h">
       <Filter>Headers\Engine\Game Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Game Objects\Physics.h">
+    <ClInclude Include="Engine\Physics\Collisions\CollisionHandler.h">
+      <Filter>Headers\Engine\Physics\Collisions</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game Objects\Scene.h">
       <Filter>Headers\Engine\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\Gravity.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\Drag.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\ForceGenerator.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\ForceRegistry.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\Spring.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\AnchoredBungee.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\AnchoredSpring.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\Bungee.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Forces\Buoyancy.h">
+      <Filter>Headers\Engine\Physics\Forces</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\Primitive.h">
+      <Filter>Headers\Engine\Physics\Collisions\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Contact.h">
+      <Filter>Headers\Engine\Physics\Collisions\Contacts</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\ContactResolver.h">
+      <Filter>Headers\Engine\Physics\Collisions\Contacts</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\Rod.h">
+      <Filter>Headers\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\Cable.h">
+      <Filter>Headers\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\ContactGenerator.h">
+      <Filter>Headers\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Contacts\Generators\Link.h">
+      <Filter>Headers\Engine\Physics\Collisions\Contacts\Generators</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\RigidBody.h">
+      <Filter>Headers\Engine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\SpherePrimitive.h">
+      <Filter>Headers\Engine\Physics\Collisions\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\PlanePrimitive.h">
+      <Filter>Headers\Engine\Physics\Collisions\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\AABBPrimitive.h">
+      <Filter>Headers\Engine\Physics\Collisions\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Physics\Collisions\Primitves\OBBPrimitive.h">
+      <Filter>Headers\Engine\Physics\Collisions\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -315,6 +438,36 @@
     </Filter>
     <Filter Include="Source\Engine\Physics">
       <UniqueIdentifier>{f3b56af5-d281-4bea-a5d0-465417ff2e8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Physics\Forces">
+      <UniqueIdentifier>{33bb5660-3c19-499a-b5da-bbd7b9c598ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Physics\Forces">
+      <UniqueIdentifier>{98e8749e-7eaa-40c8-b5ad-46bf09d3d79e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Physics\Collisions">
+      <UniqueIdentifier>{165a7382-b100-4ee6-a0be-9c335454a1e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Physics\Collisions">
+      <UniqueIdentifier>{cfdd29ea-2b8c-4365-8ed9-def5195a4d4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Physics\Collisions\Primitives">
+      <UniqueIdentifier>{004805c1-5835-4c1f-b3c5-cfcf51f02424}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Physics\Collisions\Contacts">
+      <UniqueIdentifier>{eff008ac-0348-4828-9a48-e26d0d1ef30d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Engine\Physics\Collisions\Contacts\Generators">
+      <UniqueIdentifier>{f6d0412a-5e07-4593-9c28-0032c34ab5e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Physics\Collisions\Contacts">
+      <UniqueIdentifier>{12012e39-f74b-4647-afc9-11825bcd9338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Physics\Collisions\Contacts\Generators">
+      <UniqueIdentifier>{39f560ff-2431-4727-bd9b-63c967e069a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Physics\Collisions\Primitives">
+      <UniqueIdentifier>{7d9ee614-45f5-43ae-9ecc-219bc3a52284}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

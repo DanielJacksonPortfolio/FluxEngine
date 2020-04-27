@@ -13,6 +13,18 @@ public:
 	}
 	Appearance(const Appearance& app);
 	Model* GetModel() { return this->model; }
+
+	Model::BoundingShape GetBoundingShape() { return this->model->GetBoundingShape(); }
+	float GetVolume() { return this->model->GetVolume(); }
+	XMVECTOR GetOriginVector() { return this->model->GetOriginVector(); }
+	float GetScaledBoundingSphereRadius() { return model->GetScaledBoundingSphereRadius(); }
+	void SetScaledBoundingSphereRadius(float scale) { model->SetScaledBoundingSphereRadius(scale); }
+	float GetBoundingSphereRadius() { return model->GetBoundingSphereRadius(); }
+	XMVECTOR GetMinimumCoord(XMMATRIX rotationMatrix = XMMATRIX()) {return model->GetMinimumCoord(rotationMatrix);}
+	XMVECTOR GetMaximumCoord(XMMATRIX rotationMatrix = XMMATRIX()) {return model->GetMaximumCoord(rotationMatrix);}
+	float GetWidth(XMMATRIX rotationMatrix = XMMATRIX()) { return model->GetWidth(rotationMatrix); }
+	float GetHeight(XMMATRIX rotationMatrix = XMMATRIX()) { return model->GetHeight(rotationMatrix); }
+	float GetDepth(XMMATRIX rotationMatrix = XMMATRIX()) { return model->GetDepth(rotationMatrix); }
 	int& GetGrayscale() { return this->grayscale; }
 	void SetGrayscale(int grayscale) { this->grayscale = grayscale; }
 	bool& GetNormalMapMode() { return this->normalMap; }

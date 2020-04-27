@@ -47,7 +47,7 @@ void Model::SetOrigin()
 
 void Model::SetBoundingShape(XMMATRIX rotation)
 {
-	this->modelBoundingSphereRadius = 0.0f;
+	this->boundingSphere.radius = 0.0f;
 	float minDistance = INT_MAX;
 	float maxDistance = 0.0f;
 	for (int i = 0; i < vertices.size(); ++i)
@@ -59,30 +59,39 @@ void Model::SetBoundingShape(XMMATRIX rotation)
 		if (distanceFromOrigin < minDistance) minDistance = distanceFromOrigin;
 		if (distanceFromOrigin > maxDistance) maxDistance = distanceFromOrigin;
 	}
-	modelBoundingSphereRadius = maxDistance;
+	this->boundingSphere.radius = maxDistance;
+	SetScaledBoundingSphereRadius(1);
 
-	float sphereVolume = (4.0f / 3.0f) * XM_PI * std::powf(modelBoundingSphereRadius, 3.0f);
 	
-	this->aabbw = 0.0f;
-	this->aabbh = 0.0f;
-	this->aabbd = 0.0f;
-	float minDistanceX = 0.0f;
-	float maxDistanceX = 0.0f;
-	float minDistanceY = 0.0f;
-	float maxDistanceY = 0.0f;
-	float minDistanceZ = 0.0f;
-	float maxDistanceZ = 0.0f;
+	this->axisAlignedBoundingBox.halfWidth = 0.0f;
+	this->axisAlignedBoundingBox.halfHeight = 0.0f;
+	this->axisAlignedBoundingBox.halfDepth = 0.0f;
+	this->orientedBoundingBox.halfWidth = 0.0f;
+	this->orientedBoundingBox.halfHeight = 0.0f;
+	this->orientedBoundingBox.halfDepth = 0.0f;
+	float minDistanceXAABB = 0.0f; float maxDistanceXAABB = 0.0f;
+	float minDistanceYAABB = 0.0f; float maxDistanceYAABB = 0.0f;
+	float minDistanceZAABB = 0.0f; float maxDistanceZAABB = 0.0f;
+	float minDistanceX = 0.0f; float maxDistanceX = 0.0f;
+	float minDistanceY = 0.0f; float maxDistanceY = 0.0f;
+	float minDistanceZ = 0.0f; float maxDistanceZ = 0.0f;
 	for (int i = 0; i < vertices.size(); ++i)
 	{
-		
 		float x = vertices[i].pos.x - XMVectorGetX(this->originVector);
 		float y = vertices[i].pos.y - XMVectorGetY(this->originVector);
 		float z = vertices[i].pos.z - XMVectorGetZ(this->originVector);
 
 		XMVECTOR xyz = XMVector3Transform(XMVectorSet(x, y, z, 0), rotation);
-		x = XMVectorGetX(xyz);
-		y = XMVectorGetY(xyz);
-		z = XMVectorGetZ(xyz);
+		float AABBx = XMVectorGetX(xyz);
+		float AABBy = XMVectorGetY(xyz);
+		float AABBz = XMVectorGetZ(xyz);
+
+		if (AABBx > maxDistanceXAABB) maxDistanceXAABB = AABBx;
+		if (AABBx < minDistanceXAABB) minDistanceXAABB = AABBx;
+		if (AABBy > maxDistanceYAABB) maxDistanceYAABB = AABBy;
+		if (AABBy < minDistanceYAABB) minDistanceYAABB = AABBy;
+		if (AABBz > maxDistanceZAABB) maxDistanceZAABB = AABBz;
+		if (AABBz < minDistanceZAABB) minDistanceZAABB = AABBz;
 
 		if (x > maxDistanceX) maxDistanceX = x;
 		if (x < minDistanceX) minDistanceX = x;
@@ -91,19 +100,277 @@ void Model::SetBoundingShape(XMMATRIX rotation)
 		if (z > maxDistanceZ) maxDistanceZ = z;
 		if (z < minDistanceZ) minDistanceZ = z;
 	}
-	aabbw = maxDistanceX - minDistanceX;
-	aabbh = maxDistanceY - minDistanceY;
-	aabbd = maxDistanceZ - minDistanceZ;
+	this->axisAlignedBoundingBox.halfWidth = (maxDistanceXAABB - minDistanceXAABB) * 0.5f;
+	this->axisAlignedBoundingBox.halfHeight =(maxDistanceYAABB - minDistanceYAABB) * 0.5f;
+	this->axisAlignedBoundingBox.halfDepth = (maxDistanceZAABB - minDistanceZAABB) * 0.5f;
 
-	this->minAABBCoord = XMVectorSet(minDistanceX, minDistanceY, minDistanceZ, 0);
-	this->maxAABBCoord = XMVectorSet(maxDistanceX, maxDistanceY, maxDistanceZ, 0);
+	this->orientedBoundingBox.halfWidth = (maxDistanceX - minDistanceX) * 0.5f;
+	this->orientedBoundingBox.halfHeight =(maxDistanceY - minDistanceY) * 0.5f;
+	this->orientedBoundingBox.halfDepth = (maxDistanceZ - minDistanceZ) * 0.5f;
 
-	float aabbVolume = aabbw * aabbh * aabbd;
+	this->boundingSphere.volume = (4.0f / 3.0f) * XM_PI * std::powf(this->boundingSphere.radius, 3.0f);
+	this->axisAlignedBoundingBox.volume = axisAlignedBoundingBox.halfWidth * axisAlignedBoundingBox.halfHeight * axisAlignedBoundingBox.halfDepth * 8;
+	this->orientedBoundingBox.volume = orientedBoundingBox.halfWidth * orientedBoundingBox.halfHeight * orientedBoundingBox.halfDepth * 8;
+	//if (axisAlignedBoundingBox.volume < boundingSphere.volume)
+	//	boundingShape = BoundingShape::AABB;
+	//else
+	//	boundingShape = BoundingShape::SPHERE;
 
-	if (aabbVolume < sphereVolume)
+	if (orientedBoundingBox.volume <= axisAlignedBoundingBox.volume && orientedBoundingBox.volume <= boundingSphere.volume)
+	{
+		boundingShape = BoundingShape::OBB;
+	}
+	else if (axisAlignedBoundingBox.volume <= boundingSphere.volume && axisAlignedBoundingBox.volume <= orientedBoundingBox.volume)
+	{
 		boundingShape = BoundingShape::AABB;
+	}
 	else
+	{
 		boundingShape = BoundingShape::SPHERE;
+	}
+}
+
+Model::BoundingShape Model::GetBoundingShape()
+{
+	return this->boundingShape;
+}
+
+XMVECTOR Model::GetOriginVector()
+{
+	return this->originVector;
+}
+
+float Model::GetScaledBoundingSphereRadius()
+{
+	return this->boundingSphere.scaledRadius;
+}
+
+void Model::SetScaledBoundingSphereRadius(float scale)
+{
+	this->boundingSphere.scaledRadius = boundingSphere.radius * scale;
+}
+
+float Model::GetBoundingSphereRadius()
+{
+	return boundingSphere.radius;
+}
+
+float Model::GetVolume()
+{
+	if (this->boundingShape == BoundingShape::SPHERE)
+	{
+		return boundingSphere.volume;
+	}
+	else if (this->boundingShape == BoundingShape::AABB)
+	{
+		return axisAlignedBoundingBox.volume;
+	}
+	else
+	{
+		return orientedBoundingBox.volume;
+	}
+}
+
+Model::AABB Model::GetAABB()
+{
+	return this->axisAlignedBoundingBox;
+}
+Model::OBB Model::GetOBB()
+{
+	return this->orientedBoundingBox;
+}
+
+float Model::GetWidth(XMMATRIX rotationMatrix)
+{
+	if (this->boundingShape == BoundingShape::SPHERE)
+	{
+		return boundingSphere.radius * 2;
+	}
+	else if (this->boundingShape == BoundingShape::AABB)
+	{
+		return axisAlignedBoundingBox.halfWidth * 2;
+	}
+	else
+	{
+		return orientedBoundingBox.halfWidth * 2;
+		//XMVECTOR points[8] = {};
+		//points[0] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[1] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[2] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[3] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[4] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[5] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[6] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[7] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//
+		//XMVECTOR lowestVector = points[0];
+		//XMVECTOR highestVector = points[0];
+		//for (int i = 1; i < 8; ++i)
+		//{
+		//	if (XMVectorGetX(points[i]) < XMVectorGetX(lowestVector))
+		//	{
+		//		lowestVector = points[i];
+		//	}
+		//	else if (XMVectorGetX(points[i]) > XMVectorGetX(highestVector))
+		//	{
+		//		highestVector = points[i];
+		//	}
+		//}
+		//return XMVectorGetX(highestVector - lowestVector);
+	}
+}
+
+float Model::GetHeight(XMMATRIX rotationMatrix)
+{
+	if (this->boundingShape == BoundingShape::SPHERE)
+	{
+		return boundingSphere.radius * 2;
+	}
+	else if (this->boundingShape == BoundingShape::AABB)
+	{
+		return axisAlignedBoundingBox.halfHeight * 2;
+	}
+	else
+	{
+		return orientedBoundingBox.halfHeight * 2;
+		//XMVECTOR points[8] = {};
+		//points[0] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[1] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[2] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[3] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[4] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[5] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[6] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[7] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//
+		//XMVECTOR lowestVector = points[0];
+		//XMVECTOR highestVector = points[0];
+		//for (int i = 1; i < 8; ++i)
+		//{
+		//	if (XMVectorGetY(points[i]) < XMVectorGetY(lowestVector))
+		//	{
+		//		lowestVector = points[i];
+		//	}
+		//	else if (XMVectorGetY(points[i]) > XMVectorGetY(highestVector))
+		//	{
+		//		highestVector = points[i];
+		//	}
+		//}
+		//return XMVectorGetY(highestVector - lowestVector);
+	}
+}
+
+float Model::GetDepth(XMMATRIX rotationMatrix)
+{
+	if (this->boundingShape == BoundingShape::SPHERE)
+	{
+		return boundingSphere.radius * 2;
+	}
+	else if (this->boundingShape == BoundingShape::AABB)
+	{
+		return axisAlignedBoundingBox.halfDepth * 2;
+	}
+	else
+	{
+		return orientedBoundingBox.halfDepth * 2;
+		//XMVECTOR points[8] = {};
+		//points[0] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[1] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[2] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[3] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[4] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[5] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[6] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//points[7] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		//
+		//XMVECTOR lowestVector = points[0];
+		//XMVECTOR highestVector = points[0];
+		//for (int i = 1; i < 8; ++i)
+		//{
+		//	if (XMVectorGetZ(points[i]) < XMVectorGetZ(lowestVector))
+		//	{
+		//		lowestVector = points[i];
+		//	}
+		//	else if (XMVectorGetZ(points[i]) > XMVectorGetZ(highestVector))
+		//	{
+		//		highestVector = points[i];
+		//	}
+		//}
+		//return XMVectorGetZ(highestVector - lowestVector);
+	}
+}
+
+XMVECTOR Model::GetMinimumCoord(XMMATRIX rotationMatrix)
+{
+	if (boundingShape == BoundingShape::SPHERE)
+	{
+		return XMVectorSet(0.0f, -boundingSphere.radius, 0.0f, 0.0f);
+	}
+	else if (boundingShape == BoundingShape::AABB)
+	{
+		return XMVectorSet(0.0f, -axisAlignedBoundingBox.halfHeight, 0.0f, 0.0f);
+	}
+	else
+	{
+		XMVECTOR points[8] = {};
+		points[0] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[1] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight,  orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[2] = XMVector3Transform(XMVectorSet( orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[3] = XMVector3Transform(XMVectorSet( orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight,  orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[4] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth,  orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[5] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth,  orientedBoundingBox.halfHeight,  orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[6] = XMVector3Transform(XMVectorSet( orientedBoundingBox.halfWidth,  orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[7] = XMVector3Transform(XMVectorSet( orientedBoundingBox.halfWidth,  orientedBoundingBox.halfHeight,  orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+
+		XMVECTOR lowestVector = points[0];
+		for (int i = 1; i < 8; ++i)
+		{
+			if (XMVectorGetY(points[i]) < XMVectorGetY(lowestVector))
+			{
+				lowestVector = points[i];
+			}
+		}
+		return lowestVector;
+	}
+}
+
+XMVECTOR Model::GetMaximumCoord(XMMATRIX rotationMatrix)
+{
+	if (boundingShape == BoundingShape::SPHERE)
+	{
+		return XMVectorSet(0.0f, boundingSphere.radius, 0.0f, 0.0f);
+	}
+	else if (boundingShape == BoundingShape::AABB)
+	{
+		return XMVectorSet(0.0f, axisAlignedBoundingBox.halfHeight, 0.0f, 0.0f);
+	}
+	else
+	{
+		XMVECTOR points[8] = {};
+		points[0] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[1] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[2] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[3] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, -orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[4] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[5] = XMVector3Transform(XMVectorSet(-orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[6] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, -orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+		points[7] = XMVector3Transform(XMVectorSet(orientedBoundingBox.halfWidth, orientedBoundingBox.halfHeight, orientedBoundingBox.halfDepth, 0.0f), rotationMatrix);
+
+		XMVECTOR highestVector = points[0];
+		for (int i = 1; i < 8; ++i)
+		{
+			if (XMVectorGetY(points[i]) > XMVectorGetY(highestVector))
+			{
+				highestVector = points[i];
+			}
+		}
+		return highestVector;
+	}
+}
+
+std::vector<Mesh*> Model::GetMeshes()
+{
+	return this->meshes;
 }
 
 void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
@@ -122,17 +389,22 @@ void Model::Draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatr
 	}
 }
 
-void Model::DrawDebug(XMVECTOR position, float scale, const XMMATRIX& viewProjectionMatrix, Model* sphere, Model* box)
+void Model::DrawDebug(XMVECTOR position, XMMATRIX rotationMatrix, float scale, const XMMATRIX& viewProjectionMatrix, Model* sphere, Model* box)
 {
 	if (boundingShape == BoundingShape::SPHERE)
 	{
-		objectBoundingSphereRadius = modelBoundingSphereRadius * scale;
-		XMMATRIX newWorld = XMMatrixScaling(objectBoundingSphereRadius, objectBoundingSphereRadius, objectBoundingSphereRadius) * XMMatrixTranslationFromVector(position);
+		SetScaledBoundingSphereRadius(scale);
+		XMMATRIX newWorld = XMMatrixScaling(boundingSphere.scaledRadius, boundingSphere.scaledRadius, boundingSphere.scaledRadius) * XMMatrixTranslationFromVector(position);
 		sphere->Draw(newWorld, viewProjectionMatrix);
+	}
+	else if (boundingShape == BoundingShape::AABB)
+	{
+		XMMATRIX newWorld = XMMatrixScaling(axisAlignedBoundingBox.halfWidth * 2 *scale, axisAlignedBoundingBox.halfHeight * 2 *scale, axisAlignedBoundingBox.halfDepth * 2 * scale) * XMMatrixTranslationFromVector(position);
+		box->Draw(newWorld, viewProjectionMatrix);
 	}
 	else
 	{
-		XMMATRIX newWorld = XMMatrixScaling(aabbw*scale, aabbh*scale, aabbd * scale) * XMMatrixTranslationFromVector(position);
+		XMMATRIX newWorld = XMMatrixScaling(orientedBoundingBox.halfWidth * 2 * scale, orientedBoundingBox.halfHeight * 2 * scale, orientedBoundingBox.halfDepth * 2 * scale) * rotationMatrix * XMMatrixTranslationFromVector(position);
 		box->Draw(newWorld, viewProjectionMatrix);
 	}
 }

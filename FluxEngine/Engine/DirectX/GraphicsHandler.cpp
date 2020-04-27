@@ -35,8 +35,8 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 	XMMATRIX inverseView = XMMatrixInverse(&determinant, viewMatrix);
 
 	XMVECTOR eyePos = this->camera->GetTransform()->GetPosition();
-	XMVECTOR rayOriginVector = XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, -1, 0), inverseProjection), inverseView); // World Space
-	rayDirection = XMVector3Normalize(rayOriginVector - eyePos);
+	XMVECTOR rayOriginVector = XMVectorSetW(XMVector3Transform(XMVector3Transform(XMVectorSet(normalizedCoordinateX, normalizedCoordinateY, -1, 0), inverseProjection), inverseView),1.0f); // World Space
+	rayDirection = XMVectorSetW(XMVector3Normalize(rayOriginVector - eyePos), 0.0f);
 
 	pickRayDirection = rayDirection;
 	pickRayOrigin = eyePos;
@@ -87,23 +87,9 @@ PropObject* GraphicsHandler::PickObject(float mouseX, float mouseY, XMVECTOR& ra
 
 void GraphicsHandler::Update(float dt)
 {
-	ResolveCollisions();
-
-	for (size_t i = 0; i < objects.size(); ++i)
-	{
-		if (gravityEnabled)
-		{
-			objects[i].second->GetPhysics()->AddLinearForce(GRAVITY * objects[i].second->GetPhysics()->GetMass()); //Gravity
-			if (XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel()->minAABBCoord * objects[i].second->GetTransform()->GetScale()) < floorHeight)
-			{
-				objects[i].second->GetPhysics()->AddLinearForce(-GRAVITY * objects[i].second->GetPhysics()->GetMass());
-				objects[i].second->GetTransform()->AdjustPosition(0, floorHeight-XMVectorGetY(objects[i].second->GetTransform()->GetPosition() + objects[i].second->GetAppearance()->GetModel()->minAABBCoord * objects[i].second->GetTransform()->GetScale()), 0);
-				objects[i].second->GetPhysics()->SetLVelocity(CollisionHandler::Instance()->VectorReflection(objects[i].second->GetPhysics()->GetLVelocity(),XMVectorSet(0.0f,1.0f,0.0f,1.0f)) * 0.5);
-			}
-		}
-			
-		objects[i].second->Update(dt);
-	}
+	scene->StartFrame(objects, &forceRegistry);
+	//ResolveCollisions();
+	scene->RunPhysics(dt);
 
 	for (size_t i = 0; i < cameras.size(); ++i)
 	{
@@ -135,8 +121,8 @@ void GraphicsHandler::PushObject(PropObject* obj, XMVECTOR rayDirection, XMVECTO
 {
 	if (obj != nullptr)
 	{
-		obj->GetPhysics()->AddLinearForce(rayDirection * pushStrength * obj->GetPhysics()->GetMass());
-		obj->GetPhysics()->AddTorque(rayDirection * pushStrength * obj->GetPhysics()->GetMass(), collisionLocation);
+		XMVECTOR force = rayDirection * pushStrength;
+		obj->GetRigidBody()->AddForceAtPoint(force, collisionLocation);
 	}
 }
 
@@ -231,6 +217,7 @@ void GraphicsHandler::RenderFrame()
 			}
 		}
 
+		bindables["RSNone"]->Bind();
 		this->floor->Draw(viewProjectionMatrix);
 
 		if (showLights)
@@ -403,6 +390,22 @@ void GraphicsHandler::LoadScene(std::string sceneName)
 		NextDLight();
 	else
 		directionalLight = nullptr;
+
+	delete gravity;
+	delete drag;
+	delete springA;
+	gravity = new Gravity(XMVectorSet(0.0f, -0.00098f, 0.0f, 0.0f));
+	drag = new Drag(0.05f, 0.0f);
+	springA = new AnchoredSpring(XMVectorSet(0.0f, 2.2f, 0.0f, 0.0f),XMVectorSet(0.0f, 50.0f, 0.0f, 0.0f), 0.01f, 5.0f);
+
+	forceRegistry.ClearAll();
+	//forceRegistry.AddRegistration(objects[0].second->GetRigidBody(), springA);
+	for (std::pair<std::string, PropObject*> object : objects)
+	{
+		forceRegistry.AddRegistration(object.second->GetRigidBody(), gravity);
+		forceRegistry.AddRegistration(object.second->GetRigidBody(), drag);
+	}
+
 }
 
 void GraphicsHandler::RenderGUI()
@@ -581,14 +584,18 @@ void GraphicsHandler::RenderGUI()
 				if (currentObject->GetAppearance()->GetRenderMode())
 				{
 					XMFLOAT3 objPos; XMStoreFloat3(&objPos,this->currentObject->GetTransform()->GetPosition());
+					XMFLOAT3 objLVel; XMStoreFloat3(&objLVel,this->currentObject->GetRigidBody()->GetLVelocity());
+					XMFLOAT3 objAVel; XMStoreFloat3(&objAVel,this->currentObject->GetRigidBody()->GetAVelocity());
 					ImGui::DragFloat3("Position XYZ", &objPos.x, 0.1f, -500.0f, 500.0f);
+					ImGui::DragFloat3("Linear Velocity XYZ", &objLVel.x, 0.1f, -500.0f, 500.0f);
+					ImGui::DragFloat3("Angular Velocity XYZ", &objAVel.x, 0.1f, -500.0f, 500.0f);
 					this->currentObject->GetTransform()->SetPosition(objPos);
 					XMFLOAT4 objQ; XMStoreFloat4(&objQ, this->currentObject->GetTransform()->GetOrientation());
 					ImGui::DragFloat3("Rotational Axis", &objQ.x, 0.01f -0.5f, 0.5f);
 					ImGui::DragFloat("Rotational Angle", &objQ.w, 0.01f, -XM_PI, XM_PI);
 					this->currentObject->GetTransform()->SetOrientation(XMLoadFloat4(&objQ));
 					ImGui::DragFloat("Scale", &currentObject->GetTransform()->GetScale(), 0.01f, 0.01f, 10.0f);
-					ImGui::DragFloat("Damping", &currentObject->GetPhysics()->GetRotationDamping(), 0.001f, 0.0f, 1.0f);
+					//ImGui::DragFloat("Damping", &currentObject->GetRigidBody()->GetRotationDamping(), 0.001f, 0.0f, 1.0f);
 					ImGui::SliderInt("Grayscale Mode", &currentObject->GetAppearance()->GetGrayscale(), 0, 2);
 					ImGui::Checkbox("Wireframe?", &currentObject->GetAppearance()->GetWireframeMode());
 					ImGui::Checkbox("Use Normal Map?", &currentObject->GetAppearance()->GetNormalMapMode()); ImGui::SameLine();
@@ -637,8 +644,8 @@ void GraphicsHandler::RenderGUI()
 			ImGui::Checkbox("VSync Enabled", &config->vSync); ImGui::SameLine();
 			ImGui::Checkbox("Show Lights?", &showLights); ImGui::SameLine();
 			ImGui::Checkbox("Gravity Enabled", &gravityEnabled);
-			if (gravityEnabled)
-				ImGui::DragFloat3("Gravity Direction", &GRAVITY.m128_f32[0], 0.00001f, -1.0f, 1.0f);
+			//if (gravityEnabled)
+			//	ImGui::DragFloat3("Gravity Direction", &GRAVITY.m128_f32[0], 0.00001f, -1.0f, 1.0f);
 			ImGui::DragFloat("Push Strength", &pushStrength, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat("Floor Height", &floorHeight, 1.0f, -100.0f, 100.0f);
 			ImGui::DragFloat("Universal Shininess", &this->shininess, 1.0f, 1.0f, 64.0f);
@@ -748,6 +755,13 @@ void GraphicsHandler::DeleteObjects()
 	}
 	objects.clear();
 }
+
+void GraphicsHandler::ToggleGravity()
+{
+	gravity->Toggle();
+	gravityEnabled = !gravityEnabled;
+} 
+
 void GraphicsHandler::DeletePointLights()
 {
 	for (int i = 0; i < pLights.size(); ++i)
@@ -1070,6 +1084,8 @@ bool GraphicsHandler::InitScene()
 		floor->Init(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), "data//objects//plane.fbx", this->device.Get(), this->deviceContext.Get(), cb_vertexShader, cb_pixelShader,"FLOOR");
 		floor->GetTransform()->SetScale(1000.0f);
 
+		scene = new Scene(10);
+
 		currentObject = objects[0].second;
 	}
 	catch (CustomException & e)
@@ -1083,21 +1099,29 @@ bool GraphicsHandler::InitScene()
 
 void GraphicsHandler::ResolveCollisions()
 {
-	////NEEDS OPTIMIZING
-	for (size_t i = 0; i < objects.size()-1; ++i)
-	{
-		for (size_t j = i+1; j < objects.size(); ++j)
-		{
-			if (j != i)
-			{
-				bool collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel()->objectBoundingSphereRadius, objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel()->objectBoundingSphereRadius);
-				if (collision)
-				{
-					CollisionHandler::Instance()->ResolveCollision(objects[i].second->GetPhysics(), objects[j].second->GetPhysics());
-					//std::string output = "Collision Detected between: " + objects[i].first + " & " + objects[j].first + ".\n";
-					//OutputDebugString(output.c_str());
-				}
-			}
-		}
-	}
+	//////NEEDS OPTIMIZING
+	//for (size_t i = 0; i < objects.size()-1; ++i)
+	//{
+	//	for (size_t j = i+1; j < objects.size(); ++j)
+	//	{
+	//		if (j != i)
+	//		{
+	//			bool collision = false;
+	//			if(objects[i].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::AABB && objects[j].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::AABB)
+	//				collision = CollisionHandler::Instance()->AABBAABBCollision(objects[i].second, objects[j].second);
+	//			else if(objects[i].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::SPHERE && objects[j].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::AABB)
+	//				collision = CollisionHandler::Instance()->SphereAABBCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel()->GetScaledBoundingSphereRadius(), objects[j].second);
+	//			else if(objects[i].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::AABB && objects[j].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::SPHERE)
+	//				collision = CollisionHandler::Instance()->SphereAABBCollision(objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel()->GetScaledBoundingSphereRadius(), objects[i].second);
+	//			else if(objects[i].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::SPHERE && objects[j].second->GetAppearance()->GetBoundingShape() == Model::BoundingShape::SPHERE)
+	//				collision = CollisionHandler::Instance()->SphereSphereCollision(objects[i].second->GetTransform()->GetPosition(), objects[i].second->GetAppearance()->GetModel()->GetScaledBoundingSphereRadius(), objects[j].second->GetTransform()->GetPosition(), objects[j].second->GetAppearance()->GetModel()->GetScaledBoundingSphereRadius());
+	//			if (collision)
+	//			{
+	//				CollisionHandler::Instance()->ResolveCollision(objects[i].second->GetRigidBody(), objects[j].second->GetRigidBody());
+	//				//std::string output = "Collision Detected between: " + objects[i].first + " & " + objects[j].first + ".\n";
+	//				//OutputDebugString(output.c_str());
+	//			}
+	//		}
+	//	}
+	//}
 }
